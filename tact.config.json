@@ -1,0 +1,20 @@
+{
+    "projects": [
+        {
+            "name": "GramStarterIdo",
+            "path": "./contracts/GramStarterIdo.tact",
+            "output": "./contracts/build"
+        },
+        {
+            "name": "GramPadGramxStaking",
+            "path": "./contracts/GramPadGramxStaking.tact",
+            "output": "./contracts/build"
+        },
+         {
+      "name": "GramPadUniversalLocker",
+      "path": "./GramPadUniversalLocker.tact",
+      "output": "./build"
+    }
+        
+    ]
+}

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" fill="none">
+  <defs>
+    <linearGradient id="background" x1="60" y1="20" x2="1120" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07140F"/>
+      <stop offset="0.52" stop-color="#0A1B22"/>
+      <stop offset="1" stop-color="#10152A"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(860 112) rotate(146) scale(420 260)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0098EA" stop-opacity=".38"/>
+      <stop offset="1" stop-color="#0098EA" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" stroke="#94A3B8" stroke-opacity=".08"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="400" rx="24" fill="url(#background)"/>
+  <rect width="1200" height="400" rx="24" fill="url(#glow)"/>
+  <rect width="1200" height="400" rx="24" fill="url(#grid)"/>
+  <circle cx="1010" cy="74" r="150" stroke="#67E8F9" stroke-opacity=".12" stroke-width="32"/>
+  <circle cx="1010" cy="74" r="92" stroke="#0098EA" stroke-opacity=".22" stroke-width="2"/>
+  <path d="M0 326C192 266 319 374 518 310C717 246 847 271 1200 176V400H0V326Z" fill="#0098EA" fill-opacity=".07"/>
+  <text x="72" y="170" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="52" font-weight="700">Grampad Project</text>
+  <text x="74" y="218" fill="#94A3B8" font-family="Arial, sans-serif" font-size="22">Community-first token launch on TON</text>
+  <rect x="74" y="254" width="146" height="34" rx="17" fill="#0098EA" fill-opacity=".14" stroke="#0098EA" stroke-opacity=".32"/>
+  <text x="102" y="277" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="15" font-weight="700">grampad.io</text>
+</svg>
