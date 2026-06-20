@@ -1,0 +1,1343 @@
+// automatically generated from `@stdlib/std/stdlib.fc` `/Users/tarannum/Downloads/ton-blockchain-launchpad (3)/contracts/build/GramPadUniversalLocker_GramPadUniversalLocker.fc` 
+PROGRAM{
+  DECLPROC __tact_context_get
+  DECLPROC __tact_context_get_sender
+  DECLPROC __tact_dict_get_slice_int
+  DECLPROC __tact_dict_set_slice_int
+  DECLPROC __tact_dict_get_int_slice
+  DECLPROC __tact_dict_set_int_slice
+  DECLPROC __tact_dict_get_int_int
+  DECLPROC __tact_dict_set_int_int
+  DECLPROC $JettonTransfer$_store
+  DECLPROC $JettonTransfer$_store_cell
+  DECLPROC $GramPadUniversalLocker$_store
+  DECLPROC $GramPadUniversalLocker$_load
+  DECLPROC $Context$_get_value
+  DECLPROC $LockDetails$_to_external
+  DECLPROC $UserLockSummary$_to_external
+  DECLPROC $ContractDetails$_to_external
+  DECLPROC $GramPadUniversalLocker$init$_load
+  DECLPROC $GramPadUniversalLocker$_contract_init
+  DECLPROC $GramPadUniversalLocker$_contract_load
+  DECLPROC $GramPadUniversalLocker$_contract_store
+  DECLPROC $Builder$_fun_asSlice
+  DECLPROC $GramPadUniversalLocker$_fun_requireOwner
+  DECLPROC $GramPadUniversalLocker$_fun_indexKey
+  DECLPROC $GramPadUniversalLocker$_fun_lockExists
+  DECLPROC $GramPadUniversalLocker$_fun_ownerOf
+  DECLPROC $GramPadUniversalLocker$_fun_jettonWalletOf
+  DECLPROC $GramPadUniversalLocker$_fun_amountOf
+  DECLPROC $GramPadUniversalLocker$_fun_createdAtOf
+  DECLPROC $GramPadUniversalLocker$_fun_unlockTimeOf
+  DECLPROC $GramPadUniversalLocker$_fun_withdrawnOf
+  DECLPROC $GramPadUniversalLocker$_fun_userLockCountOf
+  DECLPROC $GramPadUniversalLocker$_fun_userActiveLockCountOf
+  DECLPROC $MessageParameters$_constructor_to_value_bounce_body
+  DECLPROC $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload
+  DECLPROC $GramPadUniversalLocker$_fun_sendJetton
+  DECLPROC $GramPadUniversalLocker$_fun_get_contract_version
+  DECLPROC $ContractDetails$_constructor_owner_deploymentId_paused_totalLockedPositions_activeLockPositions_totalWithdrawnPositions_nextLockId
+  DECLPROC $GramPadUniversalLocker$_fun_get_contract_details
+  DECLPROC $UserLockSummary$_constructor_user_totalLocks_activeLocks
+  DECLPROC $GramPadUniversalLocker$_fun_get_user_summary
+  DECLPROC $GramPadUniversalLocker$_fun_get_user_lock_id_by_index
+  DECLPROC $LockDetails$_constructor_lockId_owner_jettonWallet_amount_lockedAt_unlockTime_withdrawn
+  DECLPROC $GramPadUniversalLocker$_fun_get_lock_details
+  DECLPROC $MessageParameters$_constructor_to_value_bounce
+  127581 DECLMETHOD %get_contract_version
+  67648 DECLMETHOD %get_contract_details
+  110770 DECLMETHOD %get_user_summary
+  81468 DECLMETHOD %get_user_lock_id_by_index
+  74862 DECLMETHOD %get_lock_details
+  DECLPROC recv_internal
+  DECLGLOBVAR __tact_context
+  DECLGLOBVAR __tact_context_sender
+  DECLGLOBVAR __tact_child_contract_codes
+  DECLGLOBVAR __tact_randomized
+  __tact_context_get PROCINLINE:<{
+    __tact_context GETGLOB
+    4 UNTUPLE
+  }>
+  __tact_context_get_sender PROCINLINE:<{
+    __tact_context_sender GETGLOB
+  }>
+  __tact_dict_get_slice_int PROCINLINE:<{
+    s1 s3 s3 XCHG3
+        DICTGET NULLSWAPIFNOT
+    IF:<{
+      SWAP
+      LDIX
+      DROP
+    }>ELSE<{
+      2DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_slice_int PROCINLINE:<{
+    OVER
+    ISNULL
+    IF:<{
+      2DROP
+      -ROT
+          DICTDEL
+      DROP
+    }>ELSE<{
+      NEWC
+      SWAP
+      STIX
+      s1 s3 s3 XCHG3
+      DICTSETB
+    }>
+  }>
+  __tact_dict_get_int_slice PROCINLINE:<{
+    -ROT
+    DICTIGET
+    NULLSWAPIFNOT
+    IF:<{
+    }>ELSE<{
+      DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_int_slice PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      -ROT
+      DICTIDEL
+      DROP
+    }>ELSE<{
+      s1 s3 s3 XCHG3
+      DICTISET
+    }>
+  }>
+  __tact_dict_get_int_int PROCINLINE:<{
+    s1 s3 s3 XCHG3
+    DICTIGET
+    NULLSWAPIFNOT
+    IF:<{
+      SWAP
+      LDIX
+      DROP
+    }>ELSE<{
+      2DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_int_int PROCINLINE:<{
+    OVER
+    ISNULL
+    IF:<{
+      2DROP
+      -ROT
+      DICTIDEL
+      DROP
+    }>ELSE<{
+      NEWC
+      SWAP
+      STIX
+      s1 s3 s3 XCHG3
+      DICTISETB
+    }>
+  }>
+  $JettonTransfer$_store PROCINLINE:<{
+    260734629 PUSHINT
+    s0 s8 XCHG2
+    32 STU
+    s1 s6 XCHG
+    64 STU
+    s0 s4 XCHG2
+    STVARUINT16
+    s1 s2 XCHG
+    STSLICE
+    STSLICE
+    STOPTREF
+    SWAP
+    STVARUINT16
+    STSLICE
+  }>
+  $JettonTransfer$_store_cell PROCINLINE:<{
+    7 -ROLL
+    $JettonTransfer$_store INLINECALLDICT
+    ENDC
+  }>
+  $GramPadUniversalLocker$_store PROCINLINE:<{
+    s1 17 s() XCHG
+    s0 18 s() XCHG
+    STSLICE
+    s1 s15 XCHG
+    64 STU
+    s1 s13 XCHG
+    1 STI
+    s1 s11 XCHG
+    64 STU
+    s1 s9 XCHG
+    64 STU
+    s1 s7 XCHG
+    64 STU
+    s1 s5 XCHG
+    64 STU
+    s1 s3 XCHG
+    64 STU
+    STDICT
+    SWAP
+    NEWC
+    STDICT
+    s1 s2 XCHG
+    STDICT
+    s1 s2 XCHG
+    STDICT
+    s0 s2 XCHG
+    NEWC
+    STDICT
+    s1 s3 XCHG
+    STDICT
+    s1 s3 XCHG
+    STDICT
+    s0 s3 XCHG
+    NEWC
+    STDICT
+    s1 s4 XCHG
+    STDICT
+    s1 s4 XCHG
+    STDICT
+    STBREFR
+    s1 s2 XCHG
+    STBREFR
+    STBREFR
+  }>
+  $GramPadUniversalLocker$_load PROCINLINE:<{
+    LDMSGADDR
+    64 LDU
+    1 LDI
+    64 LDU
+    64 LDU
+    64 LDU
+    64 LDU
+    64 LDU
+    LDDICT
+    LDREF
+    SWAP
+    CTOS
+    LDDICT
+    LDDICT
+    LDDICT
+    LDREF
+    DROP
+    CTOS
+    LDDICT
+    LDDICT
+    LDDICT
+    LDREF
+    DROP
+    CTOS
+    LDDICT
+    LDDICT
+    LDDICT
+    DROP
+    s9 18 s() XCHG
+    s9 17 s() XCHG
+    s9 16 s() XCHG
+    s9 s15 XCHG
+    s9 s14 XCHG
+    s9 s13 XCHG
+    s9 s12 XCHG
+    s9 s11 XCHG
+    s9 s10 XCHG
+  }>
+  $Context$_get_value PROCINLINE:<{
+    s1 s3 XCHG
+    3 BLKDROP
+  }>
+  $LockDetails$_to_external PROCINLINE:<{
+  }>
+  $UserLockSummary$_to_external PROCINLINE:<{
+  }>
+  $ContractDetails$_to_external PROCINLINE:<{
+  }>
+  $GramPadUniversalLocker$init$_load PROCINLINE:<{
+    LDMSGADDR
+    257 PUSHINT
+    LDIX
+    -ROT
+  }>
+  $GramPadUniversalLocker$_contract_init PROCINLINE:<{
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    FALSE
+    1 PUSHINT
+    DUP
+    0 PUSHINT
+    s0 s0 PUSH2
+    10 6 BLKSWAP
+  }>
+  $GramPadUniversalLocker$_contract_load PROCINLINE:<{
+    c4 PUSH
+    CTOS
+    1 LDI
+    SWAP
+    IF:<{
+      $GramPadUniversalLocker$_load INLINECALLDICT
+      18 s() POP
+      16 s() 17 s() XCHG
+      s15 16 s() XCHG
+      15 ROLL
+    }>ELSE<{
+      $GramPadUniversalLocker$init$_load INLINECALLDICT
+      s0 s2 XCHG
+      ENDS
+      SWAP
+      $GramPadUniversalLocker$_contract_init INLINECALLDICT
+    }>
+  }>
+  $GramPadUniversalLocker$_contract_store PROCINLINE:<{
+    NEWC
+    TRUE
+    SWAP
+    1 STI
+    s0 18 s() XCHG
+    s0 17 s() XCHG
+    s0 16 s() XCHG
+    15 -ROLL
+    $GramPadUniversalLocker$_store INLINECALLDICT
+    ENDC
+    c4 POP
+  }>
+  $Builder$_fun_asSlice PROCINLINE:<{
+        ENDC
+        CTOS
+  }>
+  $GramPadUniversalLocker$_fun_requireOwner PROCREF:<{
+    35499 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    19 s() PUSH
+    SDEQ
+    THROWANYIFNOT
+  }>
+  $GramPadUniversalLocker$_fun_indexKey PROCREF:<{
+        NEWC
+    ROT
+        STSLICER
+    64 STU
+        ENDC
+        HASHCU
+  }>
+  $GramPadUniversalLocker$_fun_lockExists PROCREF:<{
+    257 PUSHINT
+    s7 PUSH
+    s0 s2 XCHG
+    __tact_dict_get_int_slice INLINECALLDICT
+    ISNULL
+    NOT
+  }>
+  $GramPadUniversalLocker$_fun_ownerOf PROCREF:<{
+    257 PUSHINT
+    s7 PUSH
+    s0 s2 XCHG
+    __tact_dict_get_int_slice INLINECALLDICT
+    9754 PUSHINT
+    OVER
+    ISNULL
+    NOT
+    THROWANYIFNOT
+  }>
+  $GramPadUniversalLocker$_fun_jettonWalletOf PROCREF:<{
+    257 PUSHINT
+    s6 PUSH
+    s0 s2 XCHG
+    __tact_dict_get_int_slice INLINECALLDICT
+    30896 PUSHINT
+    OVER
+    ISNULL
+    NOT
+    THROWANYIFNOT
+  }>
+  $GramPadUniversalLocker$_fun_amountOf PROCREF:<{
+    257 PUSHINT
+    s0 s5 PUSH2
+    s3 s3 XCHG2
+    __tact_dict_get_int_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      0 PUSHINT
+    }>
+  }>
+  $GramPadUniversalLocker$_fun_createdAtOf PROCREF:<{
+    257 PUSHINT
+    s0 s4 PUSH2
+    s3 s3 XCHG2
+    __tact_dict_get_int_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      0 PUSHINT
+    }>
+  }>
+  $GramPadUniversalLocker$_fun_unlockTimeOf PROCREF:<{
+    257 PUSHINT
+    s0 s3 PUSH2
+    s3 s3 XCHG2
+    __tact_dict_get_int_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      0 PUSHINT
+    }>
+  }>
+  $GramPadUniversalLocker$_fun_withdrawnOf PROCREF:<{
+    257 PUSHINT
+    s2 PUSH
+    s0 s2 XCHG
+    1 PUSHINT
+    __tact_dict_get_int_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      FALSE
+    }>
+  }>
+  $GramPadUniversalLocker$_fun_userLockCountOf PROCREF:<{
+    267 PUSHINT
+    s10 PUSH
+    s0 s2 XCHG
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      0 PUSHINT
+    }>
+  }>
+  $GramPadUniversalLocker$_fun_userActiveLockCountOf PROCREF:<{
+    267 PUSHINT
+    s9 PUSH
+    s0 s2 XCHG
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      0 PUSHINT
+    }>
+  }>
+  $MessageParameters$_constructor_to_value_bounce_body PROCINLINE:<{
+    0 PUSHINT
+    s4 s4 XCHG2
+    s3 s1 s3 XCHG3
+  }>
+  $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload PROCINLINE:<{
+  }>
+  $GramPadUniversalLocker$_fun_sendJetton PROCREF:<{
+    16 s() PUSH
+    INC
+    120000000 PUSHINT
+    TRUE
+        MYADDR
+    PUSHNULL
+    10000000 PUSHINT
+    FALSE
+        NEWC
+        1 STI
+    $Builder$_fun_asSlice INLINECALLDICT
+    s6 23 s() XCHG
+    5 4 REVERSE
+    $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload INLINECALLDICT
+    NEWC
+    $JettonTransfer$_store_cell INLINECALLDICT
+    s1 s2 XCHG
+    $MessageParameters$_constructor_to_value_bounce_body INLINECALLDICT
+        NEWC
+        b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+        1 STI               // store `bounce`
+        b{000} STSLICECONST // store bounced = false and src = addr_none
+        STSLICE             // store `to`
+        SWAP
+        STGRAMS             // store `value`
+        106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+        STZEROES
+        // → Stack state
+        // s0: Builder
+        // s1: `body`
+        // s2: `mode`
+        STDICT
+        ENDC
+        SWAP
+        SENDRAWMSG
+  }>
+  $GramPadUniversalLocker$_fun_get_contract_version PROCREF:<{
+    2 PUSHINT
+  }>
+  $ContractDetails$_constructor_owner_deploymentId_paused_totalLockedPositions_activeLockPositions_totalWithdrawnPositions_nextLockId PROCINLINE:<{
+  }>
+  $GramPadUniversalLocker$_fun_get_contract_details PROCREF:<{
+    17 s() PUSH
+    17 s() PUSH
+    17 s() PUSH
+    s15 s14 s13 PUSH3
+    20 s() PUSH
+    $ContractDetails$_constructor_owner_deploymentId_paused_totalLockedPositions_activeLockPositions_totalWithdrawnPositions_nextLockId INLINECALLDICT
+  }>
+  $UserLockSummary$_constructor_user_totalLocks_activeLocks PROCINLINE:<{
+  }>
+  $GramPadUniversalLocker$_fun_get_user_summary PROCREF:<{
+    17 s() 18 s() XCHG
+    16 s() 18 s() XCHG
+    s15 18 s() XCHG
+    s14 18 s() XCHG
+    s13 18 s() XCHG
+    s12 18 s() XCHG
+    s11 18 s() XCHG
+    s10 18 s() XCHG
+    s9 18 s() XCHG
+    s0 18 s() XCHG
+    s0 s8 XCHG
+    s0 s7 XCHG
+    s0 s6 XCHG
+    5 -ROLL
+    18 s() PUSH
+    $GramPadUniversalLocker$_fun_userLockCountOf INLINECALLDICT
+    17 s() 18 s() XCHG
+    16 s() 18 s() XCHG
+    s15 18 s() XCHG
+    s14 18 s() XCHG
+    s13 18 s() XCHG
+    s12 18 s() XCHG
+    s11 18 s() XCHG
+    s10 18 s() XCHG
+    s9 18 s() XCHG
+    s0 18 s() XCHG
+    s0 s8 XCHG
+    s0 s7 XCHG
+    s0 s6 XCHG
+    5 -ROLL
+    19 s() PUSH
+    $GramPadUniversalLocker$_fun_userActiveLockCountOf INLINECALLDICT
+    s2 20 s() XCHG
+    s1 19 s() XCHG
+    $UserLockSummary$_constructor_user_totalLocks_activeLocks INLINECALLDICT
+    18 s() 20 s() XCHG
+    17 s() 19 s() XCHG
+    16 s() 18 s() XCHG
+    s15 17 s() XCHG
+    s14 16 s() XCHG
+    s13 s15 XCHG
+    s12 s14 XCHG
+    s11 s13 XCHG
+    s10 s12 XCHG
+    s9 s11 XCHG
+    s8 s10 XCHG
+    s7 s9 XCHG
+    s6 s8 XCHG
+    s5 s7 XCHG
+    s4 s6 XCHG
+    s3 s5 XCHG
+  }>
+  $GramPadUniversalLocker$_fun_get_user_lock_id_by_index PROCREF:<{
+    17 s() 19 s() XCHG
+    5 15 REVERSE
+    s14 18 s() XCHG
+    s13 19 s() XCHG
+    s12 18 s() XCHG
+    s11 19 s() XCHG
+    s10 18 s() XCHG
+    s9 19 s() XCHG
+    s8 18 s() XCHG
+    s7 19 s() XCHG
+    s6 18 s() XCHG
+    s5 19 s() XCHG
+    s4 18 s() XCHG
+    s3 19 s() XCHG
+    s2 18 s() XCHG
+    s1 19 s() XCHG
+    s0 18 s() XCHG
+    19 s() PUSH
+    $GramPadUniversalLocker$_fun_userLockCountOf INLINECALLDICT
+    19 s() PUSH
+    -1 GTINT
+    IF:<{
+      19 s() PUSH
+      SWAP
+      LESS
+    }>ELSE<{
+      DROP
+      FALSE
+    }>
+    1173 THROWIFNOT
+    s6 PUSH
+    s0 20 s() XCHG
+    257 PUSHINT
+    s0 20 s() XCHG
+    $GramPadUniversalLocker$_fun_indexKey INLINECALLDICT
+    19 s() PUSH
+    s3 21 s() XCHG
+    s2 20 s() XCHG
+    __tact_dict_get_int_int INLINECALLDICT
+    63207 PUSHINT
+    OVER
+    ISNULL
+    NOT
+    THROWANYIFNOT
+    16 s() 18 s() XCHG
+    s15 17 s() XCHG
+    s14 16 s() XCHG
+    s13 s15 XCHG
+    s12 s14 XCHG
+    s11 s13 XCHG
+    s10 s12 XCHG
+    s9 s11 XCHG
+    s8 s10 XCHG
+    s7 s9 XCHG
+    s6 s8 XCHG
+    s5 s7 XCHG
+    s4 s6 XCHG
+    s3 s5 XCHG
+    s4 s3 s0 XCHG3
+  }>
+  $LockDetails$_constructor_lockId_owner_jettonWallet_amount_lockedAt_unlockTime_withdrawn PROCINLINE:<{
+  }>
+  $GramPadUniversalLocker$_fun_get_lock_details PROCREF:<{
+    16 s() 18 s() XCHG
+    5 14 REVERSE
+    s13 17 s() XCHG
+    s12 18 s() XCHG
+    s11 17 s() XCHG
+    s10 18 s() XCHG
+    s9 17 s() XCHG
+    s8 18 s() XCHG
+    s7 17 s() XCHG
+    s6 18 s() XCHG
+    s5 17 s() XCHG
+    s4 18 s() XCHG
+    s3 17 s() XCHG
+    s2 18 s() XCHG
+    s1 17 s() XCHG
+    s0 18 s() XCHG
+    9754 PUSHINT
+    s0 18 s() XCHG
+    19 s() PUSH
+    $GramPadUniversalLocker$_fun_lockExists INLINECALLDICT
+    s1 19 s() XCHG
+    THROWANYIFNOT
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    18 s() PUSH
+    $GramPadUniversalLocker$_fun_ownerOf INLINECALLDICT
+    17 s() 18 s() XCHG
+    16 s() 18 s() XCHG
+    s15 18 s() XCHG
+    s14 18 s() XCHG
+    s13 18 s() XCHG
+    s12 18 s() XCHG
+    s11 18 s() XCHG
+    s10 18 s() XCHG
+    s9 18 s() XCHG
+    s0 18 s() XCHG
+    s0 s8 XCHG
+    s0 s7 XCHG
+    s0 s6 XCHG
+    5 -ROLL
+    19 s() PUSH
+    $GramPadUniversalLocker$_fun_jettonWalletOf INLINECALLDICT
+    17 s() 18 s() XCHG
+    16 s() 18 s() XCHG
+    s15 18 s() XCHG
+    s14 18 s() XCHG
+    s13 18 s() XCHG
+    s12 18 s() XCHG
+    s11 18 s() XCHG
+    s10 18 s() XCHG
+    s9 18 s() XCHG
+    s0 18 s() XCHG
+    s0 s8 XCHG
+    s0 s7 XCHG
+    s0 s6 XCHG
+    5 -ROLL
+    20 s() PUSH
+    $GramPadUniversalLocker$_fun_amountOf INLINECALLDICT
+    17 s() 18 s() XCHG
+    16 s() 18 s() XCHG
+    s15 18 s() XCHG
+    s14 18 s() XCHG
+    s13 18 s() XCHG
+    s12 18 s() XCHG
+    s11 18 s() XCHG
+    s10 18 s() XCHG
+    s9 18 s() XCHG
+    s0 18 s() XCHG
+    s0 s8 XCHG
+    s0 s7 XCHG
+    s0 s6 XCHG
+    5 -ROLL
+    21 s() PUSH
+    $GramPadUniversalLocker$_fun_createdAtOf INLINECALLDICT
+    17 s() 18 s() XCHG
+    16 s() 18 s() XCHG
+    s15 18 s() XCHG
+    s14 18 s() XCHG
+    s13 18 s() XCHG
+    s12 18 s() XCHG
+    s11 18 s() XCHG
+    s10 18 s() XCHG
+    s9 18 s() XCHG
+    s0 18 s() XCHG
+    s0 s8 XCHG
+    s0 s7 XCHG
+    s0 s6 XCHG
+    5 -ROLL
+    22 s() PUSH
+    $GramPadUniversalLocker$_fun_unlockTimeOf INLINECALLDICT
+    17 s() 18 s() XCHG
+    16 s() 18 s() XCHG
+    s15 18 s() XCHG
+    s14 18 s() XCHG
+    s13 18 s() XCHG
+    s12 18 s() XCHG
+    s11 18 s() XCHG
+    s10 18 s() XCHG
+    s9 18 s() XCHG
+    s0 18 s() XCHG
+    s0 s8 XCHG
+    s0 s7 XCHG
+    s0 s6 XCHG
+    5 -ROLL
+    23 s() PUSH
+    $GramPadUniversalLocker$_fun_withdrawnOf INLINECALLDICT
+    s6 24 s() XCHG
+    s5 23 s() XCHG
+    s4 22 s() XCHG
+    s3 21 s() XCHG
+    s2 20 s() XCHG
+    s1 19 s() XCHG
+    $LockDetails$_constructor_lockId_owner_jettonWallet_amount_lockedAt_unlockTime_withdrawn INLINECALLDICT
+    18 s() 24 s() XCHG
+    17 s() 23 s() XCHG
+    16 s() 22 s() XCHG
+    s15 21 s() XCHG
+    s14 20 s() XCHG
+    s13 19 s() XCHG
+    s12 18 s() XCHG
+    s11 17 s() XCHG
+    s10 16 s() XCHG
+    s9 s15 XCHG
+    s8 s14 XCHG
+    s7 s13 XCHG
+  }>
+  $MessageParameters$_constructor_to_value_bounce PROCINLINE:<{
+    0 PUSHINT
+    s0 s3 XCHG
+    PUSHNULL
+    s3 s1 s3 XCHG3
+  }>
+  %get_contract_version PROC:<{
+    $GramPadUniversalLocker$_contract_load INLINECALLDICT
+    $GramPadUniversalLocker$_fun_get_contract_version INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
+  }>
+  %get_contract_details PROC:<{
+    $GramPadUniversalLocker$_contract_load INLINECALLDICT
+    $GramPadUniversalLocker$_fun_get_contract_details INLINECALLDICT
+    14 7 BLKDROP2
+    4 7 BLKDROP2
+    $ContractDetails$_to_external INLINECALLDICT
+  }>
+  %get_user_summary PROC:<{
+    $GramPadUniversalLocker$_contract_load INLINECALLDICT
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramPadUniversalLocker$_fun_get_user_summary INLINECALLDICT
+    15 3 BLKDROP2
+    3 3 BLKDROP2
+    $UserLockSummary$_to_external INLINECALLDICT
+  }>
+  %get_user_lock_id_by_index PROC:<{
+    $GramPadUniversalLocker$_contract_load INLINECALLDICT
+    17 s() 19 s() XCHG
+    16 s() 18 s() XCHG
+    s15 17 s() XCHG
+    s14 16 s() XCHG
+    2 14 BLKSWAP
+    $GramPadUniversalLocker$_fun_get_user_lock_id_by_index INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    2 1 BLKDROP2
+  }>
+  %get_lock_details PROC:<{
+    $GramPadUniversalLocker$_contract_load INLINECALLDICT
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramPadUniversalLocker$_fun_get_lock_details INLINECALLDICT
+    14 7 BLKDROP2
+    4 7 BLKDROP2
+    $LockDetails$_to_external INLINECALLDICT
+  }>
+  recv_internal PROC:<{
+    SWAP
+    CTOS
+    2 PUSHINT
+    SDSKIPFIRST
+    1 LDI
+    1 LDI
+    LDMSGADDR
+    OVER
+    s3 s4 XCHG
+    s6 s6 XCHG2
+    4 TUPLE
+    __tact_context SETGLOB
+    s0 s2 XCHG
+    __tact_context_sender SETGLOB
+    $GramPadUniversalLocker$_contract_load INLINECALLDICT
+    s0 19 s() XCHG
+    IFJMP:<{
+      15 BLKDROP
+      4 BLKDROP
+    }>
+    s0 17 s() XCHG
+    32 LDUQ 130 THROWIFNOT
+    OVER
+    2490013878 PUSHINT
+    EQUAL
+    IFJMP:<{
+      2DROP
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      2 13 BLKSWAP
+      $GramPadUniversalLocker$_contract_store INLINECALLDICT
+    }>
+    OVER
+    157817343 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      1 LDI
+      DROP
+      16 s() 17 s() XCHG
+      s15 16 s() XCHG
+      s14 s15 XCHG
+      s13 s14 XCHG
+      s12 s13 XCHG
+      s11 s12 XCHG
+      s10 s11 XCHG
+      s9 s10 XCHG
+      s8 s9 XCHG
+      s7 s8 XCHG
+      s6 s7 XCHG
+      s5 s6 XCHG
+      s4 s5 XCHG
+      s3 s4 XCHG
+      s0 18 s() XCHG
+      s1 s3 s0 XCHG3
+      $GramPadUniversalLocker$_fun_requireOwner INLINECALLDICT
+      s15 POP
+      15304 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      10000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      16 s() 17 s() XCHG
+      s15 16 s() XCHG
+      14 ROLL
+      $GramPadUniversalLocker$_contract_store INLINECALLDICT
+    }>
+    OVER
+    256331011 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      LDMSGADDR
+      DROP
+      16 s() 17 s() XCHG
+      s15 16 s() XCHG
+      s14 s15 XCHG
+      s13 s14 XCHG
+      s12 s13 XCHG
+      s11 s12 XCHG
+      s10 s11 XCHG
+      s9 s10 XCHG
+      s8 s9 XCHG
+      s7 s8 XCHG
+      s6 s7 XCHG
+      s5 s6 XCHG
+      s4 s5 XCHG
+      s3 s4 XCHG
+      s0 18 s() XCHG
+      s1 s3 s0 XCHG3
+      $GramPadUniversalLocker$_fun_requireOwner INLINECALLDICT
+      17 s() POP
+      15304 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      10000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      s15 16 s() XCHG
+      15 ROLL
+      $GramPadUniversalLocker$_contract_store INLINECALLDICT
+    }>
+    OVER
+    4057420251 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      LDVARUINT16
+      LDMSGADDR
+      DROP
+      s1 18 s() XCHG
+      s0 19 s() XCHG
+      $GramPadUniversalLocker$_fun_requireOwner INLINECALLDICT
+      15304 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      10000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      43103 PUSHINT
+      19 s() PUSH
+      0 GTINT
+      THROWANYIFNOT
+      33848 PUSHINT
+          BALANCE FIRST
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      SUB
+      20 s() PUSH
+      GEQ
+      THROWANYIFNOT
+      s1 19 s() XCHG
+      s0 18 s() XCHG
+      FALSE
+      $MessageParameters$_constructor_to_value_bounce INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+          STZEROES
+          // → Stack state
+          // s0: Builder
+          // s1: `body`
+          // s2: `mode`
+          STDICT
+          ENDC
+          SWAP
+          SENDRAWMSG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      2 14 BLKSWAP
+      $GramPadUniversalLocker$_contract_store INLINECALLDICT
+    }>
+    OVER
+    4011149208 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      32 LDU
+      DROP
+      38900 PUSHINT
+      s15 PUSH
+      NOT
+      THROWANYIFNOT
+      15304 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      10000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      23764 PUSHINT
+          NOW
+      s2 s(-1) PUXC
+      GREATER
+      THROWANYIFNOT
+      267 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      s3 s10 XCHG
+      ROT
+      257 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      s12 s14 XCHG
+      s11 s13 XCHG
+      s10 s12 XCHG
+      s9 s11 XCHG
+      s8 s10 XCHG
+      s0 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s4 s3 s0 XCHG3
+      s1 s2 XCHG
+      $GramPadUniversalLocker$_contract_store INLINECALLDICT
+    }>
+    OVER
+    1935855772 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      64 LDU
+      NIP
+      LDVARUINT16
+      LDMSGADDR
+      DROP
+      38900 PUSHINT
+      16 s() PUSH
+      NOT
+      THROWANYIFNOT
+      17062 PUSHINT
+      s2 PUSH
+      0 GTINT
+      THROWANYIFNOT
+      __tact_context_get_sender INLINECALLDICT
+      s10 PUSH
+      267 PUSHINT
+      s3 PUSH
+      257 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      49017 PUSHINT
+      OVER
+      ISNULL
+      NOT
+      THROWANYIFNOT
+      s2 s11 PUXC
+      267 PUSHINT
+          DICTDEL
+      DROP
+      16 s() PUSH
+      INC
+      17 s() 20 s() XCHG
+      16 s() 19 s() XCHG
+      s15 18 s() XCHG
+      s0 s14 XCHG
+      s13 19 s() XCHG
+      s12 18 s() XCHG
+      s0 s11 XCHG
+      s10 19 s() XCHG
+      s9 s8 XCHG2
+      s7 19 s() XCHG
+      s6 s5 XCHG2
+      s4 19 s() XCHG
+      2SWAP
+      s1 21 s() XCHG
+      s0 22 s() XCHG
+      21 s() PUSH
+      $GramPadUniversalLocker$_fun_userLockCountOf INLINECALLDICT
+      17 s() 18 s() XCHG
+      16 s() 18 s() XCHG
+      s15 18 s() XCHG
+      s14 18 s() XCHG
+      s13 18 s() XCHG
+      s12 18 s() XCHG
+      s11 18 s() XCHG
+      s10 18 s() XCHG
+      s9 18 s() XCHG
+      s0 18 s() XCHG
+      s0 s8 XCHG
+      s0 s7 XCHG
+      s0 s6 XCHG
+      5 -ROLL
+      22 s() PUSH
+      $GramPadUniversalLocker$_fun_userActiveLockCountOf INLINECALLDICT
+      s7 PUSH
+      16 s() 19 s() XCHG
+      s15 18 s() XCHG
+      s14 17 s() XCHG
+      s13 19 s() XCHG
+      s12 18 s() XCHG
+      s11 17 s() XCHG
+      s10 19 s() XCHG
+      s9 18 s() XCHG
+      s8 17 s() XCHG
+      s7 19 s() XCHG
+      s6 18 s() XCHG
+      s5 17 s() XCHG
+      s4 19 s() XCHG
+      s3 18 s() XCHG
+      s2 17 s() XCHG
+      s1 19 s() XCHG
+      s0 18 s() XCHG
+      257 PUSHINT
+      s0 18 s() XCHG
+      25 s() PUSH
+      22 s() PUSH
+      $GramPadUniversalLocker$_fun_indexKey INLINECALLDICT
+      s7 POP
+      18 s() PUSH
+      s3 20 s() XCHG
+      s2 19 s() XCHG
+      s1 s7 XCHG
+      25 s() PUSH
+      SWAP
+      __tact_dict_set_int_int INLINECALLDICT
+      267 PUSHINT
+      s0 20 s() XCHG
+      INC
+      s2 s7 XCHG
+      s1 20 s() XCHG
+      24 s() PUSH
+      SWAP
+      257 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
+      267 PUSHINT
+      s0 18 s() XCHG
+      INC
+      s2 s5 XCHG
+      s1 18 s() XCHG
+      23 s() PUSH
+      SWAP
+      257 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
+      257 PUSHINT
+      SWAP
+      21 s() PUSH
+      SWAP
+      s0 23 s() XCHG
+      __tact_dict_set_int_slice INLINECALLDICT
+      s1 s2 XCHG
+      257 PUSHINT
+      SWAP
+      20 s() PUSH
+      SWAP
+      s0 23 s() XCHG
+      __tact_dict_set_int_slice INLINECALLDICT
+      257 PUSHINT
+      DUP
+      s3 s4 XCHG
+      s1 s2 XCHG
+      20 s() PUSH
+      s0 s2 XCHG
+      s0 20 s() XCHG
+      SWAP
+      __tact_dict_set_int_int INLINECALLDICT
+      257 PUSHINT
+          NOW
+      OVER
+      s3 s15 XCHG
+      20 s() PUSH
+      -ROT
+      __tact_dict_set_int_int INLINECALLDICT
+      257 PUSHINT
+      DUP
+      s3 s13 XCHG
+      s1 s2 XCHG
+      19 s() PUSH
+      s0 s2 XCHG
+      s0 18 s() XCHG
+      SWAP
+      __tact_dict_set_int_int INLINECALLDICT
+      s1 s10 XCHG
+      257 PUSHINT
+      SWAP
+      s0 17 s() XCHG
+      FALSE
+      1 PUSHINT
+      __tact_dict_set_int_int INLINECALLDICT
+      s0 s3 XCHG
+      INC
+      s0 s2 XCHG
+      INC
+      s8 17 s() XCHG
+      s7 16 s() XCHG
+      s6 s15 XCHG
+      s5 s14 XCHG
+      s4 s13 XCHG
+      s12 s1 s11 XCHG3
+      s6 s10 s8 XCHG3
+      s0 s5 XCHG
+      s4 s4 s4 XCHG3
+      s0 s3 XCHG
+      $GramPadUniversalLocker$_contract_store INLINECALLDICT
+    }>
+    SWAP
+    1786648362 PUSHINT
+    EQUAL
+    IFJMP:<{
+      64 LDU
+      DROP
+      15304 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      150000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      __tact_context_get_sender INLINECALLDICT
+      16 s() 17 s() XCHG
+      s15 17 s() XCHG
+      s14 17 s() XCHG
+      s13 17 s() XCHG
+      s12 17 s() XCHG
+      s11 17 s() XCHG
+      s10 17 s() XCHG
+      s9 17 s() XCHG
+      s8 17 s() XCHG
+      s7 17 s() XCHG
+      s6 17 s() XCHG
+      s5 17 s() XCHG
+      s4 17 s() XCHG
+      s3 17 s() XCHG
+      s2 17 s() XCHG
+      s1 17 s() XCHG
+      s0 18 s() XCHG
+      9754 PUSHINT
+      s0 20 s() XCHG
+      18 s() PUSH
+      $GramPadUniversalLocker$_fun_lockExists INLINECALLDICT
+      s1 21 s() XCHG
+      THROWANYIFNOT
+      43062 PUSHINT
+      s0 20 s() XCHG
+      18 s() PUSH
+      $GramPadUniversalLocker$_fun_ownerOf INLINECALLDICT
+      20 s() PUSH
+      SDEQ
+      s1 21 s() XCHG
+      THROWANYIFNOT
+      25810 PUSHINT
+      s0 20 s() XCHG
+      18 s() PUSH
+      $GramPadUniversalLocker$_fun_withdrawnOf INLINECALLDICT
+      NOT
+      s1 21 s() XCHG
+      THROWANYIFNOT
+      31443 PUSHINT
+          NOW
+      17 s() 18 s() XCHG
+      16 s() 18 s() XCHG
+      s15 18 s() XCHG
+      s14 18 s() XCHG
+      s13 18 s() XCHG
+      s12 18 s() XCHG
+      s11 18 s() XCHG
+      s10 18 s() XCHG
+      s9 18 s() XCHG
+      s8 18 s() XCHG
+      s7 18 s() XCHG
+      s6 18 s() XCHG
+      s5 18 s() XCHG
+      s4 18 s() XCHG
+      s3 18 s() XCHG
+      s2 18 s() XCHG
+      s1 18 s() XCHG
+      s0 21 s() XCHG
+      19 s() PUSH
+      $GramPadUniversalLocker$_fun_unlockTimeOf INLINECALLDICT
+      s1 22 s() XCHG
+      GEQ
+      s1 18 s() XCHG
+      THROWANYIFNOT
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      2 13 BLKSWAP
+      s0 19 s() XCHG
+      19 s() PUSH
+      $GramPadUniversalLocker$_fun_amountOf INLINECALLDICT
+      40636 PUSHINT
+      OVER
+      0 GTINT
+      THROWANYIFNOT
+      17 s() 18 s() XCHG
+      16 s() 18 s() XCHG
+      s15 18 s() XCHG
+      s14 18 s() XCHG
+      s13 18 s() XCHG
+      s12 18 s() XCHG
+      s11 18 s() XCHG
+      s10 18 s() XCHG
+      s9 18 s() XCHG
+      s0 18 s() XCHG
+      s0 s8 XCHG
+      s0 s7 XCHG
+      s0 s6 XCHG
+      5 -ROLL
+      20 s() PUSH
+      $GramPadUniversalLocker$_fun_jettonWalletOf INLINECALLDICT
+      SWAP
+      257 PUSHINT
+      22 s() PUSH
+      TRUE
+      1 PUSHINT
+      __tact_dict_set_int_int INLINECALLDICT
+      257 PUSHINT
+      0 PUSHINT
+      OVER
+      s4 s7 XCHG
+      s2 s3 XCHG
+      s2 24 s() XCHG
+      __tact_dict_set_int_int INLINECALLDICT
+      s0 s3 XCHG
+      s0 20 s() XCHG
+      19 s() PUSH
+      $GramPadUniversalLocker$_fun_userActiveLockCountOf INLINECALLDICT
+      DUP
+      0 GTINT
+      IF:<{
+        267 PUSHINT
+        SWAP
+        DEC
+        s2 s9 XCHG
+        21 s() PUSH
+        SWAP
+        257 PUSHINT
+        __tact_dict_set_slice_int INLINECALLDICT
+        s0 s7 XCHG
+      }>ELSE<{
+        DROP
+      }>
+      s0 s11 XCHG
+      DEC
+      s0 s10 XCHG
+      INC
+      17 s() 20 s() XCHG
+      16 s() 19 s() XCHG
+      s15 18 s() XCHG
+      s14 17 s() XCHG
+      s13 16 s() XCHG
+      s12 s15 XCHG
+      s10 s14 XCHG
+      s0 s13 XCHG
+      s9 s12 XCHG
+      s8 s11 XCHG
+      s7 s10 XCHG
+      s6 s9 XCHG
+      s5 s8 XCHG
+      s4 s7 XCHG
+      s3 s6 XCHG
+      s5 s0 s4 XCHG3
+      s0 s1 s3 XCHG3
+      $GramPadUniversalLocker$_fun_sendJetton INLINECALLDICT
+      $GramPadUniversalLocker$_contract_store INLINECALLDICT
+    }>
+    15 BLKDROP
+    4 BLKDROP
+    130 THROW
+  }>
+}END>c

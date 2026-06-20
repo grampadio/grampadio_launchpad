@@ -1,0 +1,4650 @@
+// automatically generated from `@stdlib/std/stdlib.fc` `/Users/tarannum/Downloads/ton-blockchain-launchpad (3)/contracts/build/GramStarterIdo_GramStarterIdo.fc` 
+PROGRAM{
+  DECLPROC __tact_context_get
+  DECLPROC __tact_context_get_sender
+  DECLPROC __tact_dict_get_slice_int
+  DECLPROC __tact_dict_set_slice_int
+  DECLPROC __tact_dict_get_int_slice
+  DECLPROC __tact_dict_set_int_slice
+  DECLPROC __tact_dict_get_int_int
+  DECLPROC __tact_dict_set_int_int
+  DECLPROC $DeployOk$_store
+  DECLPROC $DeployOk$_store_cell
+  DECLPROC $JettonTransfer$_store
+  DECLPROC $JettonTransfer$_store_cell
+  DECLPROC $JettonTransfer$_load_bounced
+  DECLPROC $GramStarterIdo$_store
+  DECLPROC $GramStarterIdo$_load
+  DECLPROC $Context$_get_value
+  DECLPROC $GramStarterIdo$init$_load
+  DECLPROC $GramStarterIdo$_contract_init
+  DECLPROC $GramStarterIdo$_contract_load
+  DECLPROC $GramStarterIdo$_contract_store
+  DECLPROC $Builder$_fun_asSlice
+  DECLPROC $GramStarterIdo$_fun_calculateVestedAmount
+  DECLPROC $GramStarterIdo$_fun_get_contract_version
+  DECLPROC $GramStarterIdo$_fun_get_ton_reserve
+  DECLPROC $GramStarterIdo$_fun_get_deployment_id
+  DECLPROC $GramStarterIdo$_fun_get_ido_state
+  DECLPROC $GramStarterIdo$_fun_get_failed_reason
+  DECLPROC $GramStarterIdo$_fun_get_raised_capital
+  DECLPROC $GramStarterIdo$_fun_get_soft_cap
+  DECLPROC $GramStarterIdo$_fun_get_hard_cap
+  DECLPROC $GramStarterIdo$_fun_get_min_buy
+  DECLPROC $GramStarterIdo$_fun_get_max_buy
+  DECLPROC $GramStarterIdo$_fun_get_sold_tokens
+  DECLPROC $GramStarterIdo$_fun_get_admin
+  DECLPROC $GramStarterIdo$_fun_get_superadmin
+  DECLPROC $GramStarterIdo$_fun_get_admin_blocked
+  DECLPROC $GramStarterIdo$_fun_get_raised_usdt_withdrawn
+  DECLPROC $GramStarterIdo$_fun_get_sale_token_required
+  DECLPROC $GramStarterIdo$_fun_get_sale_token_deposited
+  DECLPROC $GramStarterIdo$_fun_get_sale_token_claimed
+  DECLPROC $GramStarterIdo$_fun_get_tge_basis_points
+  DECLPROC $GramStarterIdo$_fun_get_cliff_duration
+  DECLPROC $GramStarterIdo$_fun_get_monthly_vesting_periods
+  DECLPROC $GramStarterIdo$_fun_get_distribution_started_at
+  DECLPROC $GramStarterIdo$_fun_get_usdt_refunded
+  DECLPROC $GramStarterIdo$_fun_get_upvotes
+  DECLPROC $GramStarterIdo$_fun_get_downvotes
+  DECLPROC $GramStarterIdo$_fun_get_participant_count
+  DECLPROC $GramStarterIdo$_fun_get_claims_processed
+  DECLPROC $GramStarterIdo$_fun_get_refunds_processed
+  DECLPROC $GramStarterIdo$_fun_get_usdt_jetton_master
+  DECLPROC $GramStarterIdo$_fun_get_usdt_decimals
+  DECLPROC $GramStarterIdo$_fun_get_sale_token_jetton_master
+  DECLPROC $GramStarterIdo$_fun_get_usdt_jetton_wallet
+  DECLPROC $GramStarterIdo$_fun_get_sale_token_jetton_wallet
+  DECLPROC $GramStarterIdo$_fun_get_remaining_sale_tokens_withdrawn
+  DECLPROC $GramStarterIdo$_fun_get_jetton_wallets_configured
+  DECLPROC $GramStarterIdo$_fun_get_user_has_voted
+  DECLPROC $GramStarterIdo$_fun_get_user_vote
+  DECLPROC $GramStarterIdo$_fun_get_user_contribution
+  DECLPROC $GramStarterIdo$_fun_get_user_allocation
+  DECLPROC $GramStarterIdo$_fun_get_user_claimed
+  DECLPROC $GramStarterIdo$_fun_get_user_claimed_allocation
+  DECLPROC $GramStarterIdo$_fun_get_user_vested_allocation
+  DECLPROC $GramStarterIdo$_fun_get_user_claimable_allocation
+  DECLPROC $GramStarterIdo$_fun_get_user_refunded
+  DECLPROC $GramStarterIdo$_fun_get_user_rejected_usdt_credit
+  DECLPROC $MessageParameters$_constructor_to_value_bounce_mode_body
+  DECLPROC $DeployOk$_constructor_queryId
+  DECLPROC $MessageParameters$_constructor_to_value_bounce_body
+  DECLPROC $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload
+  DECLPROC $MessageParameters$_constructor_to_value_bounce
+  127581 DECLMETHOD %get_contract_version
+  117287 DECLMETHOD %get_ton_reserve
+  91439 DECLMETHOD %get_deployment_id
+  82244 DECLMETHOD %get_ido_state
+  70002 DECLMETHOD %get_failed_reason
+  118646 DECLMETHOD %get_raised_capital
+  71772 DECLMETHOD %get_soft_cap
+  121264 DECLMETHOD %get_hard_cap
+  114613 DECLMETHOD %get_min_buy
+  97064 DECLMETHOD %get_max_buy
+  97699 DECLMETHOD %get_sold_tokens
+  113142 DECLMETHOD %get_admin
+  74181 DECLMETHOD %get_superadmin
+  128001 DECLMETHOD %get_admin_blocked
+  80604 DECLMETHOD %get_raised_usdt_withdrawn
+  114540 DECLMETHOD %get_sale_token_required
+  80809 DECLMETHOD %get_sale_token_deposited
+  83792 DECLMETHOD %get_sale_token_claimed
+  67088 DECLMETHOD %get_tge_basis_points
+  129069 DECLMETHOD %get_cliff_duration
+  75402 DECLMETHOD %get_monthly_vesting_periods
+  103887 DECLMETHOD %get_distribution_started_at
+  83009 DECLMETHOD %get_usdt_refunded
+  77921 DECLMETHOD %get_upvotes
+  117739 DECLMETHOD %get_downvotes
+  76968 DECLMETHOD %get_participant_count
+  116213 DECLMETHOD %get_claims_processed
+  127110 DECLMETHOD %get_refunds_processed
+  89083 DECLMETHOD %get_usdt_jetton_master
+  105772 DECLMETHOD %get_usdt_decimals
+  128718 DECLMETHOD %get_sale_token_jetton_master
+  98864 DECLMETHOD %get_usdt_jetton_wallet
+  77573 DECLMETHOD %get_sale_token_jetton_wallet
+  109034 DECLMETHOD %get_remaining_sale_tokens_withdrawn
+  125177 DECLMETHOD %get_jetton_wallets_configured
+  99892 DECLMETHOD %get_user_has_voted
+  106741 DECLMETHOD %get_user_vote
+  67418 DECLMETHOD %get_user_contribution
+  110934 DECLMETHOD %get_user_allocation
+  112748 DECLMETHOD %get_user_claimed
+  71485 DECLMETHOD %get_user_claimed_allocation
+  117472 DECLMETHOD %get_user_vested_allocation
+  72534 DECLMETHOD %get_user_claimable_allocation
+  126903 DECLMETHOD %get_user_refunded
+  116310 DECLMETHOD %get_user_rejected_usdt_credit
+  DECLPROC recv_internal
+  DECLGLOBVAR __tact_context
+  DECLGLOBVAR __tact_context_sender
+  DECLGLOBVAR __tact_child_contract_codes
+  DECLGLOBVAR __tact_randomized
+  __tact_context_get PROCINLINE:<{
+    __tact_context GETGLOB
+    4 UNTUPLE
+  }>
+  __tact_context_get_sender PROCINLINE:<{
+    __tact_context_sender GETGLOB
+  }>
+  __tact_dict_get_slice_int PROCINLINE:<{
+    s1 s3 s3 XCHG3
+        DICTGET NULLSWAPIFNOT
+    IF:<{
+      SWAP
+      LDIX
+      DROP
+    }>ELSE<{
+      2DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_slice_int PROCINLINE:<{
+    OVER
+    ISNULL
+    IF:<{
+      2DROP
+      -ROT
+          DICTDEL
+      DROP
+    }>ELSE<{
+      NEWC
+      SWAP
+      STIX
+      s1 s3 s3 XCHG3
+      DICTSETB
+    }>
+  }>
+  __tact_dict_get_int_slice PROCINLINE:<{
+    -ROT
+    DICTIGET
+    NULLSWAPIFNOT
+    IF:<{
+    }>ELSE<{
+      DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_int_slice PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      -ROT
+      DICTIDEL
+      DROP
+    }>ELSE<{
+      s1 s3 s3 XCHG3
+      DICTISET
+    }>
+  }>
+  __tact_dict_get_int_int PROCINLINE:<{
+    s1 s3 s3 XCHG3
+    DICTIGET
+    NULLSWAPIFNOT
+    IF:<{
+      SWAP
+      LDIX
+      DROP
+    }>ELSE<{
+      2DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_int_int PROCINLINE:<{
+    OVER
+    ISNULL
+    IF:<{
+      2DROP
+      -ROT
+      DICTIDEL
+      DROP
+    }>ELSE<{
+      NEWC
+      SWAP
+      STIX
+      s1 s3 s3 XCHG3
+      DICTISETB
+    }>
+  }>
+  $DeployOk$_store PROCINLINE:<{
+    2952335191 PUSHINT
+    ROT
+    32 STU
+    64 STU
+  }>
+  $DeployOk$_store_cell PROCINLINE:<{
+    SWAP
+    $DeployOk$_store INLINECALLDICT
+    ENDC
+  }>
+  $JettonTransfer$_store PROCINLINE:<{
+    260734629 PUSHINT
+    s0 s8 XCHG2
+    32 STU
+    s1 s6 XCHG
+    64 STU
+    s0 s4 XCHG2
+    STVARUINT16
+    s1 s2 XCHG
+    STSLICE
+    STSLICE
+    STOPTREF
+    SWAP
+    STVARUINT16
+    STSLICE
+  }>
+  $JettonTransfer$_store_cell PROCINLINE:<{
+    7 -ROLL
+    $JettonTransfer$_store INLINECALLDICT
+    ENDC
+  }>
+  $JettonTransfer$_load_bounced PROCINLINE:<{
+    64 LDU
+    LDVARUINT16
+    -ROT
+  }>
+  $GramStarterIdo$_store PROCINLINE:<{
+    s1 47 s() XCHG
+    s0 48 s() XCHG
+    STSLICE
+    s1 45 s() XCHG
+    STSLICE
+    s1 43 s() XCHG
+    1 STI
+    SWAP
+    s0 41 s() XCHG
+    STVARUINT16
+    s1 39 s() XCHG
+    64 STU
+    s1 37 s() XCHG
+    STSLICE
+    s0 35 s() XCHG
+    NEWC
+    STSLICE
+    s1 34 s() XCHG
+    STSLICE
+    s1 32 s() XCHG
+    STSLICE
+    s1 30 s() XCHG
+    1 STI
+    s1 28 s() XCHG
+    8 STU
+    SWAP
+    s0 26 s() XCHG
+    STVARUINT16
+    NEWC
+    SWAP
+    s0 25 s() XCHG
+    STVARUINT16
+    SWAP
+    s0 23 s() XCHG
+    STVARUINT16
+    SWAP
+    s0 21 s() XCHG
+    STVARUINT16
+    SWAP
+    s0 19 s() XCHG
+    STVARUINT16
+    SWAP
+    s0 17 s() XCHG
+    STVARUINT16
+    s1 s15 XCHG
+    16 STU
+    s1 s13 XCHG
+    32 STU
+    s1 s11 XCHG
+    16 STU
+    s1 s9 XCHG
+    32 STU
+    s0 s7 XCHG2
+    STVARUINT16
+    s0 s5 XCHG2
+    STVARUINT16
+    NEWC
+    s0 s4 XCHG2
+    STVARUINT16
+    ROT
+    STVARUINT16
+    SWAP
+    STVARUINT16
+    s1 s2 XCHG
+    8 STU
+    s1 s2 XCHG
+    8 STU
+    s1 s2 XCHG
+    32 STU
+    s1 s2 XCHG
+    32 STU
+    s1 s2 XCHG
+    32 STU
+    s1 s2 XCHG
+    32 STU
+    s1 s2 XCHG
+    32 STU
+    s1 s2 XCHG
+    1 STI
+    s1 s2 XCHG
+    1 STI
+    s1 s2 XCHG
+    64 STU
+    s1 s3 XCHG
+    STDICT
+    s1 s3 XCHG
+    STDICT
+    s1 s3 XCHG
+    STDICT
+    s0 s3 XCHG
+    NEWC
+    STDICT
+    s1 s4 XCHG
+    STDICT
+    s1 s5 XCHG
+    STDICT
+    s0 s5 XCHG
+    NEWC
+    STDICT
+    s1 s6 XCHG
+    STDICT
+    s1 s6 XCHG
+    STDICT
+    s0 s6 XCHG
+    NEWC
+    STDICT
+    s1 s7 XCHG
+    STDICT
+    s1 s7 XCHG
+    STDICT
+    s1 s4 XCHG
+    STBREFR
+    s1 s3 XCHG
+    STBREFR
+    s1 s2 XCHG
+    STBREFR
+    s1 s3 XCHG
+    STBREFR
+    s1 s2 XCHG
+    STBREFR
+    STBREFR
+  }>
+  $GramStarterIdo$_load PROCINLINE:<{
+    LDMSGADDR
+    LDMSGADDR
+    1 LDI
+    LDVARUINT16
+    64 LDU
+    LDMSGADDR
+    LDREF
+    SWAP
+    CTOS
+    LDMSGADDR
+    LDMSGADDR
+    LDMSGADDR
+    1 LDI
+    8 LDU
+    LDVARUINT16
+    LDREF
+    DROP
+    CTOS
+    LDVARUINT16
+    LDVARUINT16
+    LDVARUINT16
+    LDVARUINT16
+    LDVARUINT16
+    16 LDU
+    32 LDU
+    16 LDU
+    32 LDU
+    LDVARUINT16
+    LDVARUINT16
+    LDREF
+    DROP
+    CTOS
+    LDVARUINT16
+    LDVARUINT16
+    LDVARUINT16
+    8 LDU
+    8 LDU
+    32 LDU
+    32 LDU
+    32 LDU
+    32 LDU
+    32 LDU
+    1 LDI
+    1 LDI
+    64 LDU
+    LDDICT
+    LDDICT
+    LDDICT
+    LDREF
+    DROP
+    CTOS
+    LDDICT
+    LDDICT
+    LDDICT
+    LDREF
+    DROP
+    CTOS
+    LDDICT
+    LDDICT
+    LDDICT
+    LDREF
+    DROP
+    CTOS
+    LDDICT
+    LDDICT
+    LDDICT
+    DROP
+    42 s() 48 s() XCHG
+    42 s() 47 s() XCHG
+    42 s() 46 s() XCHG
+    42 s() 45 s() XCHG
+    42 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+  }>
+  $Context$_get_value PROCINLINE:<{
+    s1 s3 XCHG
+    3 BLKDROP
+  }>
+  $GramStarterIdo$init$_load PROCREF:<{
+    LDMSGADDR
+    LDMSGADDR
+    257 PUSHINT
+    LDIX
+    LDREF
+    SWAP
+    CTOS
+    LDMSGADDR
+    LDMSGADDR
+    257 PUSHINT
+    LDIX
+    LDREF
+    DROP
+    CTOS
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    LDREF
+    DROP
+    CTOS
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    LDREF
+    DROP
+    CTOS
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    LDREF
+    DROP
+    CTOS
+    257 PUSHINT
+    LDIX
+    DROP
+    s13 16 s() XCHG
+    s13 s15 XCHG
+    s13 s14 XCHG
+  }>
+  $GramStarterIdo$_contract_init PROCINLINE:<{
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    46698 PUSHINT
+    23 s() PUSH
+    0 GTINT
+    THROWANYIFNOT
+    25435 PUSHINT
+    26 s() PUSH
+    100000000 PUSHINT
+    GEQ
+    THROWANYIFNOT
+    27946 PUSHINT
+    26 s() PUSH
+    10000000000 PUSHINT
+    LEQ
+    THROWANYIFNOT
+    55732 PUSHINT
+    22 s() PUSH
+    24 s() PUSH
+    GEQ
+    THROWANYIFNOT
+    9909 PUSHINT
+    21 s() PUSH
+    0 GTINT
+    THROWANYIFNOT
+    24505 PUSHINT
+    20 s() PUSH
+    22 s() PUSH
+    GEQ
+    THROWANYIFNOT
+    2282 PUSHINT
+    20 s() PUSH
+    23 s() PUSH
+    LEQ
+    THROWANYIFNOT
+    28941 PUSHINT
+    19 s() PUSH
+    0 GTINT
+    THROWANYIFNOT
+    26157 PUSHINT
+    18 s() PUSH
+    0 GTINT
+    THROWANYIFNOT
+    50846 PUSHINT
+    17 s() PUSH
+    -1 GTINT
+    IF:<{
+      17 s() PUSH
+      10000 PUSHINT
+      LEQ
+    }>ELSE<{
+      FALSE
+    }>
+    THROWANYIFNOT
+    12419 PUSHINT
+    16 s() PUSH
+    -1 GTINT
+    THROWANYIFNOT
+    56368 PUSHINT
+    17 s() PUSH
+    10000 PUSHINT
+    EQUAL
+    IF:<{
+      TRUE
+    }>ELSE<{
+      s15 PUSH
+      0 GTINT
+    }>
+    THROWANYIFNOT
+    44310 PUSHINT
+    s15 PUSH
+    121 LESSINT
+    THROWANYIFNOT
+    44616 PUSHINT
+    21 s() PUSH
+    19 s() PUSH
+    MUL
+    20 s() PUSH
+    GEQ
+    THROWANYIFNOT
+    58712 PUSHINT
+    22 s() PUSH
+    19 s() PUSH
+    MUL
+    20 s() PUSH
+    GEQ
+    THROWANYIFNOT
+    57534 PUSHINT
+    s14 PUSH
+    4 GTINT
+    IF:<{
+      s14 PUSH
+      19 LESSINT
+    }>ELSE<{
+      FALSE
+    }>
+    THROWANYIFNOT
+    8716 PUSHINT
+    s13 PUSH
+    0 GTINT
+    THROWANYIFNOT
+    44483 PUSHINT
+    28 s() PUSH
+    28 s() PUSH
+    SDEQ
+    NOT
+    THROWANYIFNOT
+    27 s() PUSH
+    FALSE
+    29 s() PUSH
+    FALSE
+    25 s() PUSH
+    23 s() PUSH
+    23 s() PUSH
+    s0 28 s() XCHG
+    0 PUSHINT
+    s0 25 s() XCHG
+    MUL
+    SWAP
+    s0 25 s() XCHG
+    DIV
+    23 s() PUSH
+    s0 s0 s0 PUSH3
+    s0 s0 s0 PUSH3
+    s0 s0 s0 PUSH3
+    DUP
+    16 s() 44 s() XCHG
+    s15 42 s() XCHG
+    s15 41 s() XCHG
+    29 s() 40 s() XCHG
+    s15 39 s() XCHG
+    29 s() 38 s() XCHG
+    s14 37 s() XCHG
+    16 s() 36 s() XCHG
+    s13 35 s() XCHG
+    30 s() 34 s() XCHG
+    s15 33 s() XCHG
+    s12 32 s() XCHG
+    s14 31 s() XCHG
+    16 s() 30 s() XCHG
+    s13 29 s() XCHG
+    s13 28 s() XCHG
+    s15 27 s() XCHG
+    s12 26 s() XCHG
+    s14 25 s() XCHG
+    16 s() 24 s() XCHG
+    s11 23 s() XCHG
+    s10 22 s() XCHG
+    s9 21 s() XCHG
+    s8 20 s() XCHG
+    s7 19 s() XCHG
+    s6 18 s() XCHG
+    s5 17 s() XCHG
+    s4 16 s() XCHG
+    s3 s15 XCHG
+    s14 s13 s0 XCHG3
+    FALSE
+    s13 s12 XCHG2
+    FALSE
+    s0 s12 XCHG
+    1 PUSHINT
+    s0 s12 XCHG
+    s4 s11 XCHG
+    s6 s10 XCHG
+    s3 s9 XCHG
+    s5 s8 XCHG
+    s6 s1 s4 XCHG3
+    s3 s3 XCHG2
+    s0 s5 XCHG
+  }>
+  $GramStarterIdo$_contract_load PROCINLINE:<{
+    c4 PUSH
+    CTOS
+    1 LDI
+    SWAP
+    IF:<{
+      $GramStarterIdo$_load INLINECALLDICT
+      48 s() POP
+      46 s() 47 s() XCHG
+      45 s() 46 s() XCHG
+      44 s() 45 s() XCHG
+      43 s() 44 s() XCHG
+      42 s() 43 s() XCHG
+      41 s() 42 s() XCHG
+      40 s() 41 s() XCHG
+      39 s() 40 s() XCHG
+      38 s() 39 s() XCHG
+      37 s() 38 s() XCHG
+      36 s() 37 s() XCHG
+      35 s() 36 s() XCHG
+      34 s() 35 s() XCHG
+      33 s() 34 s() XCHG
+      32 s() 33 s() XCHG
+      31 s() 32 s() XCHG
+      30 s() 31 s() XCHG
+      29 s() 30 s() XCHG
+      28 s() 29 s() XCHG
+      27 s() 28 s() XCHG
+      26 s() 27 s() XCHG
+      25 s() 26 s() XCHG
+      24 s() 25 s() XCHG
+      23 s() 24 s() XCHG
+      22 s() 23 s() XCHG
+      21 s() 22 s() XCHG
+      20 s() 21 s() XCHG
+      19 s() 20 s() XCHG
+      18 s() 19 s() XCHG
+      17 s() 18 s() XCHG
+      16 s() 17 s() XCHG
+      s15 16 s() XCHG
+      15 ROLL
+    }>ELSE<{
+      $GramStarterIdo$init$_load INLINECALLDICT
+      s0 16 s() XCHG
+      ENDS
+      15 ROLL
+      $GramStarterIdo$_contract_init INLINECALLDICT
+    }>
+  }>
+  $GramStarterIdo$_contract_store PROCINLINE:<{
+    NEWC
+    TRUE
+    SWAP
+    1 STI
+    s0 48 s() XCHG
+    s0 47 s() XCHG
+    s0 46 s() XCHG
+    s0 45 s() XCHG
+    s0 44 s() XCHG
+    s0 43 s() XCHG
+    s0 42 s() XCHG
+    s0 41 s() XCHG
+    s0 40 s() XCHG
+    s0 39 s() XCHG
+    s0 38 s() XCHG
+    s0 37 s() XCHG
+    s0 36 s() XCHG
+    s0 35 s() XCHG
+    s0 34 s() XCHG
+    s0 33 s() XCHG
+    s0 32 s() XCHG
+    s0 31 s() XCHG
+    s0 30 s() XCHG
+    s0 29 s() XCHG
+    s0 28 s() XCHG
+    s0 27 s() XCHG
+    s0 26 s() XCHG
+    s0 25 s() XCHG
+    s0 24 s() XCHG
+    s0 23 s() XCHG
+    s0 22 s() XCHG
+    s0 21 s() XCHG
+    s0 20 s() XCHG
+    s0 19 s() XCHG
+    s0 18 s() XCHG
+    s0 17 s() XCHG
+    s0 16 s() XCHG
+    15 -ROLL
+    $GramStarterIdo$_store INLINECALLDICT
+    ENDC
+    c4 POP
+  }>
+  $Builder$_fun_asSlice PROCINLINE:<{
+        ENDC
+        CTOS
+  }>
+  $GramStarterIdo$_fun_calculateVestedAmount PROCREF:<{
+    29 s() PUSH
+    0 EQINT
+    IF:<{
+      TRUE
+    }>ELSE<{
+      OVER
+      1 LESSINT
+    }>
+    IFJMP:<{
+      2DROP
+      0 PUSHINT
+    }>
+    OVER
+    33 s() PUSH
+    MUL
+    10000 PUSHINT
+    DIV
+    33 s() PUSH
+    10000 PUSHINT
+    EQUAL
+    IFJMP:<{
+      2DROP
+    }>
+    30 s() PUSH
+    33 s() PUSH
+    ADD
+    s2 s0 PUSH2
+    LESS
+    IFJMP:<{
+      s1 s3 XCHG
+      3 BLKDROP
+    }>
+    s1 s2 XCHG
+    SUB
+    2592000 PUSHINT
+    DIV
+    DUP
+    32 s() PUSH
+    GEQ
+    IFJMP:<{
+      2DROP
+    }>
+    s2 s1 XCPU
+    SUB
+    ROT
+    MUL
+    30 s() PUSH
+    DIV
+    ADD
+  }>
+  $GramStarterIdo$_fun_get_contract_version PROCREF:<{
+    14 PUSHINT
+  }>
+  $GramStarterIdo$_fun_get_ton_reserve PROCREF:<{
+    44 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_deployment_id PROCREF:<{
+    43 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_ido_state PROCREF:<{
+    21 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_failed_reason PROCREF:<{
+    20 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_raised_capital PROCREF:<{
+    25 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_soft_cap PROCREF:<{
+    36 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_hard_cap PROCREF:<{
+    35 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_min_buy PROCREF:<{
+    34 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_max_buy PROCREF:<{
+    33 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_sold_tokens PROCREF:<{
+    25 s() PUSH
+    32 s() PUSH
+    MUL
+    33 s() PUSH
+    DIV
+  }>
+  $GramStarterIdo$_fun_get_admin PROCREF:<{
+    47 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_superadmin PROCREF:<{
+    46 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_admin_blocked PROCREF:<{
+    45 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_raised_usdt_withdrawn PROCREF:<{
+    s13 PUSH
+  }>
+  $GramStarterIdo$_fun_get_sale_token_required PROCREF:<{
+    26 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_sale_token_deposited PROCREF:<{
+    24 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_sale_token_claimed PROCREF:<{
+    23 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_tge_basis_points PROCREF:<{
+    30 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_cliff_duration PROCREF:<{
+    29 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_monthly_vesting_periods PROCREF:<{
+    28 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_distribution_started_at PROCREF:<{
+    27 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_usdt_refunded PROCREF:<{
+    22 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_upvotes PROCREF:<{
+    19 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_downvotes PROCREF:<{
+    18 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_participant_count PROCREF:<{
+    17 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_claims_processed PROCREF:<{
+    16 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_refunds_processed PROCREF:<{
+    s15 PUSH
+  }>
+  $GramStarterIdo$_fun_get_usdt_jetton_master PROCREF:<{
+    42 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_usdt_decimals PROCREF:<{
+    37 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_sale_token_jetton_master PROCREF:<{
+    41 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_usdt_jetton_wallet PROCREF:<{
+    40 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_sale_token_jetton_wallet PROCREF:<{
+    39 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_remaining_sale_tokens_withdrawn PROCREF:<{
+    s14 PUSH
+  }>
+  $GramStarterIdo$_fun_get_jetton_wallets_configured PROCREF:<{
+    38 s() PUSH
+  }>
+  $GramStarterIdo$_fun_get_user_has_voted PROCREF:<{
+    267 PUSHINT
+    s13 PUSH
+    s0 s2 XCHG
+    1 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    ISNULL
+    NOT
+  }>
+  $GramStarterIdo$_fun_get_user_vote PROCREF:<{
+    267 PUSHINT
+    s13 PUSH
+    s0 s2 XCHG
+    1 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      FALSE
+    }>
+  }>
+  $GramStarterIdo$_fun_get_user_contribution PROCREF:<{
+    267 PUSHINT
+    s12 PUSH
+    s0 s2 XCHG
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      0 PUSHINT
+    }>
+  }>
+  $GramStarterIdo$_fun_get_user_allocation PROCREF:<{
+    267 PUSHINT
+    s11 PUSH
+    s0 s2 XCHG
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      0 PUSHINT
+    }>
+  }>
+  $GramStarterIdo$_fun_get_user_claimed PROCREF:<{
+    267 PUSHINT
+    s9 PUSH
+    s0 s2 XCHG
+    1 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      FALSE
+    }>
+  }>
+  $GramStarterIdo$_fun_get_user_claimed_allocation PROCREF:<{
+    267 PUSHINT
+    s10 PUSH
+    s0 s2 XCHG
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      0 PUSHINT
+    }>
+  }>
+  $GramStarterIdo$_fun_get_user_vested_allocation PROCREF:<{
+    267 PUSHINT
+    s11 PUSH
+    s0 s2 XCHG
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      0 PUSHINT
+    }>
+        NOW
+    $GramStarterIdo$_fun_calculateVestedAmount INLINECALLDICT
+  }>
+  $GramStarterIdo$_fun_get_user_claimable_allocation PROCREF:<{
+    s10 PUSH
+    267 PUSHINT
+    s2 PUSH
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      2DROP
+      0 PUSHINT
+    }>
+    0 PUSHINT
+    267 PUSHINT
+    s12 s0 s3 PUXC2
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    NOT
+    IF:<{
+      s2 POP
+    }>ELSE<{
+      DROP
+    }>
+        NOW
+    49 s() 50 s() XCHG
+    48 s() 50 s() XCHG
+    47 s() 50 s() XCHG
+    46 s() 50 s() XCHG
+    45 s() 50 s() XCHG
+    44 s() 50 s() XCHG
+    43 s() 50 s() XCHG
+    42 s() 50 s() XCHG
+    41 s() 50 s() XCHG
+    40 s() 50 s() XCHG
+    39 s() 50 s() XCHG
+    38 s() 50 s() XCHG
+    37 s() 50 s() XCHG
+    36 s() 50 s() XCHG
+    35 s() 50 s() XCHG
+    34 s() 50 s() XCHG
+    33 s() 50 s() XCHG
+    32 s() 50 s() XCHG
+    31 s() 50 s() XCHG
+    30 s() 50 s() XCHG
+    29 s() 50 s() XCHG
+    28 s() 50 s() XCHG
+    27 s() 50 s() XCHG
+    26 s() 50 s() XCHG
+    25 s() 50 s() XCHG
+    24 s() 50 s() XCHG
+    23 s() 50 s() XCHG
+    22 s() 50 s() XCHG
+    21 s() 50 s() XCHG
+    20 s() 50 s() XCHG
+    19 s() 50 s() XCHG
+    18 s() 50 s() XCHG
+    17 s() 50 s() XCHG
+    16 s() 50 s() XCHG
+    s15 50 s() XCHG
+    s14 50 s() XCHG
+    s13 50 s() XCHG
+    s12 50 s() XCHG
+    s11 50 s() XCHG
+    s10 50 s() XCHG
+    s9 50 s() XCHG
+    s8 50 s() XCHG
+    s7 50 s() XCHG
+    s6 50 s() XCHG
+    s5 50 s() XCHG
+    s4 50 s() XCHG
+    s3 50 s() XCHG
+    s2 50 s() XCHG
+    $GramStarterIdo$_fun_calculateVestedAmount INLINECALLDICT
+    DUP
+    50 s() PUSH
+    LEQ
+    IFJMP:<{
+      DROP
+      48 s() POP
+      46 s() 47 s() XCHG
+      45 s() 46 s() XCHG
+      44 s() 45 s() XCHG
+      43 s() 44 s() XCHG
+      42 s() 43 s() XCHG
+      41 s() 42 s() XCHG
+      40 s() 41 s() XCHG
+      39 s() 40 s() XCHG
+      38 s() 39 s() XCHG
+      37 s() 38 s() XCHG
+      36 s() 37 s() XCHG
+      35 s() 36 s() XCHG
+      34 s() 35 s() XCHG
+      33 s() 34 s() XCHG
+      32 s() 33 s() XCHG
+      31 s() 32 s() XCHG
+      30 s() 31 s() XCHG
+      29 s() 30 s() XCHG
+      28 s() 29 s() XCHG
+      27 s() 28 s() XCHG
+      26 s() 27 s() XCHG
+      25 s() 26 s() XCHG
+      24 s() 25 s() XCHG
+      23 s() 24 s() XCHG
+      22 s() 23 s() XCHG
+      21 s() 22 s() XCHG
+      20 s() 21 s() XCHG
+      19 s() 20 s() XCHG
+      18 s() 19 s() XCHG
+      17 s() 18 s() XCHG
+      16 s() 17 s() XCHG
+      s15 16 s() XCHG
+      15 ROLL
+      0 PUSHINT
+    }>
+    SWAP
+    s0 49 s() XCHG
+    SUB
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    s14 s15 XCHG
+    s13 s14 XCHG
+    s12 s13 XCHG
+    s11 s12 XCHG
+    s10 s11 XCHG
+    s9 s10 XCHG
+    s8 s9 XCHG
+    s7 s8 XCHG
+    s6 s7 XCHG
+    s5 s6 XCHG
+    s4 s5 XCHG
+    s3 s4 XCHG
+    s1 s3 s0 XCHG3
+  }>
+  $GramStarterIdo$_fun_get_user_refunded PROCREF:<{
+    267 PUSHINT
+    s8 PUSH
+    s0 s2 XCHG
+    1 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      FALSE
+    }>
+  }>
+  $GramStarterIdo$_fun_get_user_rejected_usdt_credit PROCREF:<{
+    267 PUSHINT
+    s2 PUSH
+    s0 s2 XCHG
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    DUP
+    ISNULL
+    IFJMP:<{
+      DROP
+      0 PUSHINT
+    }>
+  }>
+  $MessageParameters$_constructor_to_value_bounce_mode_body PROCINLINE:<{
+    s3 s4 s3 XCHG3
+  }>
+  $DeployOk$_constructor_queryId PROCINLINE:<{
+  }>
+  $MessageParameters$_constructor_to_value_bounce_body PROCINLINE:<{
+    0 PUSHINT
+    s4 s4 XCHG2
+    s3 s1 s3 XCHG3
+  }>
+  $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload PROCINLINE:<{
+  }>
+  $MessageParameters$_constructor_to_value_bounce PROCINLINE:<{
+    0 PUSHINT
+    s0 s3 XCHG
+    PUSHNULL
+    s3 s1 s3 XCHG3
+  }>
+  %get_contract_version PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_contract_version INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_ton_reserve PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_ton_reserve INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_deployment_id PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_deployment_id INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_ido_state PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_ido_state INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_failed_reason PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_failed_reason INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_raised_capital PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_raised_capital INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_soft_cap PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_soft_cap INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_hard_cap PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_hard_cap INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_min_buy PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_min_buy INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_max_buy PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_max_buy INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_sold_tokens PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_sold_tokens INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_admin PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_admin INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_superadmin PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_superadmin INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_admin_blocked PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_admin_blocked INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_raised_usdt_withdrawn PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_raised_usdt_withdrawn INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_sale_token_required PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_sale_token_required INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_sale_token_deposited PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_sale_token_deposited INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_sale_token_claimed PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_sale_token_claimed INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_tge_basis_points PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_tge_basis_points INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_cliff_duration PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_cliff_duration INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_monthly_vesting_periods PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_monthly_vesting_periods INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_distribution_started_at PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_distribution_started_at INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_usdt_refunded PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_usdt_refunded INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_upvotes PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_upvotes INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_downvotes PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_downvotes INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_participant_count PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_participant_count INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_claims_processed PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_claims_processed INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_refunds_processed PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_refunds_processed INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_usdt_jetton_master PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_usdt_jetton_master INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_usdt_decimals PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_usdt_decimals INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_sale_token_jetton_master PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_sale_token_jetton_master INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_usdt_jetton_wallet PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_usdt_jetton_wallet INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_sale_token_jetton_wallet PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_sale_token_jetton_wallet INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_remaining_sale_tokens_withdrawn PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_remaining_sale_tokens_withdrawn INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_jetton_wallets_configured PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    $GramStarterIdo$_fun_get_jetton_wallets_configured INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_user_has_voted PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramStarterIdo$_fun_get_user_has_voted INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_user_vote PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramStarterIdo$_fun_get_user_vote INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_user_contribution PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramStarterIdo$_fun_get_user_contribution INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_user_allocation PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramStarterIdo$_fun_get_user_allocation INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_user_claimed PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramStarterIdo$_fun_get_user_claimed INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_user_claimed_allocation PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramStarterIdo$_fun_get_user_claimed_allocation INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_user_vested_allocation PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramStarterIdo$_fun_get_user_vested_allocation INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_user_claimable_allocation PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramStarterIdo$_fun_get_user_claimable_allocation INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_user_refunded PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramStarterIdo$_fun_get_user_refunded INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  %get_user_rejected_usdt_credit PROC:<{
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    47 s() 48 s() XCHG
+    46 s() 47 s() XCHG
+    45 s() 46 s() XCHG
+    44 s() 45 s() XCHG
+    43 s() 44 s() XCHG
+    42 s() 43 s() XCHG
+    41 s() 42 s() XCHG
+    40 s() 41 s() XCHG
+    39 s() 40 s() XCHG
+    38 s() 39 s() XCHG
+    37 s() 38 s() XCHG
+    36 s() 37 s() XCHG
+    35 s() 36 s() XCHG
+    34 s() 35 s() XCHG
+    33 s() 34 s() XCHG
+    32 s() 33 s() XCHG
+    31 s() 32 s() XCHG
+    30 s() 31 s() XCHG
+    29 s() 30 s() XCHG
+    28 s() 29 s() XCHG
+    27 s() 28 s() XCHG
+    26 s() 27 s() XCHG
+    25 s() 26 s() XCHG
+    24 s() 25 s() XCHG
+    23 s() 24 s() XCHG
+    22 s() 23 s() XCHG
+    21 s() 22 s() XCHG
+    20 s() 21 s() XCHG
+    19 s() 20 s() XCHG
+    18 s() 19 s() XCHG
+    17 s() 18 s() XCHG
+    16 s() 17 s() XCHG
+    s15 16 s() XCHG
+    15 ROLL
+    $GramStarterIdo$_fun_get_user_rejected_usdt_credit INLINECALLDICT
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+    16 s() POP
+    15 BLKDROP
+  }>
+  recv_internal PROC:<{
+    SWAP
+    CTOS
+    2 PUSHINT
+    SDSKIPFIRST
+    1 LDI
+    1 LDI
+    LDMSGADDR
+    OVER
+    s3 s4 XCHG
+    s6 s6 XCHG2
+    4 TUPLE
+    __tact_context SETGLOB
+    s0 s2 XCHG
+    __tact_context_sender SETGLOB
+    $GramStarterIdo$_contract_load INLINECALLDICT
+    s0 49 s() XCHG
+    IFJMP:<{
+      s0 47 s() XCHG
+      32 PUSHINT
+      SDSKIPFIRST
+      0 PUSHINT
+      OVER
+      SBITS
+      31 GTINT
+      IF:<{
+        DROP
+        32 LDU
+        SWAP
+      }>
+      260734629 PUSHINT
+      EQUAL
+      IFJMP:<{
+        $JettonTransfer$_load_bounced INLINECALLDICT
+        DROP
+        NIP
+        257 PUSHINT
+        s4 s(-1) s(-1) PUXCPU
+        s3 s(-1) PUXC
+        __tact_dict_get_int_int INLINECALLDICT
+        s3 PUSH
+        257 PUSHINT
+        s3 PUSH
+        __tact_dict_get_int_slice INLINECALLDICT
+        257 PUSHINT
+        s4 s(-1) s(-1) PUXCPU
+        s5 s(-1) PUXC
+        __tact_dict_get_int_int INLINECALLDICT
+        s2 PUSH
+        ISNULL
+        IF:<{
+          TRUE
+        }>ELSE<{
+          OVER
+          ISNULL
+        }>
+        IF:<{
+          TRUE
+        }>ELSE<{
+          DUP
+          ISNULL
+        }>
+        IFJMP:<{
+          4 BLKDROP
+          45 s() 47 s() XCHG
+          44 s() 46 s() XCHG
+          43 s() 45 s() XCHG
+          42 s() 44 s() XCHG
+          41 s() 43 s() XCHG
+          40 s() 42 s() XCHG
+          39 s() 41 s() XCHG
+          38 s() 40 s() XCHG
+          37 s() 39 s() XCHG
+          36 s() 38 s() XCHG
+          35 s() 37 s() XCHG
+          34 s() 36 s() XCHG
+          33 s() 35 s() XCHG
+          32 s() 34 s() XCHG
+          31 s() 33 s() XCHG
+          30 s() 32 s() XCHG
+          29 s() 31 s() XCHG
+          28 s() 30 s() XCHG
+          27 s() 29 s() XCHG
+          26 s() 28 s() XCHG
+          25 s() 27 s() XCHG
+          24 s() 26 s() XCHG
+          23 s() 25 s() XCHG
+          22 s() 24 s() XCHG
+          21 s() 23 s() XCHG
+          20 s() 22 s() XCHG
+          19 s() 21 s() XCHG
+          18 s() 20 s() XCHG
+          17 s() 19 s() XCHG
+          16 s() 18 s() XCHG
+          s15 17 s() XCHG
+          s14 16 s() XCHG
+          s13 s15 XCHG
+          2 13 BLKSWAP
+          $GramStarterIdo$_contract_store INLINECALLDICT
+        }>
+        s2 PUSH
+        1 EQINT
+        IF:<{
+          0 PUSHINT
+          s11 PUSH
+          267 PUSHINT
+          s4 PUSH
+          257 PUSHINT
+          __tact_dict_get_slice_int INLINECALLDICT
+          DUP
+          ISNULL
+          NOT
+          IF:<{
+            NIP
+          }>ELSE<{
+            DROP
+          }>
+          OVER
+          SUB
+          FALSE
+          s11 PUSH
+          267 PUSHINT
+          s5 PUSH
+          1 PUSHINT
+          __tact_dict_get_slice_int INLINECALLDICT
+          DUP
+          ISNULL
+          NOT
+          IF:<{
+            NIP
+          }>ELSE<{
+            DROP
+          }>
+          s1 s12 XCHG
+          267 PUSHINT
+          s0 s4 s13 XCPUXC
+          257 PUSHINT
+          __tact_dict_set_slice_int INLINECALLDICT
+          s0 s11 XCHG
+          IF:<{
+            s0 s9 XCHG
+            267 PUSHINT
+            s2 PUSH
+            FALSE
+            1 PUSHINT
+            __tact_dict_set_slice_int INLINECALLDICT
+            s0 18 s() XCHG
+            DEC
+            s0 18 s() XCHG
+            s0 s9 XCHG
+          }>
+          s0 25 s() XCHG
+          25 s() PUSH
+          SUB
+          s0 25 s() XCHG
+        }>
+        s2 PUSH
+        2 EQINT
+        IF:<{
+          0 PUSHINT
+          257 PUSHINT
+          DUP
+          53 s() PUSH
+          s2 s7 s2 XCPUXC
+          __tact_dict_get_int_int INLINECALLDICT
+          DUP
+          ISNULL
+          NOT
+          IF:<{
+            NIP
+          }>ELSE<{
+            DROP
+          }>
+          s0 s9 XCHG
+          267 PUSHINT
+          s3 PUSH
+          FALSE
+          1 PUSHINT
+          __tact_dict_set_slice_int INLINECALLDICT
+          s0 18 s() XCHG
+          DEC
+          s0 25 s() XCHG
+          OVER
+          SUB
+          s0 s13 XCHG
+          267 PUSHINT
+          2OVER
+          257 PUSHINT
+          __tact_dict_set_slice_int INLINECALLDICT
+          s1 s12 XCHG
+          267 PUSHINT
+          s0 s3 s10 XCPUXC
+          257 PUSHINT
+          __tact_dict_set_slice_int INLINECALLDICT
+          s12 24 s() XCHG
+          s12 17 s() XCHG
+          s8 s12 XCHG
+          s0 s11 XCHG
+        }>
+        s2 PUSH
+        3 EQINT
+        IF:<{
+          TRUE
+        }>ELSE<{
+          s2 PUSH
+          4 EQINT
+        }>
+        IF:<{
+          0 PUSHINT
+          52 s() PUSH
+          267 PUSHINT
+          s4 PUSH
+          257 PUSHINT
+          __tact_dict_get_slice_int INLINECALLDICT
+          DUP
+          ISNULL
+          NOT
+          IF:<{
+            NIP
+          }>ELSE<{
+            DROP
+          }>
+          267 PUSHINT
+          s0 s2 XCHG
+          ADD
+          s3 52 s() XCHG
+          s1 s2 XCHG
+          257 PUSHINT
+          __tact_dict_set_slice_int INLINECALLDICT
+          s0 49 s() XCHG
+        }>ELSE<{
+          2DROP
+        }>
+        DUP
+        5 EQINT
+        IF:<{
+          FALSE
+          s15 POP
+        }>
+        6 EQINT
+        IF:<{
+          FALSE
+          s13 POP
+        }>
+        s0 s3 PUXC
+        257 PUSHINT
+            DICTIDEL
+        DROP
+        s3 s2 PUXC
+        257 PUSHINT
+            DICTIDEL
+        DROP
+        s3 s1 PUXC
+        257 PUSHINT
+            DICTIDEL
+        DROP
+        s0 47 s() XCHG
+        s1 s3 XCHG
+        257 PUSHINT
+            DICTIDEL
+        DROP
+        45 s() 47 s() XCHG
+        44 s() 46 s() XCHG
+        43 s() 45 s() XCHG
+        42 s() 44 s() XCHG
+        41 s() 43 s() XCHG
+        40 s() 42 s() XCHG
+        39 s() 41 s() XCHG
+        38 s() 40 s() XCHG
+        37 s() 39 s() XCHG
+        36 s() 38 s() XCHG
+        35 s() 37 s() XCHG
+        34 s() 36 s() XCHG
+        33 s() 35 s() XCHG
+        32 s() 34 s() XCHG
+        31 s() 33 s() XCHG
+        30 s() 32 s() XCHG
+        29 s() 31 s() XCHG
+        28 s() 30 s() XCHG
+        27 s() 29 s() XCHG
+        26 s() 28 s() XCHG
+        25 s() 27 s() XCHG
+        24 s() 26 s() XCHG
+        23 s() 25 s() XCHG
+        22 s() 24 s() XCHG
+        21 s() 23 s() XCHG
+        20 s() 22 s() XCHG
+        19 s() 21 s() XCHG
+        18 s() 20 s() XCHG
+        17 s() 19 s() XCHG
+        16 s() 18 s() XCHG
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
+        s12 s14 XCHG
+        s11 s13 XCHG
+        s10 s12 XCHG
+        s9 s11 XCHG
+        s8 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s4 s0 s4 XCHG3
+        s0 s3 XCHG
+        $GramStarterIdo$_contract_store INLINECALLDICT
+      }>
+      15 BLKDROP
+      15 BLKDROP
+      15 BLKDROP
+      4 BLKDROP
+    }>
+    s0 47 s() XCHG
+    32 LDUQ 130 THROWIFNOT
+    OVER
+    2490013878 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      64 LDU
+      DROP
+      43 s() PUSH
+      0 PUSHINT
+          RAWRESERVE
+      __tact_context_get_sender INLINECALLDICT
+      0 PUSHINT
+      FALSE
+      130 PUSHINT
+      s0 s4 XCHG
+      $DeployOk$_constructor_queryId INLINECALLDICT
+      NEWC
+      $DeployOk$_store_cell INLINECALLDICT
+      s3 s4 XCHG
+      s1 s3 s0 XCHG3
+      $MessageParameters$_constructor_to_value_bounce_mode_body INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+          STZEROES
+          // → Stack state
+          // s0: Builder
+          // s1: `body`
+          // s2: `mode`
+          STDICT
+          ENDC
+          SWAP
+          SENDRAWMSG
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      2 13 BLKSWAP
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    2581814978 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      1 LDI
+      DROP
+      51628 PUSHINT
+      21 s() PUSH
+      0 EQINT
+      THROWANYIFNOT
+      23376 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      10000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      __tact_context_get_sender INLINECALLDICT
+      s11 PUSH
+      267 PUSHINT
+      s2 PUSH
+      1 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      59369 PUSHINT
+      SWAP
+      ISNULL
+      THROWANYIFNOT
+      s1 s11 XCHG
+      267 PUSHINT
+      s1 s12 XCPU
+      1 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
+      s0 s10 XCHG
+      IF:<{
+        s0 17 s() XCHG
+        INC
+      }>ELSE<{
+        s0 16 s() XCHG
+        INC
+        s0 16 s() XCHG
+        s0 17 s() XCHG
+      }>
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      s0 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      s12 s14 XCHG
+      s11 s13 XCHG
+      s10 s12 XCHG
+      s9 s11 XCHG
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s4 s3 s0 XCHG3
+      s1 s2 XCHG
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    1436965512 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      38 s() POP
+      38 s() POP
+      s0 36 s() XCHG
+      LDMSGADDR
+      LDMSGADDR
+      DROP
+      7280 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      46 s() PUSH
+      SDEQ
+      IF:<{
+        TRUE
+      }>ELSE<{
+        __tact_context_get_sender INLINECALLDICT
+        47 s() PUSH
+        SDEQ
+        IF:<{
+          44 s() PUSH
+          NOT
+        }>ELSE<{
+          FALSE
+        }>
+      }>
+      THROWANYIFNOT
+      23376 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      10000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      63304 PUSHINT
+      s0 37 s() XCHG
+      NOT
+      s1 37 s() XCHG
+      THROWANYIFNOT
+      48275 PUSHINT
+      19 s() PUSH
+      0 EQINT
+      THROWANYIFNOT
+      38074 PUSHINT
+      OVER
+      37 s() PUSH
+      SDEQ
+      NOT
+      THROWANYIFNOT
+      2174 PUSHINT
+          MYADDR
+      s2 s(-1) PUXC
+      SDEQ
+      NOT
+      THROWANYIFNOT
+      26481 PUSHINT
+          MYADDR
+      37 s() PUSH
+      SWAP
+      SDEQ
+      NOT
+      THROWANYIFNOT
+      2174 PUSHINT
+      OVER
+      46 s() PUSH
+      SDEQ
+      NOT
+      THROWANYIFNOT
+      26481 PUSHINT
+      36 s() PUSH
+      46 s() PUSH
+      SDEQ
+      NOT
+      THROWANYIFNOT
+      2174 PUSHINT
+      OVER
+      45 s() PUSH
+      SDEQ
+      NOT
+      THROWANYIFNOT
+      26481 PUSHINT
+      36 s() PUSH
+      45 s() PUSH
+      SDEQ
+      NOT
+      THROWANYIFNOT
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      s0 39 s() XCHG
+      35 s() 38 s() XCHG
+      TRUE
+      s0 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      s12 s14 XCHG
+      s11 s13 XCHG
+      s10 s12 XCHG
+      s9 s11 XCHG
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s0 s1 s4 XCHG3
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    2860461458 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      8 LDU
+      DROP
+      7280 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      47 s() PUSH
+      SDEQ
+      IF:<{
+        TRUE
+      }>ELSE<{
+        __tact_context_get_sender INLINECALLDICT
+        48 s() PUSH
+        SDEQ
+        IF:<{
+          45 s() PUSH
+          NOT
+        }>ELSE<{
+          FALSE
+        }>
+      }>
+      THROWANYIFNOT
+      23376 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      10000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      32474 PUSHINT
+      OVER
+      3 EQINT
+      IF:<{
+        TRUE
+      }>ELSE<{
+        OVER
+        4 EQINT
+      }>
+      THROWANYIFNOT
+      20 s() PUSH
+      0 EQINT
+      IF:<{
+        DUP
+        3 EQINT
+      }>ELSE<{
+        FALSE
+      }>
+      IFJMP:<{
+        DROP
+        18 s() POP
+        18 s() POP
+        s15 s14 PUSH2
+        GEQ
+        IF:<{
+          12628 PUSHINT
+          35 s() PUSH
+          THROWANYIFNOT
+          3 PUSHINT
+          0 PUSHINT
+        }>ELSE<{
+          5 PUSHINT
+          1 PUSHINT
+        }>
+        45 s() 47 s() XCHG
+        44 s() 46 s() XCHG
+        43 s() 45 s() XCHG
+        42 s() 44 s() XCHG
+        41 s() 43 s() XCHG
+        40 s() 42 s() XCHG
+        39 s() 41 s() XCHG
+        38 s() 40 s() XCHG
+        37 s() 39 s() XCHG
+        36 s() 38 s() XCHG
+        35 s() 37 s() XCHG
+        34 s() 36 s() XCHG
+        33 s() 35 s() XCHG
+        32 s() 34 s() XCHG
+        31 s() 33 s() XCHG
+        30 s() 32 s() XCHG
+        29 s() 31 s() XCHG
+        28 s() 30 s() XCHG
+        27 s() 29 s() XCHG
+        26 s() 28 s() XCHG
+        25 s() 27 s() XCHG
+        24 s() 26 s() XCHG
+        23 s() 25 s() XCHG
+        22 s() 24 s() XCHG
+        21 s() 23 s() XCHG
+        20 s() 22 s() XCHG
+        s1 21 s() XCHG
+        s0 20 s() XCHG
+        17 s() 19 s() XCHG
+        16 s() 18 s() XCHG
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
+        s12 s14 XCHG
+        s11 s13 XCHG
+        s10 s12 XCHG
+        s9 s11 XCHG
+        s8 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s4 s0 s0 XCHG3
+        $GramStarterIdo$_contract_store INLINECALLDICT
+      }>
+      20 s() PUSH
+      3 EQINT
+      IF:<{
+        4 EQINT
+      }>ELSE<{
+        DROP
+        FALSE
+      }>
+      IFJMP:<{
+        18 s() POP
+        18 s() POP
+        21 s() PUSH
+        33 s() PUSH
+        LESS
+        IF:<{
+          5 PUSHINT
+          2 PUSHINT
+        }>ELSE<{
+          23 s() POP
+          4 PUSHINT
+          0 PUSHINT
+              NOW
+          s0 25 s() XCHG
+          -ROT
+        }>
+        45 s() 47 s() XCHG
+        44 s() 46 s() XCHG
+        43 s() 45 s() XCHG
+        42 s() 44 s() XCHG
+        41 s() 43 s() XCHG
+        40 s() 42 s() XCHG
+        39 s() 41 s() XCHG
+        38 s() 40 s() XCHG
+        37 s() 39 s() XCHG
+        36 s() 38 s() XCHG
+        35 s() 37 s() XCHG
+        34 s() 36 s() XCHG
+        33 s() 35 s() XCHG
+        32 s() 34 s() XCHG
+        31 s() 33 s() XCHG
+        30 s() 32 s() XCHG
+        29 s() 31 s() XCHG
+        28 s() 30 s() XCHG
+        27 s() 29 s() XCHG
+        26 s() 28 s() XCHG
+        25 s() 27 s() XCHG
+        24 s() 26 s() XCHG
+        23 s() 25 s() XCHG
+        22 s() 24 s() XCHG
+        21 s() 23 s() XCHG
+        20 s() 22 s() XCHG
+        s1 21 s() XCHG
+        s0 20 s() XCHG
+        17 s() 19 s() XCHG
+        16 s() 18 s() XCHG
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
+        s12 s14 XCHG
+        s11 s13 XCHG
+        s10 s12 XCHG
+        s9 s11 XCHG
+        s8 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s4 s0 s0 XCHG3
+        $GramStarterIdo$_contract_store INLINECALLDICT
+      }>
+      20852 PUSHINT
+      THROWANY
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      2 13 BLKSWAP
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    1935855772 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      64 LDU
+      NIP
+      LDVARUINT16
+      LDMSGADDR
+      DROP
+      12628 PUSHINT
+      39 s() PUSH
+      THROWANYIFNOT
+      __tact_context_get_sender INLINECALLDICT
+      40 s() PUSH
+      SDEQ
+      IFJMP:<{
+        DROP
+        49728 PUSHINT
+        21 s() PUSH
+        0 EQINT
+        IF:<{
+          TRUE
+        }>ELSE<{
+          21 s() PUSH
+          3 EQINT
+        }>
+        THROWANYIFNOT
+        s1 23 s() XCHG
+        ADD
+        45 s() 47 s() XCHG
+        44 s() 46 s() XCHG
+        43 s() 45 s() XCHG
+        42 s() 44 s() XCHG
+        41 s() 43 s() XCHG
+        40 s() 42 s() XCHG
+        39 s() 41 s() XCHG
+        38 s() 40 s() XCHG
+        37 s() 39 s() XCHG
+        36 s() 38 s() XCHG
+        35 s() 37 s() XCHG
+        34 s() 36 s() XCHG
+        33 s() 35 s() XCHG
+        32 s() 34 s() XCHG
+        31 s() 33 s() XCHG
+        30 s() 32 s() XCHG
+        29 s() 31 s() XCHG
+        28 s() 30 s() XCHG
+        27 s() 29 s() XCHG
+        26 s() 28 s() XCHG
+        25 s() 27 s() XCHG
+        24 s() 26 s() XCHG
+        23 s() 25 s() XCHG
+        s0 24 s() XCHG
+        21 s() 23 s() XCHG
+        20 s() 22 s() XCHG
+        19 s() 21 s() XCHG
+        18 s() 20 s() XCHG
+        17 s() 19 s() XCHG
+        16 s() 18 s() XCHG
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
+        s12 s14 XCHG
+        s11 s13 XCHG
+        s10 s12 XCHG
+        s9 s11 XCHG
+        s8 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s4 s0 s3 XCHG3
+        $GramStarterIdo$_contract_store INLINECALLDICT
+      }>
+      __tact_context_get_sender INLINECALLDICT
+      41 s() PUSH
+      SDEQ
+      IFJMP:<{
+        0 PUSHINT
+        s11 PUSH
+        267 PUSHINT
+        s3 PUSH
+        257 PUSHINT
+        __tact_dict_get_slice_int INLINECALLDICT
+        DUP
+        ISNULL
+        NOT
+        IF:<{
+          NIP
+        }>ELSE<{
+          DROP
+        }>
+        22 s() PUSH
+        3 NEQINT
+        IF:<{
+          TRUE
+        }>ELSE<{
+          25 s() PUSH
+          28 s() PUSH
+          LESS
+        }>
+        IF:<{
+          TRUE
+        }>ELSE<{
+          OVER
+          49 s() PUSH
+          SDEQ
+        }>
+        IF:<{
+          TRUE
+        }>ELSE<{
+          s2 PUSH
+          36 s() PUSH
+          LESS
+        }>
+        IF:<{
+          TRUE
+        }>ELSE<{
+          s2 PUSH
+          35 s() PUSH
+          GREATER
+        }>
+        IF:<{
+          TRUE
+        }>ELSE<{
+          s0 s2 PUSH2
+          ADD
+          35 s() PUSH
+          GREATER
+        }>
+        IF:<{
+          TRUE
+        }>ELSE<{
+          26 s() PUSH
+          s3 PUSH
+          ADD
+          37 s() PUSH
+          GREATER
+        }>
+        IFJMP:<{
+          DROP
+          0 PUSHINT
+          50 s() PUSH
+          267 PUSHINT
+          s3 PUSH
+          257 PUSHINT
+          __tact_dict_get_slice_int INLINECALLDICT
+          DUP
+          ISNULL
+          NOT
+          IF:<{
+            NIP
+          }>ELSE<{
+            DROP
+          }>
+          267 PUSHINT
+          s1 s3 PUSH2
+          ADD
+          s2 52 s() XCHG
+          s3 s(-1) PUXC
+          257 PUSHINT
+          __tact_dict_set_slice_int INLINECALLDICT
+          __tact_context_get INLINECALLDICT
+          $Context$_get_value INLINECALLDICT
+          150000000 PUSHINT
+          GEQ
+          IF:<{
+            s13 PUSH
+            INC
+            257 PUSHINT
+            4 PUSHINT
+            OVER
+            s3 s9 XCHG
+            17 s() PUSH
+            -ROT
+            __tact_dict_set_int_int INLINECALLDICT
+            s0 s5 XCHG
+            257 PUSHINT
+            s15 s3 PUSH2
+            __tact_dict_set_int_slice INLINECALLDICT
+            257 PUSHINT
+            s5 s0 s0 XC2PU
+            16 s() PUSH
+            s6 s1 PUXC
+            __tact_dict_set_int_int INLINECALLDICT
+            51 s() PUSH
+            IF:<{
+              267 PUSHINT
+              s3 s1 PUXC
+              s0 53 s() XCHG
+              257 PUSHINT
+              __tact_dict_set_slice_int INLINECALLDICT
+            }>ELSE<{
+              51 s() POP
+              s1 s(-1) PUXC
+              267 PUSHINT
+                  DICTDEL
+              DROP
+            }>
+            120000000 PUSHINT
+            TRUE
+                MYADDR
+            PUSHNULL
+            10000000 PUSHINT
+            FALSE
+                NEWC
+                1 STI
+            $Builder$_fun_asSlice INLINECALLDICT
+            s6 19 s() XCHG
+            s5 s8 XCHG
+            s4 s7 XCHG
+            $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload INLINECALLDICT
+            NEWC
+            $JettonTransfer$_store_cell INLINECALLDICT
+            41 s() PUSH
+            3 -ROLL
+            $MessageParameters$_constructor_to_value_bounce_body INLINECALLDICT
+                NEWC
+                b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+                1 STI               // store `bounce`
+                b{000} STSLICECONST // store bounced = false and src = addr_none
+                STSLICE             // store `to`
+                SWAP
+                STGRAMS             // store `value`
+                106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+                STZEROES
+                // → Stack state
+                // s0: Builder
+                // s1: `body`
+                // s2: `mode`
+                STDICT
+                ENDC
+                SWAP
+                SENDRAWMSG
+            s10 47 s() XCHG
+            s1 s0 s10 XCHG3
+          }>ELSE<{
+            50 s() POP
+            2DROP
+          }>
+          45 s() 47 s() XCHG
+          44 s() 46 s() XCHG
+          43 s() 45 s() XCHG
+          42 s() 44 s() XCHG
+          41 s() 43 s() XCHG
+          40 s() 42 s() XCHG
+          39 s() 41 s() XCHG
+          38 s() 40 s() XCHG
+          37 s() 39 s() XCHG
+          36 s() 38 s() XCHG
+          35 s() 37 s() XCHG
+          34 s() 36 s() XCHG
+          33 s() 35 s() XCHG
+          32 s() 34 s() XCHG
+          31 s() 33 s() XCHG
+          30 s() 32 s() XCHG
+          29 s() 31 s() XCHG
+          28 s() 30 s() XCHG
+          27 s() 29 s() XCHG
+          26 s() 28 s() XCHG
+          25 s() 27 s() XCHG
+          24 s() 26 s() XCHG
+          23 s() 25 s() XCHG
+          22 s() 24 s() XCHG
+          21 s() 23 s() XCHG
+          20 s() 22 s() XCHG
+          19 s() 21 s() XCHG
+          18 s() 20 s() XCHG
+          17 s() 19 s() XCHG
+          16 s() 18 s() XCHG
+          s15 17 s() XCHG
+          s14 16 s() XCHG
+          s13 s15 XCHG
+          2 13 BLKSWAP
+          $GramStarterIdo$_contract_store INLINECALLDICT
+        }>
+        FALSE
+        s7 PUSH
+        267 PUSHINT
+        s4 PUSH
+        1 PUSHINT
+        __tact_dict_get_slice_int INLINECALLDICT
+        DUP
+        ISNULL
+        NOT
+        IF:<{
+          NIP
+        }>ELSE<{
+          DROP
+        }>
+        IFNOT:<{
+          s0 s6 XCHG
+          267 PUSHINT
+          s2 PUSH
+          TRUE
+          1 PUSHINT
+          __tact_dict_set_slice_int INLINECALLDICT
+          s0 18 s() XCHG
+          INC
+          s0 18 s() XCHG
+          s0 s6 XCHG
+        }>
+        s2 PUSH
+        33 s() PUSH
+        MUL
+        34 s() PUSH
+        DIV
+        0 PUSHINT
+        s12 PUSH
+        267 PUSHINT
+        s5 PUSH
+        257 PUSHINT
+        __tact_dict_get_slice_int INLINECALLDICT
+        DUP
+        ISNULL
+        NOT
+        IF:<{
+          NIP
+        }>ELSE<{
+          DROP
+        }>
+        267 PUSHINT
+        s3 s5 XCPU
+        ADD
+        s14 s3 s0 XCHG3
+        s4 s(-1) PUXC
+        257 PUSHINT
+        __tact_dict_set_slice_int INLINECALLDICT
+        SWAP
+        267 PUSHINT
+        s0 s13 XCHG
+        ADD
+        s3 s11 XCHG
+        s12 s12 s0 XCHG3
+        257 PUSHINT
+        __tact_dict_set_slice_int INLINECALLDICT
+        s1 24 s() XCHG
+        s0 s8 XCHG
+        ADD
+        45 s() 47 s() XCHG
+        44 s() 46 s() XCHG
+        43 s() 45 s() XCHG
+        42 s() 44 s() XCHG
+        41 s() 43 s() XCHG
+        40 s() 42 s() XCHG
+        39 s() 41 s() XCHG
+        38 s() 40 s() XCHG
+        37 s() 39 s() XCHG
+        36 s() 38 s() XCHG
+        35 s() 37 s() XCHG
+        34 s() 36 s() XCHG
+        33 s() 35 s() XCHG
+        32 s() 34 s() XCHG
+        31 s() 33 s() XCHG
+        30 s() 32 s() XCHG
+        29 s() 31 s() XCHG
+        28 s() 30 s() XCHG
+        27 s() 29 s() XCHG
+        26 s() 28 s() XCHG
+        25 s() 27 s() XCHG
+        24 s() 26 s() XCHG
+        s0 25 s() XCHG
+        22 s() 24 s() XCHG
+        21 s() 23 s() XCHG
+        20 s() 22 s() XCHG
+        19 s() 21 s() XCHG
+        18 s() 20 s() XCHG
+        17 s() 19 s() XCHG
+        16 s() 18 s() XCHG
+        s15 17 s() XCHG
+        s14 16 s() XCHG
+        s13 s15 XCHG
+        s12 s14 XCHG
+        s11 s13 XCHG
+        s10 s12 XCHG
+        s9 s11 XCHG
+        s8 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s4 s3 s0 XCHG3
+        s1 s2 XCHG
+        $GramStarterIdo$_contract_store INLINECALLDICT
+      }>
+      2DROP
+      2603 PUSHINT
+      THROWANY
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      2 13 BLKSWAP
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    3776613916 PUSHINT
+    EQUAL
+    IFJMP:<{
+      2DROP
+      52480 PUSHINT
+      20 s() PUSH
+      4 EQINT
+      THROWANYIFNOT
+      11833 PUSHINT
+      24 s() PUSH
+      36 s() PUSH
+      GEQ
+      THROWANYIFNOT
+      7529 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      150000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      __tact_context_get_sender INLINECALLDICT
+      s9 PUSH
+      267 PUSHINT
+      s2 PUSH
+      257 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      22182 PUSHINT
+      OVER
+      ISNULL
+      NOT
+      IF:<{
+        SWAP
+        0 GTINT
+      }>ELSE<{
+        NIP
+        FALSE
+      }>
+      THROWANYIFNOT
+      s8 PUSH
+      267 PUSHINT
+      s2 PUSH
+      257 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      56883 PUSHINT
+      OVER
+      ISNULL
+      NOT
+      IF:<{
+        OVER
+        0 GTINT
+      }>ELSE<{
+        FALSE
+      }>
+      THROWANYIFNOT
+      0 PUSHINT
+      s9 PUSH
+      267 PUSHINT
+      s4 PUSH
+      257 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      DUP
+      ISNULL
+      NOT
+      IF:<{
+        NIP
+      }>ELSE<{
+        DROP
+      }>
+          NOW
+      48 s() 49 s() XCHG
+      47 s() 49 s() XCHG
+      46 s() 49 s() XCHG
+      45 s() 49 s() XCHG
+      44 s() 49 s() XCHG
+      43 s() 49 s() XCHG
+      42 s() 49 s() XCHG
+      41 s() 49 s() XCHG
+      40 s() 49 s() XCHG
+      39 s() 49 s() XCHG
+      38 s() 49 s() XCHG
+      37 s() 49 s() XCHG
+      36 s() 49 s() XCHG
+      35 s() 49 s() XCHG
+      34 s() 49 s() XCHG
+      33 s() 49 s() XCHG
+      32 s() 49 s() XCHG
+      31 s() 49 s() XCHG
+      30 s() 49 s() XCHG
+      29 s() 49 s() XCHG
+      28 s() 49 s() XCHG
+      27 s() 49 s() XCHG
+      26 s() 49 s() XCHG
+      25 s() 49 s() XCHG
+      24 s() 49 s() XCHG
+      23 s() 49 s() XCHG
+      22 s() 49 s() XCHG
+      21 s() 49 s() XCHG
+      20 s() 49 s() XCHG
+      19 s() 49 s() XCHG
+      18 s() 49 s() XCHG
+      17 s() 49 s() XCHG
+      16 s() 49 s() XCHG
+      s15 49 s() XCHG
+      s14 49 s() XCHG
+      s13 49 s() XCHG
+      s12 49 s() XCHG
+      s11 49 s() XCHG
+      s10 49 s() XCHG
+      s9 49 s() XCHG
+      s8 49 s() XCHG
+      s7 49 s() XCHG
+      s6 49 s() XCHG
+      s5 49 s() XCHG
+      s4 49 s() XCHG
+      s3 49 s() XCHG
+      s2 50 s() XCHG
+      s1 51 s() XCHG
+      50 s() PUSH
+      SWAP
+      $GramStarterIdo$_fun_calculateVestedAmount INLINECALLDICT
+      55004 PUSHINT
+      OVER
+      53 s() PUSH
+      GREATER
+      THROWANYIFNOT
+      51 s() PUSH
+      SUB
+      51 s() PUSH
+      OVER
+      ADD
+      s0 s10 XCHG
+      267 PUSHINT
+      51 s() PUSH
+      s12 PUSH
+      257 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
+      s0 25 s() XCHG
+      OVER
+      ADD
+      s0 51 s() XCHG
+      s1 s10 XCHG
+      EQUAL
+      IF:<{
+        s0 s7 XCHG
+        267 PUSHINT
+        49 s() PUSH
+        TRUE
+        1 PUSHINT
+        __tact_dict_set_slice_int INLINECALLDICT
+        s0 16 s() XCHG
+        INC
+        s0 16 s() XCHG
+        s0 s7 XCHG
+      }>
+      s12 PUSH
+      INC
+      257 PUSHINT
+      1 PUSHINT
+      OVER
+      s3 s8 XCHG
+      16 s() PUSH
+      -ROT
+      __tact_dict_set_int_int INLINECALLDICT
+      s0 s4 XCHG
+      257 PUSHINT
+      s14 PUSH
+      51 s() PUSH
+      __tact_dict_set_int_slice INLINECALLDICT
+      257 PUSHINT
+      s4 s0 s0 XC2PU
+      s15 s11 s(-2) PU2XC
+      __tact_dict_set_int_int INLINECALLDICT
+      257 PUSHINT
+      DUP
+      s3 s4 XCHG
+      s15 s0 s2 PUXC2
+      s0 54 s() XCHG
+      SWAP
+      __tact_dict_set_int_int INLINECALLDICT
+      120000000 PUSHINT
+      TRUE
+          MYADDR
+      PUSHNULL
+      10000000 PUSHINT
+      FALSE
+          NEWC
+          1 STI
+      $Builder$_fun_asSlice INLINECALLDICT
+      s6 18 s() XCHG
+      s5 s14 XCHG
+      s4 54 s() XCHG
+      $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload INLINECALLDICT
+      NEWC
+      $JettonTransfer$_store_cell INLINECALLDICT
+      39 s() PUSH
+      s9 s1 s3 XCHG3
+      s0 49 s() XCHG
+      SWAP
+      $MessageParameters$_constructor_to_value_bounce_body INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+          STZEROES
+          // → Stack state
+          // s0: Builder
+          // s1: `body`
+          // s2: `mode`
+          STDICT
+          ENDC
+          SWAP
+          SENDRAWMSG
+      44 s() 47 s() XCHG
+      43 s() 46 s() XCHG
+      42 s() 45 s() XCHG
+      41 s() 44 s() XCHG
+      40 s() 43 s() XCHG
+      39 s() 42 s() XCHG
+      38 s() 41 s() XCHG
+      37 s() 40 s() XCHG
+      36 s() 39 s() XCHG
+      35 s() 38 s() XCHG
+      34 s() 37 s() XCHG
+      33 s() 36 s() XCHG
+      32 s() 35 s() XCHG
+      31 s() 34 s() XCHG
+      30 s() 33 s() XCHG
+      29 s() 32 s() XCHG
+      28 s() 31 s() XCHG
+      27 s() 30 s() XCHG
+      26 s() 29 s() XCHG
+      25 s() 28 s() XCHG
+      24 s() 27 s() XCHG
+      23 s() 26 s() XCHG
+      22 s() 25 s() XCHG
+      21 s() 24 s() XCHG
+      22 s() 23 s() XCHG
+      19 s() 22 s() XCHG
+      18 s() 21 s() XCHG
+      17 s() 20 s() XCHG
+      16 s() 19 s() XCHG
+      s15 18 s() XCHG
+      s14 17 s() XCHG
+      s13 16 s() XCHG
+      s12 s15 XCHG
+      s11 s14 XCHG
+      s10 s13 XCHG
+      s1 s12 XCHG
+      s8 s11 XCHG
+      s7 s10 XCHG
+      s6 s9 XCHG
+      s4 s7 XCHG
+      s3 s6 XCHG
+      s5 s1 s4 XCHG3
+      2SWAP
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    4092342774 PUSHINT
+    EQUAL
+    IFJMP:<{
+      2DROP
+      17188 PUSHINT
+      20 s() PUSH
+      5 EQINT
+      IF:<{
+        TRUE
+      }>ELSE<{
+        20 s() PUSH
+        4 EQINT
+        IF:<{
+          24 s() PUSH
+          36 s() PUSH
+          LESS
+        }>ELSE<{
+          FALSE
+        }>
+      }>
+      THROWANYIFNOT
+      49101 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      150000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      __tact_context_get_sender INLINECALLDICT
+      s9 PUSH
+      267 PUSHINT
+      s2 PUSH
+      257 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      22182 PUSHINT
+      OVER
+      ISNULL
+      NOT
+      IF:<{
+        OVER
+        0 GTINT
+      }>ELSE<{
+        FALSE
+      }>
+      THROWANYIFNOT
+      FALSE
+      s7 PUSH
+      267 PUSHINT
+      s4 PUSH
+      1 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      DUP
+      ISNULL
+      NOT
+      IF:<{
+        NIP
+      }>ELSE<{
+        DROP
+      }>
+      22411 PUSHINT
+      SWAP
+      NOT
+      THROWANYIFNOT
+      s0 s6 XCHG
+      267 PUSHINT
+      s2 PUSH
+      TRUE
+      1 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
+      s0 s15 XCHG
+      INC
+      s0 22 s() XCHG
+      s6 PUSH
+      ADD
+      0 PUSHINT
+      s10 PUSH
+      267 PUSHINT
+      s4 PUSH
+      257 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      DUP
+      ISNULL
+      NOT
+      IF:<{
+        NIP
+      }>ELSE<{
+        DROP
+      }>
+      s13 PUSH
+      INC
+      257 PUSHINT
+      2 PUSHINT
+      OVER
+      s3 s9 XCHG
+      17 s() PUSH
+      -ROT
+      __tact_dict_set_int_int INLINECALLDICT
+      s0 s5 XCHG
+      257 PUSHINT
+      s15 s4 PUSH2
+      __tact_dict_set_int_slice INLINECALLDICT
+      257 PUSHINT
+      s5 s0 s0 XC2PU
+      16 s() PUSH
+      s11 s1 PUXC
+      __tact_dict_set_int_int INLINECALLDICT
+      257 PUSHINT
+      DUP
+      s3 52 s() XCHG
+      s1 s2 XCHG
+      16 s() PUSH
+      s0 s2 XCHG
+      s0 53 s() XCHG
+      SWAP
+      __tact_dict_set_int_int INLINECALLDICT
+      s0 s11 XCHG
+      267 PUSHINT
+      s3 PUSH
+      0 PUSHINT
+      257 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
+      s0 s10 XCHG
+      267 PUSHINT
+      s3 PUSH
+      0 PUSHINT
+      257 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
+      120000000 PUSHINT
+      TRUE
+          MYADDR
+      PUSHNULL
+      10000000 PUSHINT
+      FALSE
+          NEWC
+          1 STI
+      $Builder$_fun_asSlice INLINECALLDICT
+      s6 19 s() XCHG
+      s5 s13 XCHG
+      s4 s8 XCHG
+      $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload INLINECALLDICT
+      NEWC
+      $JettonTransfer$_store_cell INLINECALLDICT
+      41 s() PUSH
+      s8 s3 s3 XCHG3
+      $MessageParameters$_constructor_to_value_bounce_body INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+          STZEROES
+          // → Stack state
+          // s0: Builder
+          // s1: `body`
+          // s2: `mode`
+          STDICT
+          ENDC
+          SWAP
+          SENDRAWMSG
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      s4 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s14 s15 XCHG
+      s12 s14 XCHG
+      s11 s13 XCHG
+      s2 s12 XCHG
+      s9 s11 XCHG
+      s7 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s5 s6 XCHG
+      s0 s3 XCHG
+      s5 s5 XCHG2
+      s4 s1 s4 XCHG3
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    3083319871 PUSHINT
+    EQUAL
+    IFJMP:<{
+      2DROP
+      27005 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      150000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      __tact_context_get_sender INLINECALLDICT
+      48 s() PUSH
+      267 PUSHINT
+      s2 PUSH
+      257 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      4928 PUSHINT
+      OVER
+      ISNULL
+      NOT
+      IF:<{
+        OVER
+        0 GTINT
+      }>ELSE<{
+        FALSE
+      }>
+      THROWANYIFNOT
+      s12 PUSH
+      INC
+      257 PUSHINT
+      4 PUSHINT
+      OVER
+      s3 s8 XCHG
+      16 s() PUSH
+      -ROT
+      __tact_dict_set_int_int INLINECALLDICT
+      s0 s4 XCHG
+      257 PUSHINT
+      s14 s3 PUSH2
+      __tact_dict_set_int_slice INLINECALLDICT
+      257 PUSHINT
+      s4 s0 s0 XC2PU
+      s15 s3 s(-2) PU2XC
+      __tact_dict_set_int_int INLINECALLDICT
+      s2 s(-1) PUXC
+      s0 51 s() XCHG
+      267 PUSHINT
+          DICTDEL
+      DROP
+      120000000 PUSHINT
+      TRUE
+          MYADDR
+      PUSHNULL
+      10000000 PUSHINT
+      FALSE
+          NEWC
+          1 STI
+      $Builder$_fun_asSlice INLINECALLDICT
+      s6 19 s() XCHG
+      5 4 REVERSE
+      $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload INLINECALLDICT
+      NEWC
+      $JettonTransfer$_store_cell INLINECALLDICT
+      41 s() PUSH
+      s3 s3 XCHG2
+      $MessageParameters$_constructor_to_value_bounce_body INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+          STZEROES
+          // → Stack state
+          // s0: Builder
+          // s1: `body`
+          // s2: `mode`
+          STDICT
+          ENDC
+          SWAP
+          SENDRAWMSG
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      s12 s14 XCHG
+      s11 s13 XCHG
+      s2 s12 XCHG
+      s9 s11 XCHG
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s0 s3 XCHG
+      s5 s5 s5 XCHG3
+      s0 s4 XCHG
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    3576854235 PUSHINT
+    EQUAL
+    IFJMP:<{
+      2DROP
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      2 13 BLKSWAP
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    3907670709 PUSHINT
+    EQUAL
+    IFJMP:<{
+      2DROP
+      7280 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      46 s() PUSH
+      SDEQ
+      IF:<{
+        TRUE
+      }>ELSE<{
+        __tact_context_get_sender INLINECALLDICT
+        47 s() PUSH
+        SDEQ
+        IF:<{
+          44 s() PUSH
+          NOT
+        }>ELSE<{
+          FALSE
+        }>
+      }>
+      THROWANYIFNOT
+      28937 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      150000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      18445 PUSHINT
+      20 s() PUSH
+      4 EQINT
+      IF:<{
+        TRUE
+      }>ELSE<{
+        20 s() PUSH
+        5 EQINT
+      }>
+      THROWANYIFNOT
+      25810 PUSHINT
+      s0 s13 XCHG
+      NOT
+      s1 s13 XCHG
+      THROWANYIFNOT
+      22 s() PUSH
+      34 s() PUSH
+      GEQ
+      IF:<{
+        18 s() PUSH
+        4 EQINT
+      }>ELSE<{
+        FALSE
+      }>
+      IF:<{
+        23936 PUSHINT
+        s14 s15 PUSH2
+        EQUAL
+        THROWANYIFNOT
+        21 s() PUSH
+        21 s() PUSH
+        SUB
+      }>ELSE<{
+        54832 PUSHINT
+        s13 s15 PUSH2
+        EQUAL
+        THROWANYIFNOT
+        21 s() PUSH
+      }>
+      61959 PUSHINT
+      OVER
+      0 GTINT
+      THROWANYIFNOT
+      TRUE
+      s11 PUSH
+      INC
+      257 PUSHINT
+      5 PUSHINT
+      s1 s14 PUSH2
+      s4 s8 XCHG
+      -ROT
+      __tact_dict_set_int_int INLINECALLDICT
+      s0 s3 XCHG
+      257 PUSHINT
+      s13 PUSH
+      49 s() PUSH
+      __tact_dict_set_int_slice INLINECALLDICT
+      257 PUSHINT
+      s15 s0 s0 XC2PU
+      s14 s4 s(-2) PU2XC
+      __tact_dict_set_int_int INLINECALLDICT
+      120000000 PUSHINT
+      TRUE
+          MYADDR
+      PUSHNULL
+      10000000 PUSHINT
+      FALSE
+          NEWC
+          1 STI
+      $Builder$_fun_asSlice INLINECALLDICT
+      s5 18 s() XCHG
+      s4 s8 XCHG
+      53 s() PUSH
+      4 -ROLL
+      $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload INLINECALLDICT
+      NEWC
+      $JettonTransfer$_store_cell INLINECALLDICT
+      40 s() PUSH
+      s14 s1 s3 XCHG3
+      s4 s4 XCHG2
+      $MessageParameters$_constructor_to_value_bounce_body INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+          STZEROES
+          // → Stack state
+          // s0: Builder
+          // s1: `body`
+          // s2: `mode`
+          STDICT
+          ENDC
+          SWAP
+          SENDRAWMSG
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      s0 s14 XCHG
+      s11 s13 XCHG
+      s2 s12 XCHG
+      s9 s11 XCHG
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s4 s0 s4 XCHG3
+      s0 s3 XCHG
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    670671511 PUSHINT
+    EQUAL
+    IFJMP:<{
+      2DROP
+      7280 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      46 s() PUSH
+      SDEQ
+      IF:<{
+        TRUE
+      }>ELSE<{
+        __tact_context_get_sender INLINECALLDICT
+        47 s() PUSH
+        SDEQ
+        IF:<{
+          44 s() PUSH
+          NOT
+        }>ELSE<{
+          FALSE
+        }>
+      }>
+      THROWANYIFNOT
+      28937 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      150000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      44927 PUSHINT
+      20 s() PUSH
+      4 EQINT
+      IF:<{
+        24 s() PUSH
+        36 s() PUSH
+        GEQ
+      }>ELSE<{
+        FALSE
+      }>
+      THROWANYIFNOT
+      59621 PUSHINT
+      s0 s12 XCHG
+      NOT
+      s1 s12 XCHG
+      THROWANYIFNOT
+      33168 PUSHINT
+      23 s() PUSH
+      0 GTINT
+      THROWANYIFNOT
+      TRUE
+      s10 PUSH
+      INC
+      257 PUSHINT
+      6 PUSHINT
+      s1 s13 PUSH2
+      s4 s7 XCHG
+      -ROT
+      __tact_dict_set_int_int INLINECALLDICT
+      s0 s2 XCHG
+      257 PUSHINT
+      s12 PUSH
+      48 s() PUSH
+      __tact_dict_set_int_slice INLINECALLDICT
+      257 PUSHINT
+      s13 s0 s0 XC2PU
+      s13 s(-1) PUXC
+      27 s() PUSH
+      SWAP
+      __tact_dict_set_int_int INLINECALLDICT
+      120000000 PUSHINT
+      TRUE
+          MYADDR
+      PUSHNULL
+      10000000 PUSHINT
+      FALSE
+          NEWC
+          1 STI
+      $Builder$_fun_asSlice INLINECALLDICT
+      s4 17 s() XCHG
+      30 s() PUSH
+      s0 s4 XCHG
+      53 s() PUSH
+      s4 s3 s4 XCHG3
+      $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload INLINECALLDICT
+      NEWC
+      $JettonTransfer$_store_cell INLINECALLDICT
+      41 s() PUSH
+      s0 s3 XCHG
+      s14 s14 XCHG2
+      $MessageParameters$_constructor_to_value_bounce_body INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+          STZEROES
+          // → Stack state
+          // s0: Builder
+          // s1: `body`
+          // s2: `mode`
+          STDICT
+          ENDC
+          SWAP
+          SENDRAWMSG
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      s12 s14 XCHG
+      s12 s1 s13 XCHG3
+      s9 s11 XCHG
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s4 s4 s0 XCHG3
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    3899144766 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      44 s() POP
+      s0 43 s() XCHG
+      1 LDI
+      DROP
+      42986 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      46 s() PUSH
+      SDEQ
+      THROWANYIFNOT
+      23376 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      10000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      s0 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      s12 s14 XCHG
+      s11 s13 XCHG
+      s10 s12 XCHG
+      s9 s11 XCHG
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s4 s3 s0 XCHG3
+      s1 s2 XCHG
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    1895346583 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      44 s() POP
+      45 s() POP
+      s0 42 s() XCHG
+      LDMSGADDR
+      DROP
+      42986 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      45 s() PUSH
+      SDEQ
+      THROWANYIFNOT
+      23376 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      10000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      32518 PUSHINT
+      OVER
+      45 s() PUSH
+      SDEQ
+      NOT
+      THROWANYIFNOT
+      s0 46 s() XCHG
+      43 s() 45 s() XCHG
+      FALSE
+      s0 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      s12 s14 XCHG
+      s11 s13 XCHG
+      s10 s12 XCHG
+      s9 s11 XCHG
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s0 s4 s4 XCHG3
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    1596556854 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      8 LDU
+      LDVARUINT16
+      LDMSGADDR
+      DROP
+      42986 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      49 s() PUSH
+      SDEQ
+      THROWANYIFNOT
+      28937 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      150000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      12628 PUSHINT
+      40 s() PUSH
+      THROWANYIFNOT
+      44021 PUSHINT
+      s3 PUSH
+      0 EQINT
+      IF:<{
+        TRUE
+      }>ELSE<{
+        s3 PUSH
+        1 EQINT
+      }>
+      THROWANYIFNOT
+      21780 PUSHINT
+      s2 PUSH
+      0 GTINT
+      THROWANYIFNOT
+      41 s() PUSH
+      s0 s3 XCHG
+      1 EQINT
+      IF:<{
+        s2 POP
+        39 s() PUSH
+        s0 s2 XCHG
+      }>
+      120000000 PUSHINT
+      TRUE
+      0 PUSHINT
+          MYADDR
+      PUSHNULL
+      10000000 PUSHINT
+      FALSE
+          NEWC
+          1 STI
+      $Builder$_fun_asSlice INLINECALLDICT
+      s4 s6 XCHG
+      s5 s8 XCHG
+      s4 s7 XCHG
+      $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload INLINECALLDICT
+      NEWC
+      $JettonTransfer$_store_cell INLINECALLDICT
+      s1 s2 XCHG
+      $MessageParameters$_constructor_to_value_bounce_body INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+          STZEROES
+          // → Stack state
+          // s0: Builder
+          // s1: `body`
+          // s2: `mode`
+          STDICT
+          ENDC
+          SWAP
+          SENDRAWMSG
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      2 13 BLKSWAP
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    OVER
+    3686087575 PUSHINT
+    EQUAL
+    IFJMP:<{
+      NIP
+      LDVARUINT16
+      LDMSGADDR
+      DROP
+      42986 PUSHINT
+      __tact_context_get_sender INLINECALLDICT
+      48 s() PUSH
+      SDEQ
+      THROWANYIFNOT
+      23376 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      10000000 PUSHINT
+      GEQ
+      THROWANYIFNOT
+      21780 PUSHINT
+      s2 PUSH
+      0 GTINT
+      THROWANYIFNOT
+      39053 PUSHINT
+          BALANCE FIRST
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      SUB
+      s3 PUSH
+      47 s() PUSH
+      ADD
+      GEQ
+      THROWANYIFNOT
+      SWAP
+      FALSE
+      $MessageParameters$_constructor_to_value_bounce INLINECALLDICT
+          NEWC
+          b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+          1 STI               // store `bounce`
+          b{000} STSLICECONST // store bounced = false and src = addr_none
+          STSLICE             // store `to`
+          SWAP
+          STGRAMS             // store `value`
+          106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+          STZEROES
+          // → Stack state
+          // s0: Builder
+          // s1: `body`
+          // s2: `mode`
+          STDICT
+          ENDC
+          SWAP
+          SENDRAWMSG
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      2 13 BLKSWAP
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    DROP
+    1879568762 PUSHINT
+    EQUAL
+    IFJMP:<{
+      56230 PUSHINT
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      0 GTINT
+      THROWANYIFNOT
+      45 s() 47 s() XCHG
+      44 s() 46 s() XCHG
+      43 s() 45 s() XCHG
+      42 s() 44 s() XCHG
+      41 s() 43 s() XCHG
+      40 s() 42 s() XCHG
+      39 s() 41 s() XCHG
+      38 s() 40 s() XCHG
+      37 s() 39 s() XCHG
+      36 s() 38 s() XCHG
+      35 s() 37 s() XCHG
+      34 s() 36 s() XCHG
+      33 s() 35 s() XCHG
+      32 s() 34 s() XCHG
+      31 s() 33 s() XCHG
+      30 s() 32 s() XCHG
+      29 s() 31 s() XCHG
+      28 s() 30 s() XCHG
+      27 s() 29 s() XCHG
+      26 s() 28 s() XCHG
+      25 s() 27 s() XCHG
+      24 s() 26 s() XCHG
+      23 s() 25 s() XCHG
+      22 s() 24 s() XCHG
+      21 s() 23 s() XCHG
+      20 s() 22 s() XCHG
+      19 s() 21 s() XCHG
+      18 s() 20 s() XCHG
+      17 s() 19 s() XCHG
+      16 s() 18 s() XCHG
+      s15 17 s() XCHG
+      s14 16 s() XCHG
+      s13 s15 XCHG
+      2 13 BLKSWAP
+      $GramStarterIdo$_contract_store INLINECALLDICT
+    }>
+    15 BLKDROP
+    15 BLKDROP
+    15 BLKDROP
+    3 BLKDROP
+    130 THROW
+  }>
+}END>c

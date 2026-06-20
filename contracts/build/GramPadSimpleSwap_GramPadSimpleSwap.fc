@@ -1,0 +1,787 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; GramPadSimpleSwap_GramPadSimpleSwap.headers.fc
+;;
+;; Header files for GramPadSimpleSwap
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; $JettonTransfer$_store
+builder $JettonTransfer$_store(builder build_0, (int, int, slice, slice, cell, int, slice) v) inline;
+
+;; $JettonTransfer$_store_cell
+cell $JettonTransfer$_store_cell((int, int, slice, slice, cell, int, slice) v, builder b) inline;
+
+;; $GramPadSimpleSwap$_store
+builder $GramPadSimpleSwap$_store(builder build_0, (slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) v) inline;
+
+;; $GramPadSimpleSwap$_load
+(slice, ((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int))) $GramPadSimpleSwap$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $ContractDetails$_to_external
+(slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $ContractDetails$_to_external(((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)) v) inline;
+
+;; $GramPadSimpleSwap$init$_load
+(slice, ((slice, slice, int, slice, int, int, int, int, int))) $GramPadSimpleSwap$init$_load(slice sc_0) inline;
+
+;; $GramPadSimpleSwap$_contract_init
+(slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $GramPadSimpleSwap$_contract_init(slice $owner, slice $gramJettonMaster, int $gramDecimals, slice $usdtJettonMaster, int $usdtDecimals, int $rateScaled, int $tonRateScaled, int $maxBuy, int $deploymentId) impure inline;
+
+;; $GramPadSimpleSwap$_contract_load
+(slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $GramPadSimpleSwap$_contract_load() impure inline;
+
+;; $GramPadSimpleSwap$_contract_store
+() $GramPadSimpleSwap$_contract_store((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) v) impure inline;
+
+;; $Builder$_fun_asSlice
+slice $Builder$_fun_asSlice(builder $self) impure inline;
+
+;; $GramPadSimpleSwap$_fun_rateScale
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_rateScale((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_requireOwner
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), ()) $GramPadSimpleSwap$_fun_requireOwner((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_decimalFactor
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_decimalFactor((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $decimals) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_quoteGramOut
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_quoteGramOut((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $usdtAmount) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_quoteUsdtOut
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_quoteUsdtOut((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $gramAmount) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_quoteGramOutFromTon
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_quoteGramOutFromTon((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $tonAmount) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_quoteTonOut
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_quoteTonOut((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $gramAmount) impure inline_ref;
+
+;; $MessageParameters$_constructor_to_value_bounce_body
+((int, cell, int, slice, int)) $MessageParameters$_constructor_to_value_bounce_body(slice $to, int $value, int $bounce, cell $body) inline;
+
+;; $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload
+((int, int, slice, slice, cell, int, slice)) $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload(int $queryId, int $amount, slice $destination, slice $responseDestination, cell $customPayload, int $forwardTonAmount, slice $forwardPayload) inline;
+
+;; $GramPadSimpleSwap$_fun_sendJetton
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), ()) $GramPadSimpleSwap$_fun_sendJetton((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, slice $jettonWallet, slice $destination, int $amount) impure inline_ref;
+
+;; $ContractDetails$_constructor_owner_deploymentId_gramJettonMaster_gramJettonWallet_gramDecimals_usdtJettonMaster_usdtJettonWallet_usdtDecimals_jettonWalletsConfigured_paused_rateScaled_tonRateScaled_rateScale_maxBuy_gramReserve_usdtReserve_tonReserve_totalSwapCount_totalGramToUsdtVolume_totalUsdtToGramVolume_totalTonToGramVolume_totalGramToTonVolume
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)) $ContractDetails$_constructor_owner_deploymentId_gramJettonMaster_gramJettonWallet_gramDecimals_usdtJettonMaster_usdtJettonWallet_usdtDecimals_jettonWalletsConfigured_paused_rateScaled_tonRateScaled_rateScale_maxBuy_gramReserve_usdtReserve_tonReserve_totalSwapCount_totalGramToUsdtVolume_totalUsdtToGramVolume_totalTonToGramVolume_totalGramToTonVolume(slice $owner, int $deploymentId, slice $gramJettonMaster, slice $gramJettonWallet, int $gramDecimals, slice $usdtJettonMaster, slice $usdtJettonWallet, int $usdtDecimals, int $jettonWalletsConfigured, int $paused, int $rateScaled, int $tonRateScaled, int $rateScale, int $maxBuy, int $gramReserve, int $usdtReserve, int $tonReserve, int $totalSwapCount, int $totalGramToUsdtVolume, int $totalUsdtToGramVolume, int $totalTonToGramVolume, int $totalGramToTonVolume) inline;
+
+;; $GramPadSimpleSwap$_fun_getContractDetails
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), (slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)) $GramPadSimpleSwap$_fun_getContractDetails((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_get_contract_version
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_get_contract_version((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_get_contract_details
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), (slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)) $GramPadSimpleSwap$_fun_get_contract_details((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_get_quote_gram_out
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_get_quote_gram_out((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $usdtAmount) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_get_quote_usdt_out
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_get_quote_usdt_out((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $gramAmount) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_get_quote_gram_out_from_ton
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_get_quote_gram_out_from_ton((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $tonAmount) impure inline_ref;
+
+;; $GramPadSimpleSwap$_fun_get_quote_ton_out
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_get_quote_ton_out((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $gramAmount) impure inline_ref;
+
+;; $MessageParameters$_constructor_to_value_bounce
+((int, cell, int, slice, int)) $MessageParameters$_constructor_to_value_bounce(slice $to, int $value, int $bounce) inline;
+
+
+;; GramPadSimpleSwap_GramPadSimpleSwap.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+builder $global_beginCell() impure asm """
+    NEWC
+""";
+
+slice $global_myAddress() impure asm """
+    MYADDR
+""";
+
+int $global_myBalance() impure asm """
+    BALANCE FIRST
+""";
+
+() $global_message((int, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+    STZEROES
+    // → Stack state
+    // s0: Builder
+    // s1: `body`
+    // s2: `mode`
+    STDICT
+    ENDC
+    SWAP
+    SENDRAWMSG
+""";
+
+builder $Builder$_fun_storeBit(int $value, builder $self) impure asm """
+    1 STI
+""";
+
+cell $Builder$_fun_endCell(builder $self) impure asm """
+    ENDC
+""";
+
+slice $Cell$_fun_beginParse(cell $self) impure asm """
+    CTOS
+""";
+
+slice $Builder$_fun_asSlice(builder $self) impure inline {
+    var ($self) = $self;
+    return $Cell$_fun_beginParse($Builder$_fun_endCell($self));
+}
+
+(slice, cell) $Slice$_fun_loadRef(slice $self) impure asm( -> 1 0) """
+    LDREF
+""";
+
+int $Slice$_fun_refs(slice $self) impure asm """
+    SREFS
+""";
+
+int $Slice$_fun_bits(slice $self) impure asm """
+    SBITS
+""";
+
+;; GramPadSimpleSwap_GramPadSimpleSwap.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: MessageParameters
+;; TLB: _ mode:int257 body:Maybe ^cell value:int257 to:address bounce:bool = MessageParameters
+;;
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_to_value_bounce_body(slice $to, int $value, int $bounce, cell $body) inline {
+    return (0, $body, $value, $to, $bounce);
+}
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_to_value_bounce(slice $to, int $value, int $bounce) inline {
+    return (0, null(), $value, $to, $bounce);
+}
+
+;;
+;; Type: JettonTransfer
+;; Header: 0x0f8a7ea5
+;; TLB: jetton_transfer#0f8a7ea5 queryId:uint64 amount:coins destination:address responseDestination:address customPayload:Maybe ^cell forwardTonAmount:coins forwardPayload:remainder<slice> = JettonTransfer
+;;
+
+builder $JettonTransfer$_store(builder build_0, (int, int, slice, slice, cell, int, slice) v) inline {
+    var (v'queryId, v'amount, v'destination, v'responseDestination, v'customPayload, v'forwardTonAmount, v'forwardPayload) = v;
+    build_0 = store_uint(build_0, 260734629, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    build_0 = build_0.store_varuint16(v'amount);
+    build_0 = build_0.store_slice(v'destination);
+    build_0 = build_0.store_slice(v'responseDestination);
+    build_0 = build_0.store_maybe_ref(v'customPayload);
+    build_0 = build_0.store_varuint16(v'forwardTonAmount);
+    build_0 = build_0.store_slice(v'forwardPayload);
+    return build_0;
+}
+
+cell $JettonTransfer$_store_cell((int, int, slice, slice, cell, int, slice) v, builder b) inline {
+    return $JettonTransfer$_store(b, v).end_cell();
+}
+
+((int, int, slice, slice, cell, int, slice)) $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload(int $queryId, int $amount, slice $destination, slice $responseDestination, cell $customPayload, int $forwardTonAmount, slice $forwardPayload) inline {
+    return ($queryId, $amount, $destination, $responseDestination, $customPayload, $forwardTonAmount, $forwardPayload);
+}
+
+;;
+;; Type: ContractDetails
+;; TLB: _ owner:address deploymentId:int257 gramJettonMaster:address gramJettonWallet:address gramDecimals:int257 usdtJettonMaster:address usdtJettonWallet:address usdtDecimals:int257 jettonWalletsConfigured:bool paused:bool rateScaled:int257 tonRateScaled:int257 rateScale:int257 maxBuy:int257 gramReserve:int257 usdtReserve:int257 tonReserve:int257 totalSwapCount:int257 totalGramToUsdtVolume:int257 totalUsdtToGramVolume:int257 totalTonToGramVolume:int257 totalGramToTonVolume:int257 = ContractDetails
+;;
+
+(slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $ContractDetails$_to_external(((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)) v) inline {
+    var (v'owner, v'deploymentId, v'gramJettonMaster, v'gramJettonWallet, v'gramDecimals, v'usdtJettonMaster, v'usdtJettonWallet, v'usdtDecimals, v'jettonWalletsConfigured, v'paused, v'rateScaled, v'tonRateScaled, v'rateScale, v'maxBuy, v'gramReserve, v'usdtReserve, v'tonReserve, v'totalSwapCount, v'totalGramToUsdtVolume, v'totalUsdtToGramVolume, v'totalTonToGramVolume, v'totalGramToTonVolume) = v; 
+    return (v'owner, v'deploymentId, v'gramJettonMaster, v'gramJettonWallet, v'gramDecimals, v'usdtJettonMaster, v'usdtJettonWallet, v'usdtDecimals, v'jettonWalletsConfigured, v'paused, v'rateScaled, v'tonRateScaled, v'rateScale, v'maxBuy, v'gramReserve, v'usdtReserve, v'tonReserve, v'totalSwapCount, v'totalGramToUsdtVolume, v'totalUsdtToGramVolume, v'totalTonToGramVolume, v'totalGramToTonVolume);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)) $ContractDetails$_constructor_owner_deploymentId_gramJettonMaster_gramJettonWallet_gramDecimals_usdtJettonMaster_usdtJettonWallet_usdtDecimals_jettonWalletsConfigured_paused_rateScaled_tonRateScaled_rateScale_maxBuy_gramReserve_usdtReserve_tonReserve_totalSwapCount_totalGramToUsdtVolume_totalUsdtToGramVolume_totalTonToGramVolume_totalGramToTonVolume(slice $owner, int $deploymentId, slice $gramJettonMaster, slice $gramJettonWallet, int $gramDecimals, slice $usdtJettonMaster, slice $usdtJettonWallet, int $usdtDecimals, int $jettonWalletsConfigured, int $paused, int $rateScaled, int $tonRateScaled, int $rateScale, int $maxBuy, int $gramReserve, int $usdtReserve, int $tonReserve, int $totalSwapCount, int $totalGramToUsdtVolume, int $totalUsdtToGramVolume, int $totalTonToGramVolume, int $totalGramToTonVolume) inline {
+    return ($owner, $deploymentId, $gramJettonMaster, $gramJettonWallet, $gramDecimals, $usdtJettonMaster, $usdtJettonWallet, $usdtDecimals, $jettonWalletsConfigured, $paused, $rateScaled, $tonRateScaled, $rateScale, $maxBuy, $gramReserve, $usdtReserve, $tonReserve, $totalSwapCount, $totalGramToUsdtVolume, $totalUsdtToGramVolume, $totalTonToGramVolume, $totalGramToTonVolume);
+}
+
+;;
+;; Type: GramPadSimpleSwap
+;; TLB: _ owner:address deploymentId:uint64 gramJettonMaster:address gramJettonWallet:address gramDecimals:uint8 usdtJettonMaster:address usdtJettonWallet:address usdtDecimals:uint8 jettonWalletsConfigured:bool paused:bool rateScaled:uint128 tonRateScaled:uint128 maxBuy:coins nextTransferQueryId:uint64 gramReserve:coins usdtReserve:coins tonReserve:coins totalSwapCount:uint64 totalGramToUsdtVolume:coins totalUsdtToGramVolume:coins totalTonToGramVolume:coins totalGramToTonVolume:coins = GramPadSimpleSwap
+;;
+
+builder $GramPadSimpleSwap$_store(builder build_0, (slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) v) inline {
+    var (v'owner, v'deploymentId, v'gramJettonMaster, v'gramJettonWallet, v'gramDecimals, v'usdtJettonMaster, v'usdtJettonWallet, v'usdtDecimals, v'jettonWalletsConfigured, v'paused, v'rateScaled, v'tonRateScaled, v'maxBuy, v'nextTransferQueryId, v'gramReserve, v'usdtReserve, v'tonReserve, v'totalSwapCount, v'totalGramToUsdtVolume, v'totalUsdtToGramVolume, v'totalTonToGramVolume, v'totalGramToTonVolume) = v;
+    build_0 = build_0.store_slice(v'owner);
+    build_0 = build_0.store_uint(v'deploymentId, 64);
+    build_0 = build_0.store_slice(v'gramJettonMaster);
+    build_0 = build_0.store_slice(v'gramJettonWallet);
+    build_0 = build_0.store_uint(v'gramDecimals, 8);
+    var build_1 = begin_cell();
+    build_1 = build_1.store_slice(v'usdtJettonMaster);
+    build_1 = build_1.store_slice(v'usdtJettonWallet);
+    build_1 = build_1.store_uint(v'usdtDecimals, 8);
+    build_1 = build_1.store_int(v'jettonWalletsConfigured, 1);
+    build_1 = build_1.store_int(v'paused, 1);
+    build_1 = build_1.store_uint(v'rateScaled, 128);
+    build_1 = build_1.store_uint(v'tonRateScaled, 128);
+    build_1 = build_1.store_varuint16(v'maxBuy);
+    build_1 = build_1.store_uint(v'nextTransferQueryId, 64);
+    var build_2 = begin_cell();
+    build_2 = build_2.store_varuint16(v'gramReserve);
+    build_2 = build_2.store_varuint16(v'usdtReserve);
+    build_2 = build_2.store_varuint16(v'tonReserve);
+    build_2 = build_2.store_uint(v'totalSwapCount, 64);
+    build_2 = build_2.store_varuint16(v'totalGramToUsdtVolume);
+    build_2 = build_2.store_varuint16(v'totalUsdtToGramVolume);
+    build_2 = build_2.store_varuint16(v'totalTonToGramVolume);
+    build_2 = build_2.store_varuint16(v'totalGramToTonVolume);
+    build_1 = store_builder_ref(build_1, build_2);
+    build_0 = store_builder_ref(build_0, build_1);
+    return build_0;
+}
+
+(slice, ((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int))) $GramPadSimpleSwap$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'deploymentId = sc_0~load_uint(64);
+    var v'gramJettonMaster = sc_0~load_msg_addr();
+    var v'gramJettonWallet = sc_0~load_msg_addr();
+    var v'gramDecimals = sc_0~load_uint(8);
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'usdtJettonMaster = sc_1~load_msg_addr();
+    var v'usdtJettonWallet = sc_1~load_msg_addr();
+    var v'usdtDecimals = sc_1~load_uint(8);
+    var v'jettonWalletsConfigured = sc_1~load_int(1);
+    var v'paused = sc_1~load_int(1);
+    var v'rateScaled = sc_1~load_uint(128);
+    var v'tonRateScaled = sc_1~load_uint(128);
+    var v'maxBuy = sc_1~load_varuint16();
+    var v'nextTransferQueryId = sc_1~load_uint(64);
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'gramReserve = sc_2~load_varuint16();
+    var v'usdtReserve = sc_2~load_varuint16();
+    var v'tonReserve = sc_2~load_varuint16();
+    var v'totalSwapCount = sc_2~load_uint(64);
+    var v'totalGramToUsdtVolume = sc_2~load_varuint16();
+    var v'totalUsdtToGramVolume = sc_2~load_varuint16();
+    var v'totalTonToGramVolume = sc_2~load_varuint16();
+    var v'totalGramToTonVolume = sc_2~load_varuint16();
+    return (sc_0, (v'owner, v'deploymentId, v'gramJettonMaster, v'gramJettonWallet, v'gramDecimals, v'usdtJettonMaster, v'usdtJettonWallet, v'usdtDecimals, v'jettonWalletsConfigured, v'paused, v'rateScaled, v'tonRateScaled, v'maxBuy, v'nextTransferQueryId, v'gramReserve, v'usdtReserve, v'tonReserve, v'totalSwapCount, v'totalGramToUsdtVolume, v'totalUsdtToGramVolume, v'totalTonToGramVolume, v'totalGramToTonVolume));
+}
+
+(slice, ((slice, slice, int, slice, int, int, int, int, int))) $GramPadSimpleSwap$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'gramJettonMaster = sc_0~load_msg_addr();
+    var v'gramDecimals = sc_0~load_int(257);
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'usdtJettonMaster = sc_1~load_msg_addr();
+    var v'usdtDecimals = sc_1~load_int(257);
+    var v'rateScaled = sc_1~load_int(257);
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'tonRateScaled = sc_2~load_int(257);
+    var v'maxBuy = sc_2~load_int(257);
+    var v'deploymentId = sc_2~load_int(257);
+    return (sc_0, (v'owner, v'gramJettonMaster, v'gramDecimals, v'usdtJettonMaster, v'usdtDecimals, v'rateScaled, v'tonRateScaled, v'maxBuy, v'deploymentId));
+}
+
+(slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $GramPadSimpleSwap$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$GramPadSimpleSwap$_load();
+    }
+    else {
+        (slice $owner, slice $gramJettonMaster, int $gramDecimals, slice $usdtJettonMaster, int $usdtDecimals, int $rateScaled, int $tonRateScaled, int $maxBuy, int $deploymentId) = $sc~$GramPadSimpleSwap$init$_load();
+        $sc.end_parse();
+        return $GramPadSimpleSwap$_contract_init($owner, $gramJettonMaster, $gramDecimals, $usdtJettonMaster, $usdtDecimals, $rateScaled, $tonRateScaled, $maxBuy, $deploymentId);
+    }
+}
+
+() $GramPadSimpleSwap$_contract_store((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $GramPadSimpleSwap$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Contract GramPadSimpleSwap functions
+;;
+
+(slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $GramPadSimpleSwap$_contract_init(slice $owner, slice $gramJettonMaster, int $gramDecimals, slice $usdtJettonMaster, int $usdtDecimals, int $rateScaled, int $tonRateScaled, int $maxBuy, int $deploymentId) impure inline {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = (null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null());
+    throw_unless(40176, ($rateScaled > 0));
+    throw_unless(40794, ($tonRateScaled > 0));
+    throw_unless(37466, ($maxBuy >= 0));
+    throw_unless(38610, ( (($gramDecimals >= 0)) ? (($gramDecimals <= 18)) : (false) ));
+    throw_unless(57534, ( (($usdtDecimals >= 0)) ? (($usdtDecimals <= 18)) : (false) ));
+    $self'owner = $owner;
+    $self'deploymentId = $deploymentId;
+    $self'gramJettonMaster = $gramJettonMaster;
+    $self'gramJettonWallet = $owner;
+    $self'gramDecimals = $gramDecimals;
+    $self'usdtJettonMaster = $usdtJettonMaster;
+    $self'usdtJettonWallet = $owner;
+    $self'usdtDecimals = $usdtDecimals;
+    $self'jettonWalletsConfigured = false;
+    $self'paused = false;
+    $self'rateScaled = $rateScaled;
+    $self'tonRateScaled = $tonRateScaled;
+    $self'maxBuy = $maxBuy;
+    $self'nextTransferQueryId = 1;
+    $self'gramReserve = 0;
+    $self'usdtReserve = 0;
+    $self'tonReserve = 0;
+    $self'totalSwapCount = 0;
+    $self'totalGramToUsdtVolume = 0;
+    $self'totalUsdtToGramVolume = 0;
+    $self'totalTonToGramVolume = 0;
+    $self'totalGramToTonVolume = 0;
+    return ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_rateScale((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    var $fresh$ret_116 = 1000000000;
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_116);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), ()) $GramPadSimpleSwap$_fun_requireOwner((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    throw_unless(35499, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), ());
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_decimalFactor((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $decimals) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    int $factor = 1;
+    int $i = 0;
+    while (($i < $decimals)) {
+        $factor = ($factor * 10);
+        $i = ($i + 1);
+    }
+    var $fresh$ret_117 = $factor;
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_117);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_quoteGramOut((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $usdtAmount) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    var $fresh$ret_118 = ((($usdtAmount * $self'rateScaled) * ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_decimalFactor($self'gramDecimals)) / (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_rateScale() * ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_decimalFactor($self'usdtDecimals)));
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_118);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_quoteUsdtOut((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $gramAmount) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    var $fresh$ret_119 = ((($gramAmount * ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_rateScale()) * ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_decimalFactor($self'usdtDecimals)) / ($self'rateScaled * ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_decimalFactor($self'gramDecimals)));
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_119);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_quoteGramOutFromTon((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $tonAmount) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    var $fresh$ret_120 = ((($tonAmount * $self'tonRateScaled) * ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_decimalFactor($self'gramDecimals)) / (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_rateScale() * ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_decimalFactor(9)));
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_120);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_quoteTonOut((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $gramAmount) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    var $fresh$ret_121 = ((($gramAmount * ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_rateScale()) * ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_decimalFactor(9)) / ($self'tonRateScaled * ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_decimalFactor($self'gramDecimals)));
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_121);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), ()) $GramPadSimpleSwap$_fun_sendJetton((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, slice $jettonWallet, slice $destination, int $amount) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    int $queryId = $self'nextTransferQueryId;
+    $self'nextTransferQueryId = ($self'nextTransferQueryId + 1);
+    $global_message($MessageParameters$_constructor_to_value_bounce_body($jettonWallet, 200000000, true, $JettonTransfer$_store_cell($JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload($queryId, $amount, $destination, $global_myAddress(), null(), 10000000, $Builder$_fun_asSlice($Builder$_fun_storeBit(false, $global_beginCell()))), begin_cell())));
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), ());
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), (slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)) $GramPadSimpleSwap$_fun_getContractDetails((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    var $fresh$ret_122 = $ContractDetails$_constructor_owner_deploymentId_gramJettonMaster_gramJettonWallet_gramDecimals_usdtJettonMaster_usdtJettonWallet_usdtDecimals_jettonWalletsConfigured_paused_rateScaled_tonRateScaled_rateScale_maxBuy_gramReserve_usdtReserve_tonReserve_totalSwapCount_totalGramToUsdtVolume_totalUsdtToGramVolume_totalTonToGramVolume_totalGramToTonVolume($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_rateScale(), $self'maxBuy, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume);
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_122);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_get_contract_version((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    var $fresh$ret_123 = 1;
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_123);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), (slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int)) $GramPadSimpleSwap$_fun_get_contract_details((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    var $fresh$ret_124 = ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_getContractDetails();
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_124);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_get_quote_gram_out((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $usdtAmount) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    throw_unless(17062, ($usdtAmount >= 0));
+    var $fresh$ret_125 = ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_quoteGramOut($usdtAmount);
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_125);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_get_quote_usdt_out((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $gramAmount) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    throw_unless(17062, ($gramAmount >= 0));
+    var $fresh$ret_126 = ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_quoteUsdtOut($gramAmount);
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_126);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_get_quote_gram_out_from_ton((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $tonAmount) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    throw_unless(17062, ($tonAmount >= 0));
+    var $fresh$ret_127 = ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_quoteGramOutFromTon($tonAmount);
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_127);
+}
+
+((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int), int) $GramPadSimpleSwap$_fun_get_quote_ton_out((slice, int, slice, slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int) $self, int $gramAmount) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
+    throw_unless(17062, ($gramAmount >= 0));
+    var $fresh$ret_128 = ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_quoteTonOut($gramAmount);
+    return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), $fresh$ret_128);
+}
+
+;;
+;; Get methods of a Contract GramPadSimpleSwap
+;;
+
+_ %get_contract_version() method_id(127581) {
+    var self = $GramPadSimpleSwap$_contract_load();
+    var res = self~$GramPadSimpleSwap$_fun_get_contract_version();
+    return res;
+}
+
+_ %get_contract_details() method_id(67648) {
+    var self = $GramPadSimpleSwap$_contract_load();
+    var res = self~$GramPadSimpleSwap$_fun_get_contract_details();
+    return $ContractDetails$_to_external(res);
+}
+
+_ %get_quote_gram_out(int $usdtAmount) method_id(103846) {
+    int $usdtAmount = $usdtAmount;
+    var self = $GramPadSimpleSwap$_contract_load();
+    var res = self~$GramPadSimpleSwap$_fun_get_quote_gram_out($usdtAmount);
+    return res;
+}
+
+_ %get_quote_usdt_out(int $gramAmount) method_id(94450) {
+    int $gramAmount = $gramAmount;
+    var self = $GramPadSimpleSwap$_contract_load();
+    var res = self~$GramPadSimpleSwap$_fun_get_quote_usdt_out($gramAmount);
+    return res;
+}
+
+_ %get_quote_gram_out_from_ton(int $tonAmount) method_id(94716) {
+    int $tonAmount = $tonAmount;
+    var self = $GramPadSimpleSwap$_contract_load();
+    var res = self~$GramPadSimpleSwap$_fun_get_quote_gram_out_from_ton($tonAmount);
+    return res;
+}
+
+_ %get_quote_ton_out(int $gramAmount) method_id(78467) {
+    int $gramAmount = $gramAmount;
+    var self = $GramPadSimpleSwap$_contract_load();
+    var res = self~$GramPadSimpleSwap$_fun_get_quote_ton_out($gramAmount);
+    return res;
+}
+
+;;
+;; Routing of a Contract GramPadSimpleSwap
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume) = $GramPadSimpleSwap$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    var op = in_msg~load_opcode_internal();
+    ;; Receive Deploy message
+    if (op == 0x946a98b6) {
+        var $msg'queryId = in_msg~load_uint(64);
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive FundTon message
+    if (op == 671470645) {
+        var $msg = empty_tuple();
+        throw_unless(4603, ($Context$_get_value(__tact_context_get()) > 0));
+        $self'tonReserve = ($self'tonReserve + $Context$_get_value(__tact_context_get()));
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive SetPaused message
+    if (op == 157817343) {
+        var $msg'paused = in_msg~load_int(1);
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
+        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        $self'paused = $msg'paused;
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive SetRate message
+    if (op == 3433483583) {
+        var $msg'rateScaled = in_msg~load_uint(128);
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
+        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        throw_unless(40176, ($msg'rateScaled > 0));
+        $self'rateScaled = $msg'rateScaled;
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive SetTonRate message
+    if (op == 2188802301) {
+        var $msg'tonRateScaled = in_msg~load_uint(128);
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
+        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        throw_unless(40794, ($msg'tonRateScaled > 0));
+        $self'tonRateScaled = $msg'tonRateScaled;
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive SetMaxBuy message
+    if (op == 1043132633) {
+        var $msg'maxBuy = in_msg~load_varuint16();
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
+        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        throw_unless(37466, ($msg'maxBuy >= 0));
+        $self'maxBuy = $msg'maxBuy;
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive SetJettonWallets message
+    if (op == 658304901) {
+        var $msg'gramJettonWallet = in_msg~load_msg_addr();
+        var $msg'usdtJettonWallet = in_msg~load_msg_addr();
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
+        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        $self'gramJettonWallet = $msg'gramJettonWallet;
+        $self'usdtJettonWallet = $msg'usdtJettonWallet;
+        $self'jettonWalletsConfigured = true;
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive ChangeOwner message
+    if (op == 256331011) {
+        var $msg'newOwner = in_msg~load_msg_addr();
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
+        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        $self'owner = $msg'newOwner;
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive OwnerWithdrawTon message
+    if (op == 826339878) {
+        var $msg'amount = in_msg~load_varuint16();
+        var $msg'destination = in_msg~load_msg_addr();
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
+        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        throw_unless(17062, ($msg'amount > 0));
+        throw_unless(25435, ($self'tonReserve >= $msg'amount));
+        throw_unless(4558, (($global_myBalance() - $Context$_get_value(__tact_context_get())) >= $msg'amount));
+        $self'tonReserve = ($self'tonReserve - $msg'amount);
+        $global_message($MessageParameters$_constructor_to_value_bounce($msg'destination, $msg'amount, false));
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive OwnerWithdrawGram message
+    if (op == 2228972469) {
+        var $msg'amount = in_msg~load_varuint16();
+        var $msg'destination = in_msg~load_msg_addr();
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
+        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 160000000));
+        throw_unless(17062, ($msg'amount > 0));
+        throw_unless(16264, ($self'gramReserve >= $msg'amount));
+        $self'gramReserve = ($self'gramReserve - $msg'amount);
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_sendJetton($self'gramJettonWallet, $msg'destination, $msg'amount);
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive OwnerWithdrawUsdt message
+    if (op == 753626566) {
+        var $msg'amount = in_msg~load_varuint16();
+        var $msg'destination = in_msg~load_msg_addr();
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
+        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 160000000));
+        throw_unless(17062, ($msg'amount > 0));
+        throw_unless(25347, ($self'usdtReserve >= $msg'amount));
+        $self'usdtReserve = ($self'usdtReserve - $msg'amount);
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_sendJetton($self'usdtJettonWallet, $msg'destination, $msg'amount);
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive JettonTransferNotification message
+    if (op == 0x7362d09c) {
+        var $msg'queryId = in_msg~load_uint(64);
+        var $msg'amount = in_msg~load_varuint16();
+        var $msg'sender = in_msg~load_msg_addr();
+        var $msg'forwardPayload = in_msg;
+        throw_unless(17062, ($msg'amount > 0));
+        throw_unless(12628, $self'jettonWalletsConfigured);
+        slice $incomingWallet = __tact_context_get_sender();
+        slice $payload = $msg'forwardPayload;
+        if (( (($Slice$_fun_bits($payload) < 160)) ? (($Slice$_fun_refs($payload) > 0)) : (false) )) {
+            $payload = $Cell$_fun_beginParse($payload~$Slice$_fun_loadRef());
+        }
+        if (( equal_slices_bits($incomingWallet, $self'usdtJettonWallet) )) {
+            if (($Slice$_fun_bits($payload) < 160)) {
+                $self'usdtReserve = ($self'usdtReserve + $msg'amount);
+                $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+                return ();
+            }
+            throw_unless(44787, (~ $self'paused));
+            throw_unless(25435, (($global_myBalance() - $Context$_get_value(__tact_context_get())) >= 220000000));
+            throw_unless(22614, ( (($self'maxBuy == 0)) ? (true) : (($msg'amount <= $self'maxBuy)) ));
+            int $marker = $payload~load_uint(32);
+            throw_unless(34023, ($marker == 1398227280));
+            int $minOut = $payload~load_uint(128);
+            int $gramOut = ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_quoteGramOut($msg'amount);
+            throw_unless(60322, ($gramOut > 0));
+            throw_unless(41529, ($gramOut >= $minOut));
+            throw_unless(16264, ($self'gramReserve >= $gramOut));
+            $self'usdtReserve = ($self'usdtReserve + $msg'amount);
+            $self'gramReserve = ($self'gramReserve - $gramOut);
+            $self'totalSwapCount = ($self'totalSwapCount + 1);
+            $self'totalUsdtToGramVolume = ($self'totalUsdtToGramVolume + $msg'amount);
+            ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_sendJetton($self'gramJettonWallet, $msg'sender, $gramOut);
+            $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+            return ();
+        }
+        throw_unless(50546, ( equal_slices_bits($incomingWallet, $self'gramJettonWallet) ));
+        if (($Slice$_fun_bits($payload) < 160)) {
+            $self'gramReserve = ($self'gramReserve + $msg'amount);
+            $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+            return ();
+        }
+        throw_unless(44787, (~ $self'paused));
+        throw_unless(25435, (($global_myBalance() - $Context$_get_value(__tact_context_get())) >= 220000000));
+        int $tonOutCheck = ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_quoteTonOut($msg'amount);
+        int $marker = $payload~load_uint(32);
+        throw_unless(34023, ($marker == 1398227280));
+        int $route = $payload~load_uint(8);
+        int $minOut = $payload~load_uint(128);
+        ifnot ($route) {
+            throw_unless(22614, ( (($self'maxBuy == 0)) ? (true) : ((($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_quoteUsdtOut($msg'amount) <= $self'maxBuy)) ));
+            int $usdtOut = ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_quoteUsdtOut($msg'amount);
+            throw_unless(60322, ($usdtOut > 0));
+            throw_unless(41529, ($usdtOut >= $minOut));
+            throw_unless(25347, ($self'usdtReserve >= $usdtOut));
+            $self'gramReserve = ($self'gramReserve + $msg'amount);
+            $self'usdtReserve = ($self'usdtReserve - $usdtOut);
+            $self'totalSwapCount = ($self'totalSwapCount + 1);
+            $self'totalGramToUsdtVolume = ($self'totalGramToUsdtVolume + $msg'amount);
+            ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_sendJetton($self'usdtJettonWallet, $msg'sender, $usdtOut);
+            $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+            return ();
+        }
+        throw_unless(34780, ($route == 1));
+        throw_unless(60322, ($tonOutCheck > 0));
+        throw_unless(41529, ($tonOutCheck >= $minOut));
+        throw_unless(25435, ($self'tonReserve >= $tonOutCheck));
+        throw_unless(5176, (($global_myBalance() - $Context$_get_value(__tact_context_get())) >= $tonOutCheck));
+        $self'gramReserve = ($self'gramReserve + $msg'amount);
+        $self'tonReserve = ($self'tonReserve - $tonOutCheck);
+        $self'totalSwapCount = ($self'totalSwapCount + 1);
+        $self'totalGramToTonVolume = ($self'totalGramToTonVolume + $msg'amount);
+        $global_message($MessageParameters$_constructor_to_value_bounce($msg'sender, $tonOutCheck, false));
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive SwapTonForGram message
+    if (op == 2431915606) {
+        var $msg'minOut = in_msg~load_varuint16();
+        throw_unless(44787, (~ $self'paused));
+        throw_unless(62831, ($msg'minOut >= 0));
+        int $tonAmount = $Context$_get_value(__tact_context_get());
+        throw_unless(4603, ($tonAmount > 0));
+        int $gramOut = ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_quoteGramOutFromTon($tonAmount);
+        throw_unless(60322, ($gramOut > 0));
+        throw_unless(41529, ($gramOut >= $msg'minOut));
+        throw_unless(16264, ($self'gramReserve >= $gramOut));
+        throw_unless(25435, ($global_myBalance() >= 220000000));
+        $self'tonReserve = ($self'tonReserve + $tonAmount);
+        $self'gramReserve = ($self'gramReserve - $gramOut);
+        $self'totalSwapCount = ($self'totalSwapCount + 1);
+        $self'totalTonToGramVolume = ($self'totalTonToGramVolume + $tonAmount);
+        ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_sendJetton($self'gramJettonWallet, __tact_context_get_sender(), $gramOut);
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Receive JettonExcesses message
+    if (op == 0xd53276db) {
+        var $msg'queryId = in_msg~load_uint(64);
+        $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
+        return ();
+    }
+    
+    ;; Throw if not handled
+    throw(130);
+}

@@ -1,0 +1,988 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; GramPadUniversalLocker_GramPadGramxStaking.headers.fc
+;;
+;; Header files for GramPadGramxStaking
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; __tact_dict_get_slice_int
+int __tact_dict_get_slice_int(cell d, int kl, slice k, int vl) inline;
+
+;; __tact_dict_set_slice_int
+(cell, ()) __tact_dict_set_slice_int(cell d, int kl, slice k, int v, int vl) inline;
+
+;; __tact_dict_get_int_slice
+slice __tact_dict_get_int_slice(cell d, int kl, int k) inline;
+
+;; __tact_dict_set_int_slice
+(cell, ()) __tact_dict_set_int_slice(cell d, int kl, int k, slice v) inline;
+
+;; __tact_dict_get_int_int
+int __tact_dict_get_int_int(cell d, int kl, int k, int vl) inline;
+
+;; __tact_dict_set_int_int
+(cell, ()) __tact_dict_set_int_int(cell d, int kl, int k, int v, int vl) inline;
+
+;; $JettonTransfer$_store
+builder $JettonTransfer$_store(builder build_0, (int, int, slice, slice, cell, int, slice) v) inline;
+
+;; $JettonTransfer$_store_cell
+cell $JettonTransfer$_store_cell((int, int, slice, slice, cell, int, slice) v, builder b) inline;
+
+;; $GramPadGramxStaking$_store
+builder $GramPadGramxStaking$_store(builder build_0, (slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) v) inline;
+
+;; $GramPadGramxStaking$_load
+(slice, ((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell))) $GramPadGramxStaking$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $ContractDetails$_to_external
+(slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int) $ContractDetails$_to_external(((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int)) v) inline;
+
+;; $UserSummary$_to_external
+(slice, int, int) $UserSummary$_to_external(((slice, int, int)) v) inline;
+
+;; $StakeDetails$_to_external
+(int, slice, int, int, int, int, int, int, int, int, int) $StakeDetails$_to_external(((int, slice, int, int, int, int, int, int, int, int, int)) v) inline;
+
+;; $GramPadGramxStaking$init$_load
+(slice, ((slice, slice, int, int, int, int))) $GramPadGramxStaking$init$_load(slice sc_0) inline;
+
+;; $GramPadGramxStaking$_contract_init
+(slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $GramPadGramxStaking$_contract_init(slice $owner, slice $gramxJettonMaster, int $annualRoiBasisPoints, int $minStake, int $flexUnstakeFeeBasisPoints, int $deploymentId) impure inline;
+
+;; $GramPadGramxStaking$_contract_load
+(slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $GramPadGramxStaking$_contract_load() impure inline;
+
+;; $GramPadGramxStaking$_contract_store
+() $GramPadGramxStaking$_contract_store((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) v) impure inline;
+
+;; $Builder$_fun_asSlice
+slice $Builder$_fun_asSlice(builder $self) impure inline;
+
+;; $GramPadGramxStaking$_fun_requireOwner
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), ()) $GramPadGramxStaking$_fun_requireOwner((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_indexKey
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_indexKey((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $user, int $index) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_stakeExists
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_stakeExists((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_ownerOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), slice) $GramPadGramxStaking$_fun_ownerOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_activeOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_activeOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_amountOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_amountOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_claimedOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_claimedOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_roiOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_roiOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_kindOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_kindOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_startedAtOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_startedAtOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_durationOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_durationOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_maturityOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_maturityOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_userStakeCountOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_userStakeCountOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $user) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_userActiveStakeCountOf
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_userActiveStakeCountOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $user) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_totalReward
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_totalReward((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId, int $atTime) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_claimableReward
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_claimableReward((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+;; $MessageParameters$_constructor_to_value_bounce_body
+((int, cell, int, slice, int)) $MessageParameters$_constructor_to_value_bounce_body(slice $to, int $value, int $bounce, cell $body) inline;
+
+;; $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload
+((int, int, slice, slice, cell, int, slice)) $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload(int $queryId, int $amount, slice $destination, slice $responseDestination, cell $customPayload, int $forwardTonAmount, slice $forwardPayload) inline;
+
+;; $GramPadGramxStaking$_fun_sendGramx
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), ()) $GramPadGramxStaking$_fun_sendGramx((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $to, int $amount) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_get_contract_version
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_get_contract_version((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self) impure inline_ref;
+
+;; $ContractDetails$_constructor_owner_deploymentId_gramxJettonMaster_gramxJettonWallet_jettonWalletConfigured_annualRoiBasisPoints_flexUnstakeFeeBasisPoints_minStake_paused_totalStaked_rewardReserve_totalRewardsPaid_totalFeesCollected_activeStakerCount_totalStakePositions_nextStakeId
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int)) $ContractDetails$_constructor_owner_deploymentId_gramxJettonMaster_gramxJettonWallet_jettonWalletConfigured_annualRoiBasisPoints_flexUnstakeFeeBasisPoints_minStake_paused_totalStaked_rewardReserve_totalRewardsPaid_totalFeesCollected_activeStakerCount_totalStakePositions_nextStakeId(slice $owner, int $deploymentId, slice $gramxJettonMaster, slice $gramxJettonWallet, int $jettonWalletConfigured, int $annualRoiBasisPoints, int $flexUnstakeFeeBasisPoints, int $minStake, int $paused, int $totalStaked, int $rewardReserve, int $totalRewardsPaid, int $totalFeesCollected, int $activeStakerCount, int $totalStakePositions, int $nextStakeId) inline;
+
+;; $GramPadGramxStaking$_fun_get_contract_details
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), (slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int)) $GramPadGramxStaking$_fun_get_contract_details((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self) impure inline_ref;
+
+;; $UserSummary$_constructor_user_totalStakePositions_activeStakePositions
+((slice, int, int)) $UserSummary$_constructor_user_totalStakePositions_activeStakePositions(slice $user, int $totalStakePositions, int $activeStakePositions) inline;
+
+;; $GramPadGramxStaking$_fun_get_user_summary
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), (slice, int, int)) $GramPadGramxStaking$_fun_get_user_summary((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $user) impure inline_ref;
+
+;; $GramPadGramxStaking$_fun_get_user_stake_id_by_index
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_get_user_stake_id_by_index((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $user, int $index) impure inline_ref;
+
+;; $StakeDetails$_constructor_stakeId_owner_active_amount_pendingReward_roiBasisPoints_stakeKind_startedAt_duration_maturityAt_claimedRewards
+((int, slice, int, int, int, int, int, int, int, int, int)) $StakeDetails$_constructor_stakeId_owner_active_amount_pendingReward_roiBasisPoints_stakeKind_startedAt_duration_maturityAt_claimedRewards(int $stakeId, slice $owner, int $active, int $amount, int $pendingReward, int $roiBasisPoints, int $stakeKind, int $startedAt, int $duration, int $maturityAt, int $claimedRewards) inline;
+
+;; $GramPadGramxStaking$_fun_get_stake_details
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), (int, slice, int, int, int, int, int, int, int, int, int)) $GramPadGramxStaking$_fun_get_stake_details((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref;
+
+
+;; GramPadUniversalLocker_GramPadGramxStaking.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+(cell, int) __tact_dict_delete(cell dict, int key_len, slice index) asm(index dict key_len) """
+    DICTDEL
+""";
+
+(slice, int) __tact_dict_get(cell dict, int key_len, slice index) asm(index dict key_len) """
+    DICTGET NULLSWAPIFNOT
+""";
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+int __tact_dict_get_slice_int(cell d, int kl, slice k, int vl) inline {
+    var (r, ok) = __tact_dict_get(d, kl, k);
+    if (ok) {
+        return r~load_int(vl);
+    } else {
+        return null();
+    }
+}
+
+(cell, ()) __tact_dict_set_slice_int(cell d, int kl, slice k, int v, int vl) inline {
+    if (null?(v)) {
+        var (r, ok) = __tact_dict_delete(d, kl, k);
+        return (r, ());
+    } else {
+        return (dict_set_builder(d, kl, k, begin_cell().store_int(v, vl)), ());
+    }
+}
+
+slice __tact_dict_get_int_slice(cell d, int kl, int k) inline {
+    var (r, ok) = idict_get?(d, kl, k);
+    if (ok) {
+        return r;
+    } else {
+        return null();
+    }
+}
+
+(cell, ()) __tact_dict_set_int_slice(cell d, int kl, int k, slice v) inline {
+    if (null?(v)) {
+        var (r, ok) = idict_delete?(d, kl, k);
+        return (r, ());
+    } else {
+        return (idict_set(d, kl, k, v), ());
+    }
+}
+
+int __tact_dict_get_int_int(cell d, int kl, int k, int vl) inline {
+    var (r, ok) = idict_get?(d, kl, k);
+    if (ok) {
+        return r~load_int(vl);
+    } else {
+        return null();
+    }
+}
+
+(cell, ()) __tact_dict_set_int_int(cell d, int kl, int k, int v, int vl) inline {
+    if (null?(v)) {
+        var (r, ok) = idict_delete?(d, kl, k);
+        return (r, ());
+    } else {
+        return (idict_set_builder(d, kl, k, begin_cell().store_int(v, vl)), ());
+    }
+}
+
+builder $global_beginCell() impure asm """
+    NEWC
+""";
+
+slice $global_myAddress() impure asm """
+    MYADDR
+""";
+
+() $global_message((int, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+    STZEROES
+    // → Stack state
+    // s0: Builder
+    // s1: `body`
+    // s2: `mode`
+    STDICT
+    ENDC
+    SWAP
+    SENDRAWMSG
+""";
+
+int $global_now() impure asm """
+    NOW
+""";
+
+builder $Builder$_fun_storeBit(int $value, builder $self) impure asm """
+    1 STI
+""";
+
+cell $Builder$_fun_endCell(builder $self) impure asm """
+    ENDC
+""";
+
+slice $Cell$_fun_beginParse(cell $self) impure asm """
+    CTOS
+""";
+
+slice $Builder$_fun_asSlice(builder $self) impure inline {
+    var ($self) = $self;
+    return $Cell$_fun_beginParse($Builder$_fun_endCell($self));
+}
+
+builder $Builder$_fun_storeAddress(builder $self, slice $address) impure asm """
+    STSLICER
+""";
+
+int $Cell$_fun_hash(cell $self) impure asm """
+    HASHCU
+""";
+
+;; GramPadUniversalLocker_GramPadGramxStaking.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: MessageParameters
+;; TLB: _ mode:int257 body:Maybe ^cell value:int257 to:address bounce:bool = MessageParameters
+;;
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_to_value_bounce_body(slice $to, int $value, int $bounce, cell $body) inline {
+    return (0, $body, $value, $to, $bounce);
+}
+
+;;
+;; Type: JettonTransfer
+;; Header: 0x0f8a7ea5
+;; TLB: jetton_transfer#0f8a7ea5 queryId:uint64 amount:coins destination:address responseDestination:address customPayload:Maybe ^cell forwardTonAmount:coins forwardPayload:remainder<slice> = JettonTransfer
+;;
+
+builder $JettonTransfer$_store(builder build_0, (int, int, slice, slice, cell, int, slice) v) inline {
+    var (v'queryId, v'amount, v'destination, v'responseDestination, v'customPayload, v'forwardTonAmount, v'forwardPayload) = v;
+    build_0 = store_uint(build_0, 260734629, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    build_0 = build_0.store_varuint16(v'amount);
+    build_0 = build_0.store_slice(v'destination);
+    build_0 = build_0.store_slice(v'responseDestination);
+    build_0 = build_0.store_maybe_ref(v'customPayload);
+    build_0 = build_0.store_varuint16(v'forwardTonAmount);
+    build_0 = build_0.store_slice(v'forwardPayload);
+    return build_0;
+}
+
+cell $JettonTransfer$_store_cell((int, int, slice, slice, cell, int, slice) v, builder b) inline {
+    return $JettonTransfer$_store(b, v).end_cell();
+}
+
+((int, int, slice, slice, cell, int, slice)) $JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload(int $queryId, int $amount, slice $destination, slice $responseDestination, cell $customPayload, int $forwardTonAmount, slice $forwardPayload) inline {
+    return ($queryId, $amount, $destination, $responseDestination, $customPayload, $forwardTonAmount, $forwardPayload);
+}
+
+;;
+;; Type: ContractDetails
+;; TLB: _ owner:address deploymentId:int257 gramxJettonMaster:address gramxJettonWallet:address jettonWalletConfigured:bool annualRoiBasisPoints:int257 flexUnstakeFeeBasisPoints:int257 minStake:int257 paused:bool totalStaked:int257 rewardReserve:int257 totalRewardsPaid:int257 totalFeesCollected:int257 activeStakerCount:int257 totalStakePositions:int257 nextStakeId:int257 = ContractDetails
+;;
+
+(slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int) $ContractDetails$_to_external(((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int)) v) inline {
+    var (v'owner, v'deploymentId, v'gramxJettonMaster, v'gramxJettonWallet, v'jettonWalletConfigured, v'annualRoiBasisPoints, v'flexUnstakeFeeBasisPoints, v'minStake, v'paused, v'totalStaked, v'rewardReserve, v'totalRewardsPaid, v'totalFeesCollected, v'activeStakerCount, v'totalStakePositions, v'nextStakeId) = v; 
+    return (v'owner, v'deploymentId, v'gramxJettonMaster, v'gramxJettonWallet, v'jettonWalletConfigured, v'annualRoiBasisPoints, v'flexUnstakeFeeBasisPoints, v'minStake, v'paused, v'totalStaked, v'rewardReserve, v'totalRewardsPaid, v'totalFeesCollected, v'activeStakerCount, v'totalStakePositions, v'nextStakeId);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int)) $ContractDetails$_constructor_owner_deploymentId_gramxJettonMaster_gramxJettonWallet_jettonWalletConfigured_annualRoiBasisPoints_flexUnstakeFeeBasisPoints_minStake_paused_totalStaked_rewardReserve_totalRewardsPaid_totalFeesCollected_activeStakerCount_totalStakePositions_nextStakeId(slice $owner, int $deploymentId, slice $gramxJettonMaster, slice $gramxJettonWallet, int $jettonWalletConfigured, int $annualRoiBasisPoints, int $flexUnstakeFeeBasisPoints, int $minStake, int $paused, int $totalStaked, int $rewardReserve, int $totalRewardsPaid, int $totalFeesCollected, int $activeStakerCount, int $totalStakePositions, int $nextStakeId) inline {
+    return ($owner, $deploymentId, $gramxJettonMaster, $gramxJettonWallet, $jettonWalletConfigured, $annualRoiBasisPoints, $flexUnstakeFeeBasisPoints, $minStake, $paused, $totalStaked, $rewardReserve, $totalRewardsPaid, $totalFeesCollected, $activeStakerCount, $totalStakePositions, $nextStakeId);
+}
+
+;;
+;; Type: UserSummary
+;; TLB: _ user:address totalStakePositions:int257 activeStakePositions:int257 = UserSummary
+;;
+
+(slice, int, int) $UserSummary$_to_external(((slice, int, int)) v) inline {
+    var (v'user, v'totalStakePositions, v'activeStakePositions) = v; 
+    return (v'user, v'totalStakePositions, v'activeStakePositions);
+}
+
+((slice, int, int)) $UserSummary$_constructor_user_totalStakePositions_activeStakePositions(slice $user, int $totalStakePositions, int $activeStakePositions) inline {
+    return ($user, $totalStakePositions, $activeStakePositions);
+}
+
+;;
+;; Type: StakeDetails
+;; TLB: _ stakeId:int257 owner:address active:bool amount:int257 pendingReward:int257 roiBasisPoints:int257 stakeKind:int257 startedAt:int257 duration:int257 maturityAt:int257 claimedRewards:int257 = StakeDetails
+;;
+
+(int, slice, int, int, int, int, int, int, int, int, int) $StakeDetails$_to_external(((int, slice, int, int, int, int, int, int, int, int, int)) v) inline {
+    var (v'stakeId, v'owner, v'active, v'amount, v'pendingReward, v'roiBasisPoints, v'stakeKind, v'startedAt, v'duration, v'maturityAt, v'claimedRewards) = v; 
+    return (v'stakeId, v'owner, v'active, v'amount, v'pendingReward, v'roiBasisPoints, v'stakeKind, v'startedAt, v'duration, v'maturityAt, v'claimedRewards);
+}
+
+((int, slice, int, int, int, int, int, int, int, int, int)) $StakeDetails$_constructor_stakeId_owner_active_amount_pendingReward_roiBasisPoints_stakeKind_startedAt_duration_maturityAt_claimedRewards(int $stakeId, slice $owner, int $active, int $amount, int $pendingReward, int $roiBasisPoints, int $stakeKind, int $startedAt, int $duration, int $maturityAt, int $claimedRewards) inline {
+    return ($stakeId, $owner, $active, $amount, $pendingReward, $roiBasisPoints, $stakeKind, $startedAt, $duration, $maturityAt, $claimedRewards);
+}
+
+;;
+;; Type: GramPadGramxStaking
+;; TLB: _ owner:address deploymentId:uint64 gramxJettonMaster:address gramxJettonWallet:address jettonWalletConfigured:bool annualRoiBasisPoints:uint16 flexUnstakeFeeBasisPoints:uint16 minStake:coins paused:bool totalStaked:coins rewardReserve:coins totalRewardsPaid:coins totalFeesCollected:coins activeStakerCount:uint32 nextTransferQueryId:uint64 nextStakeId:uint64 pendingStakeKind:dict<address, int> pendingStakeDuration:dict<address, int> userStakeCount:dict<address, int> userActiveStakeCount:dict<address, int> userStakeIdByIndex:dict<int, int> stakeOwner:dict<int, address> stakeAmount:dict<int, int> stakeRoiBasisPoints:dict<int, int> stakeKind:dict<int, int> stakeStartedAt:dict<int, int> stakeDuration:dict<int, int> stakeClaimedRewards:dict<int, int> stakeActive:dict<int, bool> = GramPadGramxStaking
+;;
+
+builder $GramPadGramxStaking$_store(builder build_0, (slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) v) inline {
+    var (v'owner, v'deploymentId, v'gramxJettonMaster, v'gramxJettonWallet, v'jettonWalletConfigured, v'annualRoiBasisPoints, v'flexUnstakeFeeBasisPoints, v'minStake, v'paused, v'totalStaked, v'rewardReserve, v'totalRewardsPaid, v'totalFeesCollected, v'activeStakerCount, v'nextTransferQueryId, v'nextStakeId, v'pendingStakeKind, v'pendingStakeDuration, v'userStakeCount, v'userActiveStakeCount, v'userStakeIdByIndex, v'stakeOwner, v'stakeAmount, v'stakeRoiBasisPoints, v'stakeKind, v'stakeStartedAt, v'stakeDuration, v'stakeClaimedRewards, v'stakeActive) = v;
+    build_0 = build_0.store_slice(v'owner);
+    build_0 = build_0.store_uint(v'deploymentId, 64);
+    build_0 = build_0.store_slice(v'gramxJettonMaster);
+    build_0 = build_0.store_slice(v'gramxJettonWallet);
+    build_0 = build_0.store_int(v'jettonWalletConfigured, 1);
+    build_0 = build_0.store_uint(v'annualRoiBasisPoints, 16);
+    build_0 = build_0.store_uint(v'flexUnstakeFeeBasisPoints, 16);
+    build_0 = build_0.store_varuint16(v'minStake);
+    var build_1 = begin_cell();
+    build_1 = build_1.store_int(v'paused, 1);
+    build_1 = build_1.store_varuint16(v'totalStaked);
+    build_1 = build_1.store_varuint16(v'rewardReserve);
+    build_1 = build_1.store_varuint16(v'totalRewardsPaid);
+    build_1 = build_1.store_varuint16(v'totalFeesCollected);
+    build_1 = build_1.store_uint(v'activeStakerCount, 32);
+    build_1 = build_1.store_uint(v'nextTransferQueryId, 64);
+    build_1 = build_1.store_uint(v'nextStakeId, 64);
+    build_1 = build_1.store_dict(v'pendingStakeKind);
+    build_1 = build_1.store_dict(v'pendingStakeDuration);
+    build_1 = build_1.store_dict(v'userStakeCount);
+    var build_2 = begin_cell();
+    build_2 = build_2.store_dict(v'userActiveStakeCount);
+    build_2 = build_2.store_dict(v'userStakeIdByIndex);
+    build_2 = build_2.store_dict(v'stakeOwner);
+    var build_3 = begin_cell();
+    build_3 = build_3.store_dict(v'stakeAmount);
+    build_3 = build_3.store_dict(v'stakeRoiBasisPoints);
+    build_3 = build_3.store_dict(v'stakeKind);
+    var build_4 = begin_cell();
+    build_4 = build_4.store_dict(v'stakeStartedAt);
+    build_4 = build_4.store_dict(v'stakeDuration);
+    build_4 = build_4.store_dict(v'stakeClaimedRewards);
+    build_4 = build_4.store_dict(v'stakeActive);
+    build_3 = store_builder_ref(build_3, build_4);
+    build_2 = store_builder_ref(build_2, build_3);
+    build_1 = store_builder_ref(build_1, build_2);
+    build_0 = store_builder_ref(build_0, build_1);
+    return build_0;
+}
+
+(slice, ((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell))) $GramPadGramxStaking$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'deploymentId = sc_0~load_uint(64);
+    var v'gramxJettonMaster = sc_0~load_msg_addr();
+    var v'gramxJettonWallet = sc_0~load_msg_addr();
+    var v'jettonWalletConfigured = sc_0~load_int(1);
+    var v'annualRoiBasisPoints = sc_0~load_uint(16);
+    var v'flexUnstakeFeeBasisPoints = sc_0~load_uint(16);
+    var v'minStake = sc_0~load_varuint16();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'paused = sc_1~load_int(1);
+    var v'totalStaked = sc_1~load_varuint16();
+    var v'rewardReserve = sc_1~load_varuint16();
+    var v'totalRewardsPaid = sc_1~load_varuint16();
+    var v'totalFeesCollected = sc_1~load_varuint16();
+    var v'activeStakerCount = sc_1~load_uint(32);
+    var v'nextTransferQueryId = sc_1~load_uint(64);
+    var v'nextStakeId = sc_1~load_uint(64);
+    var v'pendingStakeKind = sc_1~load_dict();
+    var v'pendingStakeDuration = sc_1~load_dict();
+    var v'userStakeCount = sc_1~load_dict();
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'userActiveStakeCount = sc_2~load_dict();
+    var v'userStakeIdByIndex = sc_2~load_dict();
+    var v'stakeOwner = sc_2~load_dict();
+    slice sc_3 = sc_2~load_ref().begin_parse();
+    var v'stakeAmount = sc_3~load_dict();
+    var v'stakeRoiBasisPoints = sc_3~load_dict();
+    var v'stakeKind = sc_3~load_dict();
+    slice sc_4 = sc_3~load_ref().begin_parse();
+    var v'stakeStartedAt = sc_4~load_dict();
+    var v'stakeDuration = sc_4~load_dict();
+    var v'stakeClaimedRewards = sc_4~load_dict();
+    var v'stakeActive = sc_4~load_dict();
+    return (sc_0, (v'owner, v'deploymentId, v'gramxJettonMaster, v'gramxJettonWallet, v'jettonWalletConfigured, v'annualRoiBasisPoints, v'flexUnstakeFeeBasisPoints, v'minStake, v'paused, v'totalStaked, v'rewardReserve, v'totalRewardsPaid, v'totalFeesCollected, v'activeStakerCount, v'nextTransferQueryId, v'nextStakeId, v'pendingStakeKind, v'pendingStakeDuration, v'userStakeCount, v'userActiveStakeCount, v'userStakeIdByIndex, v'stakeOwner, v'stakeAmount, v'stakeRoiBasisPoints, v'stakeKind, v'stakeStartedAt, v'stakeDuration, v'stakeClaimedRewards, v'stakeActive));
+}
+
+(slice, ((slice, slice, int, int, int, int))) $GramPadGramxStaking$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'gramxJettonMaster = sc_0~load_msg_addr();
+    var v'annualRoiBasisPoints = sc_0~load_int(257);
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'minStake = sc_1~load_int(257);
+    var v'flexUnstakeFeeBasisPoints = sc_1~load_int(257);
+    var v'deploymentId = sc_1~load_int(257);
+    return (sc_0, (v'owner, v'gramxJettonMaster, v'annualRoiBasisPoints, v'minStake, v'flexUnstakeFeeBasisPoints, v'deploymentId));
+}
+
+(slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $GramPadGramxStaking$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$GramPadGramxStaking$_load();
+    }
+    else {
+        (slice $owner, slice $gramxJettonMaster, int $annualRoiBasisPoints, int $minStake, int $flexUnstakeFeeBasisPoints, int $deploymentId) = $sc~$GramPadGramxStaking$init$_load();
+        $sc.end_parse();
+        return $GramPadGramxStaking$_contract_init($owner, $gramxJettonMaster, $annualRoiBasisPoints, $minStake, $flexUnstakeFeeBasisPoints, $deploymentId);
+    }
+}
+
+() $GramPadGramxStaking$_contract_store((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $GramPadGramxStaking$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Contract GramPadGramxStaking functions
+;;
+
+(slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $GramPadGramxStaking$_contract_init(slice $owner, slice $gramxJettonMaster, int $annualRoiBasisPoints, int $minStake, int $flexUnstakeFeeBasisPoints, int $deploymentId) impure inline {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = (null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null(), null());
+    throw_unless(58668, ( (($annualRoiBasisPoints >= 0)) ? (($annualRoiBasisPoints <= 100000)) : (false) ));
+    throw_unless(46136, ($flexUnstakeFeeBasisPoints <= 5000));
+    throw_unless(13325, ($minStake > 0));
+    $self'owner = $owner;
+    $self'deploymentId = $deploymentId;
+    $self'gramxJettonMaster = $gramxJettonMaster;
+    $self'gramxJettonWallet = $owner;
+    $self'jettonWalletConfigured = false;
+    $self'annualRoiBasisPoints = $annualRoiBasisPoints;
+    $self'flexUnstakeFeeBasisPoints = $flexUnstakeFeeBasisPoints;
+    $self'minStake = $minStake;
+    $self'paused = false;
+    $self'totalStaked = 0;
+    $self'rewardReserve = 0;
+    $self'totalRewardsPaid = 0;
+    $self'totalFeesCollected = 0;
+    $self'activeStakerCount = 0;
+    $self'nextTransferQueryId = 1;
+    $self'nextStakeId = 1;
+    return ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), ()) $GramPadGramxStaking$_fun_requireOwner((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    throw_unless(35499, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), ());
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_indexKey((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $user, int $index) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    var $fresh$ret_0 = $Cell$_fun_hash($Builder$_fun_endCell(store_uint($Builder$_fun_storeAddress($global_beginCell(), $user), $index, 64)));
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_0);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_stakeExists((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    slice $ownerValue = __tact_dict_get_int_slice($self'stakeOwner, 257, $stakeId);
+    var $fresh$ret_1 = (~ null?($ownerValue));
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_1);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), slice) $GramPadGramxStaking$_fun_ownerOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    slice $value = __tact_dict_get_int_slice($self'stakeOwner, 257, $stakeId);
+    throw_unless(2512, (~ null?($value)));
+    var $fresh$ret_2 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_2);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_activeOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $value = __tact_dict_get_int_int($self'stakeActive, 257, $stakeId, 1);
+    if (null?($value)) {
+        var $fresh$ret_3 = false;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_3);
+    }
+    var $fresh$ret_4 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_4);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_amountOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $value = __tact_dict_get_int_int($self'stakeAmount, 257, $stakeId, 257);
+    if (null?($value)) {
+        var $fresh$ret_5 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_5);
+    }
+    var $fresh$ret_6 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_6);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_claimedOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $value = __tact_dict_get_int_int($self'stakeClaimedRewards, 257, $stakeId, 257);
+    if (null?($value)) {
+        var $fresh$ret_7 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_7);
+    }
+    var $fresh$ret_8 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_8);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_roiOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $value = __tact_dict_get_int_int($self'stakeRoiBasisPoints, 257, $stakeId, 257);
+    if (null?($value)) {
+        var $fresh$ret_9 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_9);
+    }
+    var $fresh$ret_10 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_10);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_kindOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $value = __tact_dict_get_int_int($self'stakeKind, 257, $stakeId, 257);
+    if (null?($value)) {
+        var $fresh$ret_11 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_11);
+    }
+    var $fresh$ret_12 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_12);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_startedAtOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $value = __tact_dict_get_int_int($self'stakeStartedAt, 257, $stakeId, 257);
+    if (null?($value)) {
+        var $fresh$ret_13 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_13);
+    }
+    var $fresh$ret_14 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_14);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_durationOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $value = __tact_dict_get_int_int($self'stakeDuration, 257, $stakeId, 257);
+    if (null?($value)) {
+        var $fresh$ret_15 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_15);
+    }
+    var $fresh$ret_16 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_16);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_maturityOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    var $fresh$ret_17 = (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_startedAtOf($stakeId) + ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_durationOf($stakeId));
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_17);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_userStakeCountOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $user) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $value = __tact_dict_get_slice_int($self'userStakeCount, 267, $user, 257);
+    if (null?($value)) {
+        var $fresh$ret_18 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_18);
+    }
+    var $fresh$ret_19 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_19);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_userActiveStakeCountOf((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $user) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $value = __tact_dict_get_slice_int($self'userActiveStakeCount, 267, $user, 257);
+    if (null?($value)) {
+        var $fresh$ret_20 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_20);
+    }
+    var $fresh$ret_21 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_21);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_totalReward((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId, int $atTime) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    ifnot (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_activeOf($stakeId)) {
+        var $fresh$ret_22 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_22);
+    }
+    int $amount = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_amountOf($stakeId);
+    int $startedAt = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_startedAtOf($stakeId);
+    int $duration = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_durationOf($stakeId);
+    int $roi = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_roiOf($stakeId);
+    int $elapsed = ($atTime - $startedAt);
+    if (( (( (($elapsed <= 0)) ? (true) : (($amount <= 0)) )) ? (true) : (($roi <= 0)) )) {
+        var $fresh$ret_23 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_23);
+    }
+    if (($elapsed > $duration)) {
+        $elapsed = $duration;
+    }
+    var $fresh$ret_24 = (((($amount * $roi) / 10000) * $elapsed) / 31536000);
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_24);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_claimableReward((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $total = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_totalReward($stakeId, $global_now());
+    int $claimed = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_claimedOf($stakeId);
+    if (($total <= $claimed)) {
+        var $fresh$ret_25 = 0;
+        return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_25);
+    }
+    var $fresh$ret_26 = ($total - $claimed);
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_26);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), ()) $GramPadGramxStaking$_fun_sendGramx((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $to, int $amount) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $queryId = $self'nextTransferQueryId;
+    $self'nextTransferQueryId = ($self'nextTransferQueryId + 1);
+    $global_message($MessageParameters$_constructor_to_value_bounce_body($self'gramxJettonWallet, 120000000, true, $JettonTransfer$_store_cell($JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload($queryId, $amount, $to, $global_myAddress(), null(), 10000000, $Builder$_fun_asSlice($Builder$_fun_storeBit(false, $global_beginCell()))), begin_cell())));
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), ());
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_get_contract_version((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    var $fresh$ret_27 = 3;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_27);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), (slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int)) $GramPadGramxStaking$_fun_get_contract_details((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    var $fresh$ret_28 = $ContractDetails$_constructor_owner_deploymentId_gramxJettonMaster_gramxJettonWallet_jettonWalletConfigured_annualRoiBasisPoints_flexUnstakeFeeBasisPoints_minStake_paused_totalStaked_rewardReserve_totalRewardsPaid_totalFeesCollected_activeStakerCount_totalStakePositions_nextStakeId($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, ($self'nextStakeId - 1), $self'nextStakeId);
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_28);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), (slice, int, int)) $GramPadGramxStaking$_fun_get_user_summary((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $user) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    var $fresh$ret_29 = $UserSummary$_constructor_user_totalStakePositions_activeStakePositions($user, ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_userStakeCountOf($user), ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_userActiveStakeCountOf($user));
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_29);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), int) $GramPadGramxStaking$_fun_get_user_stake_id_by_index((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, slice $user, int $index) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    int $count = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_userStakeCountOf($user);
+    throw_unless(1173, ( (($index >= 0)) ? (($index < $count)) : (false) ));
+    int $value = __tact_dict_get_int_int($self'userStakeIdByIndex, 257, ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_indexKey($user, $index), 257);
+    throw_unless(61068, (~ null?($value)));
+    var $fresh$ret_30 = $value;
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_30);
+}
+
+((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell), (int, slice, int, int, int, int, int, int, int, int, int)) $GramPadGramxStaking$_fun_get_stake_details((slice, int, slice, slice, int, int, int, int, int, int, int, int, int, int, int, int, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell, cell) $self, int $stakeId) impure inline_ref {
+    var (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)) = $self;
+    throw_unless(2512, ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_stakeExists($stakeId));
+    var $fresh$ret_31 = $StakeDetails$_constructor_stakeId_owner_active_amount_pendingReward_roiBasisPoints_stakeKind_startedAt_duration_maturityAt_claimedRewards($stakeId, ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_ownerOf($stakeId), ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_activeOf($stakeId), ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_amountOf($stakeId), ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_claimableReward($stakeId), ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_roiOf($stakeId), ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_kindOf($stakeId), ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_startedAtOf($stakeId), ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_durationOf($stakeId), ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_maturityOf($stakeId), ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_claimedOf($stakeId));
+    return (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive), $fresh$ret_31);
+}
+
+;;
+;; Get methods of a Contract GramPadGramxStaking
+;;
+
+_ %get_contract_version() method_id(127581) {
+    var self = $GramPadGramxStaking$_contract_load();
+    var res = self~$GramPadGramxStaking$_fun_get_contract_version();
+    return res;
+}
+
+_ %get_contract_details() method_id(67648) {
+    var self = $GramPadGramxStaking$_contract_load();
+    var res = self~$GramPadGramxStaking$_fun_get_contract_details();
+    return $ContractDetails$_to_external(res);
+}
+
+_ %get_user_summary(slice $user) method_id(110770) {
+    slice $user = $user;
+    var self = $GramPadGramxStaking$_contract_load();
+    var res = self~$GramPadGramxStaking$_fun_get_user_summary($user);
+    return $UserSummary$_to_external(res);
+}
+
+_ %get_user_stake_id_by_index(slice $user, int $index) method_id(105539) {
+    slice $user = $user;
+    int $index = $index;
+    var self = $GramPadGramxStaking$_contract_load();
+    var res = self~$GramPadGramxStaking$_fun_get_user_stake_id_by_index($user, $index);
+    return res;
+}
+
+_ %get_stake_details(int $stakeId) method_id(77055) {
+    int $stakeId = $stakeId;
+    var self = $GramPadGramxStaking$_contract_load();
+    var res = self~$GramPadGramxStaking$_fun_get_stake_details($stakeId);
+    return $StakeDetails$_to_external(res);
+}
+
+;;
+;; Routing of a Contract GramPadGramxStaking
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive) = $GramPadGramxStaking$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    var op = in_msg~load_opcode_internal();
+    ;; Receive Deploy message
+    if (op == 0x946a98b6) {
+        var $msg'queryId = in_msg~load_uint(64);
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Receive FundContractTon message
+    if (op == 1879568762) {
+        var $msg = empty_tuple();
+        ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_requireOwner();
+        throw_unless(56230, ($Context$_get_value(__tact_context_get()) > 0));
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Receive ConfigureStake message
+    if (op == 3695446447) {
+        var $msg'stakeKind = in_msg~load_uint(8);
+        var $msg'durationSeconds = in_msg~load_uint(32);
+        throw_unless(46992, (~ $self'paused));
+        throw_unless(23376, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        throw_unless(43959, ( (($msg'stakeKind == 0)) ? (true) : (($msg'stakeKind == 1)) ));
+        throw_unless(45702, ( (( (( (( (($msg'durationSeconds == 604800)) ? (true) : (($msg'durationSeconds == 2592000)) )) ? (true) : (($msg'durationSeconds == 7776000)) )) ? (true) : (($msg'durationSeconds == 23328000)) )) ? (true) : (($msg'durationSeconds == 31536000)) ));
+        slice $user = __tact_context_get_sender();
+        $self'pendingStakeKind~__tact_dict_set_slice_int(267, $user, $msg'stakeKind, 257);
+        $self'pendingStakeDuration~__tact_dict_set_slice_int(267, $user, $msg'durationSeconds, 257);
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Receive SetGramxJettonWallet message
+    if (op == 1947494201) {
+        var $msg'gramxJettonWallet = in_msg~load_msg_addr();
+        ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_requireOwner();
+        throw_unless(18624, (~ $self'jettonWalletConfigured));
+        throw_unless(23376, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        $self'gramxJettonWallet = $msg'gramxJettonWallet;
+        $self'jettonWalletConfigured = true;
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Receive SetAnnualRoi message
+    if (op == 1212961359) {
+        var $msg'annualRoiBasisPoints = in_msg~load_uint(16);
+        ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_requireOwner();
+        throw_unless(23376, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        throw_unless(58668, ($msg'annualRoiBasisPoints <= 100000));
+        $self'annualRoiBasisPoints = $msg'annualRoiBasisPoints;
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Receive SetFlexUnstakeFee message
+    if (op == 4287318778) {
+        var $msg'flexUnstakeFeeBasisPoints = in_msg~load_uint(16);
+        ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_requireOwner();
+        throw_unless(23376, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        throw_unless(46136, ($msg'flexUnstakeFeeBasisPoints <= 5000));
+        $self'flexUnstakeFeeBasisPoints = $msg'flexUnstakeFeeBasisPoints;
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Receive SetPaused message
+    if (op == 157817343) {
+        var $msg'paused = in_msg~load_int(1);
+        ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_requireOwner();
+        throw_unless(23376, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        $self'paused = $msg'paused;
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Receive ChangeOwner message
+    if (op == 256331011) {
+        var $msg'newOwner = in_msg~load_msg_addr();
+        ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_requireOwner();
+        throw_unless(23376, ($Context$_get_value(__tact_context_get()) >= 10000000));
+        $self'owner = $msg'newOwner;
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Receive JettonTransferNotification message
+    if (op == 0x7362d09c) {
+        var $msg'queryId = in_msg~load_uint(64);
+        var $msg'amount = in_msg~load_varuint16();
+        var $msg'sender = in_msg~load_msg_addr();
+        var $msg'forwardPayload = in_msg;
+        throw_unless(32101, $self'jettonWalletConfigured);
+        throw_unless(50546, ( equal_slices_bits(__tact_context_get_sender(), $self'gramxJettonWallet) ));
+        throw_unless(17062, ($msg'amount > 0));
+        if (( equal_slices_bits($msg'sender, $self'owner) )) {
+            $self'rewardReserve = ($self'rewardReserve + $msg'amount);
+            $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+            return ();
+        }
+        throw_unless(46992, (~ $self'paused));
+        throw_unless(12648, ($msg'amount >= $self'minStake));
+        slice $staker = $msg'sender;
+        int $configuredKind = __tact_dict_get_slice_int($self'pendingStakeKind, 267, $staker, 257);
+        int $configuredDuration = __tact_dict_get_slice_int($self'pendingStakeDuration, 267, $staker, 257);
+        throw_unless(53544, ( ((~ null?($configuredKind))) ? ((~ null?($configuredDuration))) : (false) ));
+        $self'pendingStakeKind~__tact_dict_delete(267, $staker);
+        $self'pendingStakeDuration~__tact_dict_delete(267, $staker);
+        int $stakeId = $self'nextStakeId;
+        $self'nextStakeId = ($self'nextStakeId + 1);
+        int $userIndex = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_userStakeCountOf($staker);
+        int $activeBefore = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_userActiveStakeCountOf($staker);
+        $self'userStakeIdByIndex~__tact_dict_set_int_int(257, ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_indexKey($staker, $userIndex), $stakeId, 257);
+        $self'userStakeCount~__tact_dict_set_slice_int(267, $staker, ($userIndex + 1), 257);
+        $self'userActiveStakeCount~__tact_dict_set_slice_int(267, $staker, ($activeBefore + 1), 257);
+        ifnot ($activeBefore) {
+            $self'activeStakerCount = ($self'activeStakerCount + 1);
+        }
+        $self'stakeOwner~__tact_dict_set_int_slice(257, $stakeId, $staker);
+        $self'stakeAmount~__tact_dict_set_int_int(257, $stakeId, $msg'amount, 257);
+        $self'stakeRoiBasisPoints~__tact_dict_set_int_int(257, $stakeId, $self'annualRoiBasisPoints, 257);
+        $self'stakeKind~__tact_dict_set_int_int(257, $stakeId, $configuredKind, 257);
+        $self'stakeStartedAt~__tact_dict_set_int_int(257, $stakeId, $global_now(), 257);
+        $self'stakeDuration~__tact_dict_set_int_int(257, $stakeId, $configuredDuration, 257);
+        $self'stakeClaimedRewards~__tact_dict_set_int_int(257, $stakeId, 0, 257);
+        $self'stakeActive~__tact_dict_set_int_int(257, $stakeId, true, 1);
+        $self'totalStaked = ($self'totalStaked + $msg'amount);
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Receive ClaimRewards message
+    if (op == 225359749) {
+        var $msg'stakeId = in_msg~load_uint(64);
+        throw_unless(7529, ($Context$_get_value(__tact_context_get()) >= 150000000));
+        slice $user = __tact_context_get_sender();
+        throw_unless(2512, ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_stakeExists($msg'stakeId));
+        throw_unless(23773, ( equal_slices_bits(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_ownerOf($msg'stakeId), $user) ));
+        throw_unless(6699, ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_activeOf($msg'stakeId));
+        if ((($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_kindOf($msg'stakeId) == 1)) {
+            throw_unless(15828, ($global_now() >= ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_maturityOf($msg'stakeId)));
+        }
+        int $reward = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_claimableReward($msg'stakeId);
+        throw_unless(5637, ($reward > 0));
+        throw_unless(8808, ($self'rewardReserve >= $reward));
+        $self'stakeClaimedRewards~__tact_dict_set_int_int(257, $msg'stakeId, (($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_claimedOf($msg'stakeId) + $reward), 257);
+        $self'rewardReserve = ($self'rewardReserve - $reward);
+        $self'totalRewardsPaid = ($self'totalRewardsPaid + $reward);
+        ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_sendGramx($user, $reward);
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Receive Unstake message
+    if (op == 4021853582) {
+        var $msg'stakeId = in_msg~load_uint(64);
+        throw_unless(28788, ($Context$_get_value(__tact_context_get()) >= 150000000));
+        slice $user = __tact_context_get_sender();
+        throw_unless(2512, ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_stakeExists($msg'stakeId));
+        throw_unless(23773, ( equal_slices_bits(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_ownerOf($msg'stakeId), $user) ));
+        throw_unless(6699, ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_activeOf($msg'stakeId));
+        int $matured = ($global_now() >= ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_maturityOf($msg'stakeId));
+        int $kind = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_kindOf($msg'stakeId);
+        throw_unless(15828, ( (($kind == 0)) ? (true) : ($matured) ));
+        int $principal = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_amountOf($msg'stakeId);
+        int $reward = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_claimableReward($msg'stakeId);
+        int $fee = 0;
+        if (( (( (($kind == 0)) ? ((~ $matured)) : (false) )) ? (($self'flexUnstakeFeeBasisPoints > 0)) : (false) )) {
+            $fee = (($principal * $self'flexUnstakeFeeBasisPoints) / 10000);
+        }
+        if (($reward > 0)) {
+            throw_unless(8808, ($self'rewardReserve >= $reward));
+            $self'rewardReserve = ($self'rewardReserve - $reward);
+            $self'totalRewardsPaid = ($self'totalRewardsPaid + $reward);
+        }
+        $self'totalStaked = ($self'totalStaked - $principal);
+        $self'totalFeesCollected = ($self'totalFeesCollected + $fee);
+        int $activeBefore = ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_userActiveStakeCountOf($user);
+        if (($activeBefore > 0)) {
+            $self'userActiveStakeCount~__tact_dict_set_slice_int(267, $user, ($activeBefore - 1), 257);
+            if (($activeBefore == 1)) {
+                $self'activeStakerCount = ($self'activeStakerCount - 1);
+            }
+        }
+        $self'stakeActive~__tact_dict_set_int_int(257, $msg'stakeId, false, 1);
+        $self'stakeAmount~__tact_dict_set_int_int(257, $msg'stakeId, 0, 257);
+        $self'stakeClaimedRewards~__tact_dict_set_int_int(257, $msg'stakeId, 0, 257);
+        int $payout = (($principal - $fee) + $reward);
+        throw_unless(46056, ($payout > 0));
+        ($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive)~$GramPadGramxStaking$_fun_sendGramx($user, $payout);
+        $GramPadGramxStaking$_contract_store(($self'owner, $self'deploymentId, $self'gramxJettonMaster, $self'gramxJettonWallet, $self'jettonWalletConfigured, $self'annualRoiBasisPoints, $self'flexUnstakeFeeBasisPoints, $self'minStake, $self'paused, $self'totalStaked, $self'rewardReserve, $self'totalRewardsPaid, $self'totalFeesCollected, $self'activeStakerCount, $self'nextTransferQueryId, $self'nextStakeId, $self'pendingStakeKind, $self'pendingStakeDuration, $self'userStakeCount, $self'userActiveStakeCount, $self'userStakeIdByIndex, $self'stakeOwner, $self'stakeAmount, $self'stakeRoiBasisPoints, $self'stakeKind, $self'stakeStartedAt, $self'stakeDuration, $self'stakeClaimedRewards, $self'stakeActive));
+        return ();
+    }
+    
+    ;; Throw if not handled
+    throw(130);
+}
