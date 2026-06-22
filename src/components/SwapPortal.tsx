@@ -22,7 +22,7 @@ import { toNano } from '@ton/core';
 const explainSwapError = (error: any) => {
   const message = error?.message || 'Swap failed.';
   if (String(message).includes('709')) {
-    return 'Swap failed with exit code 709. This usually means the Jetton wallet did not have enough TON budget to forward the transfer, or the swap contract rejected the forwarded message before execution completed.';
+    return 'Swap failed with exit code 709. This usually means the Jetton wallet did not have enough GRAM budget to forward the transfer, or the swap contract rejected the forwarded message before execution completed.';
   }
   return message;
 };
@@ -32,12 +32,12 @@ interface SwapPortalProps {
   onOpenConnect: () => void;
 }
 
-type SwapAsset = 'GRAMX' | 'USDT' | 'TON';
+type SwapAsset = 'GRAMX' | 'USDT' | 'GRAM';
 type SwapRoute = 'usdt-to-gram' | 'gram-to-usdt' | 'ton-to-gram' | 'gram-to-ton';
 
 const getSwapRoute = (fromAsset: SwapAsset, toAsset: SwapAsset): SwapRoute => {
   if (fromAsset === 'USDT' && toAsset === 'GRAMX') return 'usdt-to-gram';
-  if (fromAsset === 'TON' && toAsset === 'GRAMX') return 'ton-to-gram';
+  if (fromAsset === 'GRAM' && toAsset === 'GRAMX') return 'ton-to-gram';
   if (fromAsset === 'GRAMX' && toAsset === 'USDT') return 'gram-to-usdt';
   return 'gram-to-ton';
 };
@@ -263,7 +263,7 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
           ],
         });
 
-        setSuccess('TON swap transaction sent. Refresh after TON confirms the swap.');
+        setSuccess('GRAM swap transaction sent. Refresh after GRAM confirms the swap.');
         setAmount('');
         window.setTimeout(() => loadSwap(false), 4000);
         return;
@@ -317,7 +317,7 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
         ],
       });
 
-      setSuccess('Swap transaction sent. Refresh after TON confirms the swap.');
+      setSuccess('Swap transaction sent. Refresh after GRAM confirms the swap.');
       setAmount('');
       window.setTimeout(() => loadSwap(false), 4000);
     } catch (nextError: any) {
@@ -331,14 +331,14 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
     direction === 'gram-to-usdt' || direction === 'gram-to-ton'
       ? config?.gramSymbol || 'GRAMX'
       : direction === 'ton-to-gram'
-        ? 'TON'
+        ? 'GRAM'
         : config?.usdtSymbol || 'USDT';
 
   const toSymbol =
     direction === 'gram-to-usdt'
       ? config?.usdtSymbol || 'USDT'
       : direction === 'gram-to-ton'
-        ? 'TON'
+        ? 'GRAM'
         : config?.gramSymbol || 'GRAMX';
 
   const fromBalance =
@@ -350,7 +350,7 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
 
   const fixedRateLabel =
     direction === 'ton-to-gram' || direction === 'gram-to-ton'
-      ? `1 TON = ${config?.tonRateLabel || '1'} ${config?.gramSymbol || 'GRAMX'}`
+      ? `1 GRAM = ${config?.tonRateLabel || '1'} ${config?.gramSymbol || 'GRAMX'}`
       : `1 USDT = ${config?.rateLabel || '1'} ${config?.gramSymbol || 'GRAMX'}`;
 
   const handleFlip = () => {
@@ -384,9 +384,9 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
   };
 
   const fromOptions: SwapAsset[] =
-    toAsset === 'GRAMX' ? ['USDT', 'TON'] : ['GRAMX'];
+    toAsset === 'GRAMX' ? ['USDT', 'GRAM'] : ['GRAMX'];
   const toOptions: SwapAsset[] =
-    fromAsset === 'GRAMX' ? ['USDT', 'TON'] : ['GRAMX'];
+    fromAsset === 'GRAMX' ? ['USDT', 'GRAM'] : ['GRAMX'];
 
   return (
     <div className="mx-auto w-full max-w-6xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
@@ -397,15 +397,15 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
           </div>
 
           <h1 className="gp-display-font mt-3 text-2xl font-semibold leading-tight text-[var(--gp-text)] sm:text-3xl">
-            USDT / TON / GRAMX swap
+            Swap your GRAMX
           </h1>
 
           <p className="mt-2 max-w-2xl text-xs leading-5 text-[var(--gp-muted)] sm:text-sm">
             A clean reserve-backed swap for community access. No order book, no noise,
-            just direct fixed-rate routes between GRAMX, USDT, and TON. May be required when you want to vote a project.
+            just direct fixed-rate routes between GRAMX, USDT, and GRAM. May be required when you want to vote a project.<br></br>
+            *Please note the TON is now GRAM
           </p>
         </div>
-
         <button
           onClick={() => loadSwap(false)}
           disabled={refreshing}
@@ -525,7 +525,7 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
 
                   <p className="mt-2 text-sm font-black text-[var(--gp-text)] sm:text-base">
                     {direction === 'ton-to-gram' || direction === 'gram-to-ton'
-                      ? 'No USDT cap on TON route'
+                      ? 'No USDT cap on GRAM route'
                       : config.maxBuyRaw === '0'
                         ? 'Unlimited'
                         : `${config.maxBuyLabel || '0'} USDT`}
@@ -618,7 +618,7 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
                     } USDT`,
                   ],
                   [
-                    'TON reserve',
+                    'GRAM reserve',
                     `${
                       details
                         ? formatUnits(
@@ -627,7 +627,7 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
                             4
                           )
                         : '0'
-                    } TON`,
+                    } GRAM`,
                   ],
                   ['Total swaps', details ? String(details.details.totalSwapCount) : '0'],
                   ['Contract state', details?.details?.paused ? 'Paused' : 'Active'],
@@ -654,12 +654,12 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
               </h2>
 
               <ul className="mt-4 list-disc space-y-3 pl-4 text-xs leading-5 text-[var(--gp-muted)] sm:text-sm sm:leading-6">
-                <li>Fixed-rate GRAMX / USDT and GRAMX / TON routes backed by contract reserves.</li>
+                <li>Fixed-rate GRAMX / USDT and GRAMX / GRAM routes backed by contract reserves.</li>
                 <li>
-                  Jetton routes use one signed transfer. TON to GRAMX sends TON directly to the contract.
+                  Jetton routes use one signed transfer. GRAM to GRAMX sends GRAM directly to the contract.
                 </li>
                 <li>
-                  Admin must keep GRAMX, USDT, and TON reserves funded for smooth swaps.
+                  Admin must keep GRAMX, USDT, and GRAM reserves funded for smooth swaps.
                 </li>
               </ul>
             </div>

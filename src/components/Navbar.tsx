@@ -15,6 +15,8 @@ import {
   LockIcon,
   UserCircle,
   ChevronDown,
+  LucideSwitchCamera,
+  ArrowUpDown,
 } from 'lucide-react';
 
 export type AppTab =
@@ -59,8 +61,8 @@ export default function Navbar({
     { key: 'home' as const, label: 'Home', icon: Building2 },
     { key: 'explore' as const, label: 'Explore', icon: LayoutGrid },
     { key: 'staking' as const, label: 'Stake', icon: Coins },
-    { key: 'guide' as const, label: 'Help', icon: HelpCircle },
     { key: 'lplocker' as const, label: 'LP Lock', icon: LockIcon },
+    { key: 'guide' as const, label: 'Help', icon: HelpCircle },
   ];
 
   const openPortfolio = () => {
@@ -105,6 +107,7 @@ export default function Navbar({
               { key: 'staking' as const, label: 'Staking', icon: Coins },
               { key: 'lplocker' as const, label: 'LP Locker', icon: Lock },
               { key: 'guide' as const, label: 'How it works', icon: HelpCircle },
+              { key: 'swap' as const, label: 'Swap', icon: ArrowUpDown },
              
             ].map(item => {
               const Icon = item.icon;

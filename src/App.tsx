@@ -466,47 +466,99 @@ export default function App() {
         onConnect={handleConnectWallet}
       />
 
-      {/* Transparent page footer */}
-      <footer className="border-t border-white/[0.06] bg-black/10 py-10 pb-30">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-5 px-6 text-xs text-slate-500 lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p><span className="font-bold text-slate-300">Grampad</span> © 2026. Community-first token launches on TON.</p>
-            <p>grampad.io · Smart contracts are public and verifiable.</p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {[
-              ['Apply for listing', 'listing-rules'],
-              ['Refund policy', 'refund-policy'],
-              ['Risk disclaimer', 'risk-disclaimer'],
-              ['FAQ', 'faq'],
-              ['Terms and conditions', 'terms'],
-              ['Privacy policy', 'privacy'],
-              ['How protection works', 'trust-mechanics'],
-            ].map(([label, page]) => (
-              <button
-                key={page}
-                onClick={() => openInfoPage(page as InfoPageKey)}
-                className="rounded-full border border-white/[0.08] px-3 py-1.5 text-[11px] font-semibold text-slate-400 transition hover:border-sky-400/25 hover:text-sky-300"
-              >
-                {label}
-              </button>
-            ))}
-            {/* <button
-              onClick={() => navigateToTab('simulation')}
-              className="rounded-full border border-sky-400/20 bg-sky-400/[0.06] px-3 py-1.5 text-[11px] font-bold text-sky-300 transition hover:border-sky-400/40"
-            >
-              IDO simulation
-            </button> */}
+     {/* Transparent page footer */}
+<footer className="border-t border-white/[0.06] bg-black/10 py-10 pb-25">
+  <div className="mx-auto max-w-[1440px] px-6 lg:px-8">
+    <div className="grid gap-8 md:grid-cols-3">
+      
+      {/* Col 1 */}
+      <div className="space-y-3">
+        <button
+            onClick={() => setActiveTab('home')}
+            className="flex items-center gap-3 text-left"
+          >
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden">
+              <img
+                src="/logo.png"
+                alt="Grampad logo"
+                className="h-full w-full object-contain"
+              />
+            </div>
+            <div className="leading-none">
+              <span className="gp-display-font block text-[25px] font-medium text-white">
+                Grampad
+              </span>
+              <span className="mt-1 block text-[9px] font-semibold uppercase text-slate-500">
+                grampad.io
+              </span>
+            </div>
+          </button>
+        <p className="max-w-sm text-xs leading-relaxed text-slate-500">
+        The first trusted IDO launchpad built for safer fundraising on TON with escrow-based raises, liquidity locking, milestone fund releases, decentralized and automatic investor refund protection.
+        </p>
+       
+      </div>
+
+      {/* Col 2 */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-black text-slate-200">Platform</h3>
+
+        <div className="flex flex-col items-start gap-2">
+          {[
+            ['Apply for listing', 'listing-rules'],
+            ['How protection works', 'trust-mechanics'],
+            ['FAQ', 'faq'],
+          ].map(([label, page]) => (
             <button
-              onClick={() => navigateToTab('swap')}
-              className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/[0.06] px-3 py-1.5 text-[11px] font-bold text-emerald-300 transition hover:border-emerald-400/40"
+              key={page}
+              onClick={() => openInfoPage(page as InfoPageKey)}
+              className="cursor-pointer text-xs font-semibold text-slate-500 transition hover:text-sky-300"
             >
-              <ArrowDownUp className="h-3.5 w-3.5" />
-              Swap
+              {label}
             </button>
-          </div>
+          ))}
+
+          <button
+            onClick={() => navigateToTab('swap')}
+              className="cursor-pointer text-xs font-semibold text-slate-500 transition hover:text-sky-300"
+          >
+            Swap
+          </button>
         </div>
-      </footer>
+      </div>
+
+      {/* Col 3 */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-black text-slate-200">Legal</h3>
+
+        <div className="flex flex-col items-start gap-2">
+          {[
+            ['Refund policy', 'refund-policy'],
+            ['Risk disclaimer', 'risk-disclaimer'],
+            ['Terms and conditions', 'terms'],
+            ['Privacy policy', 'privacy'],
+          ].map(([label, page]) => (
+            <button
+              key={page}
+              onClick={() => openInfoPage(page as InfoPageKey)}
+              className="cursor-pointer text-xs font-semibold text-slate-500 transition hover:text-sky-300"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+       
+      </div>
+      
+    </div>
+    <p className="pt-2 text-xs text-slate-400/70 text-center mt-20">
+         
+          © 2026 Grampad. All rights reserved.
+      
+      </p>
+  </div>
+</footer>
     </div>
   );
 }
