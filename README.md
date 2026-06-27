@@ -1,8 +1,9 @@
-# Naughty Coin: Decentralized IDO Launchpad Smart Contracts
+# Grampad.io: Decentralized IDO Launchpad
 
 This project integrates a production-ready, self-contained **TON Tact Smart Contract** architecture that governs token sales, voting mechanisms, hardcap/softcap enforcement, and automated secure refunds or token distribution directly via the TON Virtual Machine (TVM).
 
 ---
+
 
 ## 🏗️ Smart Contract Architecture Overview
 
