@@ -171,4 +171,4 @@ Want to test the contract logic safely inside the browser preview?
 4. Launch simulated transactions (`Contribute`, `ClaimRefund`, and `ClaimTokens`) to track real-time gas consumption, VM logs, map index state updates, and storage modifications instantly!
 
 #generate admin password
-http://localhost:3233/api/admin/hash?password=admin
+http://localhost:8080/api/admin/hash?password=admin
