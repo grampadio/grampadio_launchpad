@@ -18,7 +18,12 @@ import SimulationPage from './components/SimulationPage.js';
 import type { AppTab } from './components/Navbar.js';
 import type { AdminSession } from './types.js';
 import { motion, AnimatePresence } from 'motion/react';
-import { Coins, Loader2, Sparkles, AlertCircle, ArrowDownUp } from 'lucide-react';
+import { Coins, Loader2, Sparkles, AlertCircle, ArrowDownUp,  Send,
+  MessageCircle,
+  Twitter,
+  Linkedin,
+  Mail,
+  BotIcon, } from 'lucide-react';
 
 export default function App() {
   const tonAddress = useTonAddress();
@@ -494,9 +499,64 @@ export default function App() {
             </div>
           </button>
         <p className="max-w-sm text-xs leading-relaxed text-slate-500">
-        The first trusted IDO launchpad built for safer fundraising on TON with escrow-based raises, liquidity locking, milestone fund releases, decentralized and automatic investor refund protection.
+        The first trusted IDO launchpad built for safer fundraising on TON  with escrow-based raises, liquidity locking, milestone fund releases, transparent and automatic investor refund protection.
         </p>
-       
+         <div className="mx-auto max-w-[1440px] px-6 lg:px-8">
+    <div className="grid gap-8 md:grid-cols-3">
+      
+      {/* Col 1 */}
+      <div className="flex items-center gap-3 pt-2">
+  <a
+    href="https://t.me/grampadio"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="rounded-lg border border-white/10 p-2 text-slate-400 transition hover:border-sky-400/30 hover:text-sky-400"
+    title="Telegram Channel"
+  >
+    <Send className="h-4 w-4" />
+  </a>
+
+    <a
+    href="https://t.me/grampadio_bot"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="rounded-lg border border-white/10 p-2 text-slate-400 transition hover:border-sky-400/30 hover:text-sky-400"
+    title="Telegram Group"
+  >
+    <BotIcon className="h-4 w-4" />
+  </a>
+
+  <a
+    href="https://x.com/grampadio"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="rounded-lg border border-white/10 p-2 text-slate-400 transition hover:border-sky-400/30 hover:text-sky-400"
+    title="Twitter / X"
+  >
+    <Twitter className="h-4 w-4" />
+  </a>
+
+  <a
+    href="https://www.linkedin.com/company/grampad-io"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="rounded-lg border border-white/10 p-2 text-slate-400 transition hover:border-sky-400/30 hover:text-sky-400"
+    title="LinkedIn"
+  >
+    <Linkedin className="h-4 w-4" />
+  </a>
+
+  <a
+    href="mailto:hello@grampad.io"
+    className="rounded-lg border border-white/10 p-2 text-slate-400 transition hover:border-sky-400/30 hover:text-sky-400"
+    title="Email"
+  >
+    <Mail className="h-4 w-4" />
+  </a>
+</div>
+    </div>
+   
+  </div>
       </div>
 
       {/* Col 2 */}

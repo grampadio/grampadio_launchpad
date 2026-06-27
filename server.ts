@@ -29,6 +29,7 @@ import {
   clearAdminSession,
   createAdminSession,
   getAdminSession,
+  hashAdminPassword,
   requireAdmin,
   requireAdminMutation,
   revokeAdminSession,
@@ -569,6 +570,25 @@ async function startServer() {
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
+  });
+
+  app.get('/api/admin/hash', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+
+    if (process.env.NODE_ENV === 'production' && process.env.ENABLE_ADMIN_HASH_API !== 'true') {
+      res.status(403).json({
+        error: 'Admin hash generator is disabled in production. Set ENABLE_ADMIN_HASH_API=true only temporarily if needed.',
+      });
+      return;
+    }
+
+    const password = cleanText(req.query.password, 256);
+    if (!password) {
+      res.status(400).json({ error: 'Password is required. Use /api/admin/hash?password=your-new-password' });
+      return;
+    }
+
+    res.json({ hash: hashAdminPassword(password) });
   });
 
   app.post('/api/admin/login', async (req, res) => {

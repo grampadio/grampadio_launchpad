@@ -446,7 +446,7 @@ const countdown = showCountdown
 
           <p className="mx-auto mb-8 max-w-4xl text-[clamp(18px,2.1vw,26px)] font-medium leading-[1.45]  text-[var(--gp-muted)]">
             The first trusted IDO launchpad built for safer fundraising on TON
-            with escrow-based raises, liquidity locking, milestone fund releases, decentralized
+            with escrow-based raises, liquidity locking, milestone fund releases, transparent
             and automatic investor refund protection.
           </p>
 

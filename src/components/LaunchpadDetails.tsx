@@ -369,10 +369,36 @@ export default function LaunchpadDetails({
   }, [wallet.address, wallet.connected, project.id, project.isUserWhitelisted, project.userVoted]);
 
   // Handle Clipboard Copy
-  const handleCopy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedText(label);
-    setTimeout(() => setCopiedText(null), 2000);
+  const handleCopy = async (
+    text: string,
+    label: string,
+    event?: { preventDefault: () => void; stopPropagation: () => void }
+  ) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    if (!text) return;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.setAttribute('readonly', '');
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+
+      setCopiedText(label);
+      setTimeout(() => setCopiedText(null), 2000);
+    } catch {
+      setCopiedText(null);
+    }
   };
 
   // Trigger Live Audit using server-side Ai
@@ -1629,7 +1655,8 @@ export default function LaunchpadDetails({
                               {project.jettonAddress || 'Not configured'}
                             </code>
                             <button
-                              onClick={() => project.jettonAddress && handleCopy(project.jettonAddress, 'jetton')}
+                              type="button"
+                              onClick={event => project.jettonAddress && handleCopy(project.jettonAddress, 'jetton', event)}
                               disabled={!project.jettonAddress}
                               className="text-slate-500 hover:text-[#0098EA] p-1.5 rounded hover:bg-slate-900 transition shrink-0 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500"
                               title="Copy Contract Address"
@@ -1655,7 +1682,8 @@ export default function LaunchpadDetails({
                               {project.idoContractAddress || 'Not deployed'}
                             </span>
                             <button
-                              onClick={() => project.idoContractAddress && handleCopy(project.idoContractAddress, 'ido-contract')}
+                              type="button"
+                              onClick={event => project.idoContractAddress && handleCopy(project.idoContractAddress, 'ido-contract', event)}
                               disabled={!project.idoContractAddress}
                               className="text-slate-500 hover:text-white p-0.5"
                             >
@@ -1683,7 +1711,8 @@ export default function LaunchpadDetails({
                           <div className="flex items-center gap-1.5 min-w-0">
                             <span className="font-mono text-slate-400 text-[10px] truncate max-w-[100px]">{project.creator}</span>
                             <button
-                              onClick={() => handleCopy(project.creator, 'creator')}
+                              type="button"
+                              onClick={event => handleCopy(project.creator, 'creator', event)}
                               className="text-slate-600 hover:text-white p-0.5"
                             >
                               {copiedText === 'creator' ? <Check className="h-2.5 w-2.5 text-emerald-400" /> : <Copy className="h-2.5 w-2.5" />}
@@ -1715,7 +1744,8 @@ export default function LaunchpadDetails({
                             {project.creator}
                           </code>
                           <button
-                            onClick={() => handleCopy(project.creator, 'team-creator')}
+                            type="button"
+                            onClick={event => handleCopy(project.creator, 'team-creator', event)}
                             className="shrink-0 text-slate-500 transition hover:text-white"
                             title="Copy owner address"
                           >

@@ -168,3 +168,6 @@ Want to test the contract logic safely inside the browser preview?
 2. Click on the newly integrated **"On-Chain Smart Contract"** section tab.
 3. Open the **"Interactive Playpen & TVM Debugger"** sub-panel.
 4. Launch simulated transactions (`Contribute`, `ClaimRefund`, and `ClaimTokens`) to track real-time gas consumption, VM logs, map index state updates, and storage modifications instantly!
+
+#generate admin password
+http://localhost:3233/api/admin/hash?password=admin
