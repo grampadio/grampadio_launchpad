@@ -19,11 +19,12 @@ import type { LucideIcon } from 'lucide-react';
 import { WalletState } from '../types.js';
 import {
   buildClaimStakingRewardsPayload,
+  buildOwnerWithdrawAnyJettonPayload,
   buildOwnerWithdrawGramxPayload,
   buildOwnerWithdrawTonPayload,
   buildRewardTopUpPayload,
   buildSetGramxJettonWalletPayload,
-  buildSetAnnualRoiPayload,
+  buildSetDurationRoiPayload,
   buildSetFlexUnstakeFeePayload,
   buildStakeGramxPayload,
   buildUnstakePayload,
@@ -34,6 +35,7 @@ import {
   getUserGramxBalance,
   getUserGramxWalletAddress,
   getUserStakingDetails,
+  getUserTonBalance,
   GRAMX_DECIMALS,
   GRAMX_MASTER_ADDRESS,
   parseGRAMXAmount,
@@ -43,6 +45,7 @@ import {
   STAKING_DEFAULT_FLEX_FEE_BPS,
   STAKING_DEFAULT_MIN_GRAMX,
   STAKING_DURATIONS,
+  stakingPlanRoiForDuration,
   stakeKindFromChain,
   type StakeKind,
 } from '../ton/staking.js';
@@ -76,6 +79,15 @@ const durationLabel = (seconds: bigint | number | string) =>
   STAKING_DURATIONS.find(item => item.seconds === BigInt(seconds))?.label ||
   `${Math.round(Number(seconds) / 86400)} days`;
 
+const durationDaysFromSeconds = (seconds: bigint | number | string) =>
+  Math.round(Number(seconds) / 86400);
+
+const formatTonAmount = (value: bigint) => {
+  const whole = value / 1000000000n;
+  const fraction = (value % 1000000000n).toString().padStart(9, '0').slice(0, 4).replace(/0+$/, '');
+  return fraction ? `${whole}.${fraction}` : whole.toString();
+};
+
 export default function StakingPortal({ wallet, onOpenConnect }: StakingPortalProps) {
   const [tonConnectUI] = useTonConnectUI();
 
@@ -90,13 +102,23 @@ export default function StakingPortal({ wallet, onOpenConnect }: StakingPortalPr
   const [rewardTopUpAmount, setRewardTopUpAmount] = useState('');
   const [withdrawTonAmount, setWithdrawTonAmount] = useState('');
   const [withdrawGramxAmount, setWithdrawGramxAmount] = useState('');
+  const [withdrawAnyJettonWallet, setWithdrawAnyJettonWallet] = useState('');
+  const [withdrawAnyJettonAmount, setWithdrawAnyJettonAmount] = useState('');
   const [roiPercent, setRoiPercent] = useState('0');
+  const [roiDurationDays, setRoiDurationDays] = useState('30');
   const [flexFeePercent, setFlexFeePercent] = useState(String(STAKING_DEFAULT_FLEX_FEE_BPS / 100));
   const [stakeKind, setStakeKind] = useState<StakeKind>('flex');
   const [stakeDuration, setStakeDuration] = useState<bigint>(STAKING_DURATIONS[1].seconds);
 
   const [deployGramxMaster, setDeployGramxMaster] = useState(GRAMX_MASTER_ADDRESS);
-  const [deployRoi, setDeployRoi] = useState('0');
+  const [deployPlanRois, setDeployPlanRois] = useState<Record<string, string>>(() =>
+    Object.fromEntries(
+      STAKING_DURATIONS.map(duration => [
+        String(durationDaysFromSeconds(duration.seconds)),
+        String(STAKING_DEFAULT_APR_BPS / 100),
+      ])
+    )
+  );
   const [deployMinStake, setDeployMinStake] = useState(STAKING_DEFAULT_MIN_GRAMX);
   const [deployFlexFee, setDeployFlexFee] = useState(String(STAKING_DEFAULT_FLEX_FEE_BPS / 100));
   const [deployedAddress, setDeployedAddress] = useState('');
@@ -115,15 +137,27 @@ export default function StakingPortal({ wallet, onOpenConnect }: StakingPortalPr
   }, [pool, wallet.address]);
 
 
-const annualRoiPercent = pool
-  ? Number(pool.annualRoiBasisPoints) / 100
-  : 0;
+const planRoiValues = pool?.plans
+  ? STAKING_DURATIONS.map(duration => Number(stakingPlanRoiForDuration(pool.plans, duration.seconds)) / 100)
+  : [];
+const planRoiLabel = planRoiValues.length
+  ? `${Math.min(...planRoiValues).toLocaleString()}%-${Math.max(...planRoiValues).toLocaleString()}%`
+  : 'Loading...';
 
   const activeStakes = userStake?.activeStakes || [];
   const allStakes = userStake?.stakes || [];
   const closedStakes = allStakes.filter(stake => !stake.active);
   const visibleStakes = stakeView === 'active' ? activeStakes : closedStakes;
   const hasActiveStake = activeStakes.length > 0;
+
+  useEffect(() => {
+    if (!pool?.plans) return;
+    const selectedDuration = STAKING_DURATIONS.find(
+      item => String(durationDaysFromSeconds(item.seconds)) === roiDurationDays
+    );
+    if (!selectedDuration) return;
+    setRoiPercent(String(Number(stakingPlanRoiForDuration(pool.plans, selectedDuration.seconds)) / 100));
+  }, [pool?.plans, roiDurationDays]);
 
   const loadStaking = async () => {
     if (!isConfigured) return;
@@ -177,6 +211,15 @@ const annualRoiPercent = pool
     return wallet.address;
   };
 
+  const requireTonBalance = async (owner: string, required: bigint, actionLabel: string) => {
+    const balance = await getUserTonBalance(owner);
+    if (balance < required) {
+      throw new Error(
+        `${actionLabel} needs at least ${formatTonAmount(required)} TON in the connected wallet. Current balance is ${formatTonAmount(balance)} TON.`
+      );
+    }
+  };
+
   const stakeGramx = async (event: FormEvent) => {
     event.preventDefault();
     const submitter = (event.nativeEvent as SubmitEvent).submitter;
@@ -206,7 +249,7 @@ const annualRoiPercent = pool
         messages: [
           {
             address: userGramxWallet.toString(),
-            amount: toNano('0.32').toString(),
+            amount: toNano('0.1').toString(),
             payload,
           },
         ],
@@ -377,12 +420,12 @@ const annualRoiPercent = pool
           {
             address: contractAddress,
             amount: toNano('0.05').toString(),
-            payload: buildSetAnnualRoiPayload(bps),
+            payload: buildSetDurationRoiPayload(Number(roiDurationDays), bps),
           },
         ],
       });
 
-      await afterTransaction('Annual ROI update sent. New stakes will use the updated ROI.');
+      await afterTransaction(`${roiDurationDays}-day annual ROI update sent. New stakes for this duration will use the updated ROI.`);
     } catch (error: any) {
       if (error.message !== 'Connect wallet first.') {
         setMessage({ type: 'error', text: error.message || 'ROI update failed.' });
@@ -397,7 +440,8 @@ const annualRoiPercent = pool
     setMessage(null);
 
     try {
-      requireWallet();
+      const owner = requireWallet();
+      await requireTonBalance(owner, toNano('0.045'), 'Staking Jetton wallet configuration');
       if (!isOwner) throw new Error('Only the staking owner can configure the Jetton wallet.');
       if (!pool) throw new Error('Load staking contract data first.');
       if (pool.walletConfigured) throw new Error('Staking Jetton wallet is already configured.');
@@ -412,7 +456,7 @@ const annualRoiPercent = pool
         network: stakingNetwork,
         messages: [{
           address: contractAddress,
-          amount: toNano('0.12').toString(),
+          amount: toNano('0.03').toString(),
           payload: buildSetGramxJettonWalletPayload(stakingGramxWallet),
         }],
       });
@@ -495,11 +539,6 @@ const annualRoiPercent = pool
 
       const amount = parseGRAMXAmount(withdrawGramxAmount);
       if (amount <= 0n) throw new Error('Enter a valid GRAMX amount.');
-      const withdrawableGramx =
-        (pool?.totalFeesCollected || 0n) + (pool?.rewardReserve || 0n);
-      if (amount > withdrawableGramx) {
-        throw new Error('Amount exceeds the reward reserve plus collected FLEX fees.');
-      }
 
       await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 600,
@@ -522,6 +561,46 @@ const annualRoiPercent = pool
     }
   };
 
+  const withdrawOwnerAnyJetton = async (event: FormEvent) => {
+    event.preventDefault();
+    setAction('withdraw-any-jetton');
+    setMessage(null);
+
+    try {
+      const owner = requireWallet();
+      if (!isOwner) throw new Error('Only the staking owner can withdraw tokens.');
+      if (!withdrawAnyJettonWallet.trim()) throw new Error('Enter the Jetton wallet address.');
+
+      let amount = 0n;
+      try {
+        amount = BigInt(String(withdrawAnyJettonAmount || '0'));
+      } catch {
+        throw new Error('Token amount must be a whole number in base units.');
+      }
+      if (amount <= 0n) throw new Error('Enter a positive token amount in base units.');
+
+      await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        network: stakingNetwork,
+        messages: [{
+          address: contractAddress,
+          amount: toNano('0.18').toString(),
+          payload: buildOwnerWithdrawAnyJettonPayload(withdrawAnyJettonWallet, amount, owner),
+        }],
+      });
+
+      setWithdrawAnyJettonWallet('');
+      setWithdrawAnyJettonAmount('');
+      await afterTransaction('Owner token emergency withdrawal sent.');
+    } catch (error: any) {
+      if (error.message !== 'Connect wallet first.') {
+        setMessage({ type: 'error', text: getStakingErrorMessage(error, 'Token withdrawal failed.') });
+      }
+    } finally {
+      setAction(null);
+    }
+  };
+
   const deployContract = async (event: FormEvent) => {
     event.preventDefault();
     setAction('deploy');
@@ -530,26 +609,34 @@ const annualRoiPercent = pool
 
     try {
       const owner = requireWallet();
+      await requireTonBalance(owner, toNano('0.08'), 'Staking contract deployment');
 
       const deployment = await prepareStakingDeployment({
         owner,
         gramxMaster: deployGramxMaster,
-        annualRoiPercent: Number(deployRoi),
+        annualRoiPercent: Math.max(...Object.values(deployPlanRois).map(value => Number(value) || 0)),
+        planRoiPercents: {
+          sevenDays: Number(deployPlanRois['7']) || 0,
+          thirtyDays: Number(deployPlanRois['30']) || 0,
+          threeMonths: Number(deployPlanRois['90']) || 0,
+          nineMonths: Number(deployPlanRois['270']) || 0,
+          twelveMonths: Number(deployPlanRois['365']) || 0,
+        },
         minStake: deployMinStake,
         flexUnstakeFeePercent: Number(deployFlexFee),
       });
+
       await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 600,
         network: stakingNetwork,
         messages: [
           deployment.deploymentMessage,
-          deployment.setupMessages[0],
         ],
       });
 
       setMessage({
         type: 'success',
-        text: 'Deploy and Jetton wallet setup submitted. Waiting for on-chain confirmation...',
+        text: 'Deploy submitted with duration ROI plans. Waiting for on-chain confirmation...',
       });
 
       const address = deployment.contract.address.toString();
@@ -559,21 +646,20 @@ const annualRoiPercent = pool
 
         try {
           const deployedPool = await getStakingPoolDetails(address);
-          if (deployedPool.walletConfigured) {
-            setDeployedAddress(address);
-            setMessage({
-              type: 'success',
-              text: `Staking contract deployed and configured. Add VITE_STAKING_CONTRACT_ADDRESS="${address}" to .env and restart the app.`,
-            });
-            return;
-          }
+          setDeployedAddress(address);
+          setPool(deployedPool);
+          setMessage({
+            type: 'success',
+            text: `Staking contract deployed at ${address}. Now click "Configure staking Jetton wallet" to finish setup.`,
+          });
+          return;
         } catch {
           // The account may not be active yet while the deployment is finalizing.
         }
       }
 
       throw new Error(
-        `Contract deployment was submitted at ${address}, but Jetton wallet configuration was not confirmed.`
+        `Contract deployment was submitted at ${address}, but it was not confirmed yet. Check Tonviewer and try refresh.`
       );
     } catch (error: any) {
       if (error.message !== 'Connect wallet first.') {
@@ -584,11 +670,60 @@ const annualRoiPercent = pool
     }
   };
 
+  const configureDeployedStakingWallet = async () => {
+    setAction('configure-deployed-wallet');
+    setMessage(null);
+
+    try {
+      const owner = requireWallet();
+      await requireTonBalance(owner, toNano('0.045'), 'Staking Jetton wallet configuration');
+      if (!deployedAddress) throw new Error('Deploy staking contract first.');
+
+      const stakingGramxWallet = await getUserGramxWalletAddress(deployedAddress, deployGramxMaster);
+
+      await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        network: stakingNetwork,
+        messages: [{
+          address: deployedAddress,
+          amount: toNano('0.1').toString(),
+          payload: buildSetGramxJettonWalletPayload(stakingGramxWallet),
+        }],
+      });
+
+      setMessage({
+        type: 'success',
+        text: 'Configure staking Jetton wallet submitted. Waiting for confirmation...',
+      });
+
+      for (let attempt = 0; attempt < 15; attempt += 1) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        const deployedPool = await getStakingPoolDetails(deployedAddress);
+        if (deployedPool.walletConfigured) {
+          setPool(deployedPool);
+          setMessage({
+            type: 'success',
+            text: `Staking contract configured. Add VITE_STAKING_CONTRACT_ADDRESS="${deployedAddress}" to .env and restart the app.`,
+          });
+          return;
+        }
+      }
+
+      throw new Error('Configure transaction was submitted, but wallet configuration was not confirmed yet.');
+    } catch (error: any) {
+      if (error.message !== 'Connect wallet first.') {
+        setMessage({ type: 'error', text: getStakingErrorMessage(error, 'Staking wallet configuration failed.') });
+      }
+    } finally {
+      setAction(null);
+    }
+  };
+
   const statCards: Array<[string, string, string, LucideIcon]> = [
     [
-  'Annual ROI',
-  annualRoiPercent === null ? 'Loading...' : `${annualRoiPercent.toLocaleString()}%`,
-  'Fetched from smart contract',
+  'Plan ROI',
+  planRoiLabel,
+  'Duration-specific yearly ROI',
   Gauge,
 ],
     ['Total staked', `${formatTokenAmount(pool?.totalStaked || 0n)} GRAMX`, 'Across all active positions', Coins],
@@ -666,21 +801,54 @@ const annualRoiPercent = pool
             </label>
 
             <label>
-              <span className={labelClass}>Annual ROI (%)</span>
-              <input className={inputClass} type="number" min="0" max="1000" step="0.01" required value={deployRoi} onChange={event => setDeployRoi(event.target.value)} />
-            </label>
-
-            <label>
               <span className={labelClass}>FLEX early unstake fee (%)</span>
               <input className={inputClass} type="number" min="0" max="50" step="0.01" required value={deployFlexFee} onChange={event => setDeployFlexFee(event.target.value)} />
             </label>
 
-            <label className="lg:col-span-2">
+            <label>
               <span className={labelClass}>Minimum stake (GRAMX)</span>
               <input className={inputClass} required value={deployMinStake} onChange={event => setDeployMinStake(event.target.value)} />
             </label>
 
-            <div className="flex items-end lg:col-span-2">
+            <div className="rounded-2xl border border-sky-400/15 bg-sky-400/[0.05] p-4 lg:col-span-4">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <span className={labelClass}>Duration ROI plans</span>
+                  <p className="text-xs leading-5 text-slate-500">
+                    Set yearly ROI for each staking duration before deployment. FLEX and LOCKED both use the selected duration ROI.
+                  </p>
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-300">Stored on-chain</span>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                {[...STAKING_DURATIONS]
+                  .sort((a, b) => Number(a.seconds - b.seconds))
+                  .map(duration => {
+                    const days = String(durationDaysFromSeconds(duration.seconds));
+                    return (
+                      <label key={duration.seconds.toString()}>
+                        <span className={labelClass}>{duration.label} ROI (%)</span>
+                        <input
+                          className={inputClass}
+                          type="number"
+                          min="0"
+                          max="1000"
+                          step="0.01"
+                          required
+                          value={deployPlanRois[days] || '0'}
+                          onChange={event => setDeployPlanRois(current => ({
+                            ...current,
+                            [days]: event.target.value,
+                          }))}
+                        />
+                      </label>
+                    );
+                  })}
+              </div>
+            </div>
+
+            <div className="flex items-end lg:col-span-4">
               {wallet.connected ? (
                 <button type="submit" disabled={action === 'deploy'} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0098EA] px-5 py-3 text-sm font-bold text-white transition hover:bg-sky-400 disabled:opacity-60">
                   {action === 'deploy' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
@@ -694,9 +862,30 @@ const annualRoiPercent = pool
             </div>
           </form>
 
+          <label className="mt-5 block">
+            <span className={labelClass}>Already deployed staking contract address</span>
+            <input
+              className={inputClass}
+              value={deployedAddress}
+              onChange={event => setDeployedAddress(event.target.value.trim())}
+              placeholder="Paste deployed staking contract address to configure it"
+            />
+          </label>
+
           {deployedAddress && (
             <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.06] p-4 text-xs text-emerald-300">
-              New staking contract: <span className="font-mono">{deployedAddress}</span>
+              <div>
+                New staking contract: <span className="font-mono">{deployedAddress}</span>
+              </div>
+              <button
+                type="button"
+                onClick={configureDeployedStakingWallet}
+                disabled={action === 'configure-deployed-wallet'}
+                className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-emerald-300 disabled:opacity-60"
+              >
+                {action === 'configure-deployed-wallet' ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                Configure staking Jetton wallet
+              </button>
             </div>
           )}
         </section>
@@ -736,6 +925,29 @@ const annualRoiPercent = pool
               ))}
             </div>
 
+            <div className="mt-6 rounded-2xl border border-sky-400/15 bg-sky-400/[0.05] p-4">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-white">Staking plans</h3>
+                  <p className="mt-1 text-[11px] text-slate-500">Yearly ROI</p>
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-500">On-chain plans</span>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-5">
+                {[...STAKING_DURATIONS]
+                  .sort((a, b) => Number(a.seconds - b.seconds))
+                  .map(duration => (
+                    <div key={duration.seconds.toString()} className="rounded-xl border border-white/[0.07] bg-black/10 p-3">
+                      <span className="block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">{duration.label}</span>
+                      <strong className="mt-2 block text-lg font-black text-sky-500">
+                        {Number(stakingPlanRoiForDuration(pool?.plans, duration.seconds)) / 100}%
+                      </strong>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
             <form onSubmit={stakeGramx} className="mt-6 grid gap-4 lg:grid-cols-[1fr_0.8fr_0.8fr_auto]">
               <label>
                 <span className={labelClass}>Stake GRAMX</span>
@@ -745,19 +957,21 @@ const annualRoiPercent = pool
               <label>
                 <span className={labelClass}>Mode</span>
                 <select className={inputClass} value={stakeKind} onChange={event => setStakeKind(event.target.value as StakeKind)}>
-                  <option value="flex">FLEX</option>
                   <option value="locked">LOCKED</option>
+                  <option value="flex">FLEX</option>
                 </select>
               </label>
 
               <label>
                 <span className={labelClass}>Duration</span>
                 <select className={inputClass} value={stakeDuration.toString()} onChange={event => setStakeDuration(BigInt(event.target.value))}>
-                  {STAKING_DURATIONS.map(duration => (
-                    <option key={duration.seconds.toString()} value={duration.seconds.toString()}>
-                      {duration.label}
-                    </option>
-                  ))}
+                {[...STAKING_DURATIONS]
+                .sort((a, b) => Number(b.seconds - a.seconds))
+                .map(duration => (
+                <option key={duration.seconds.toString()} value={duration.seconds.toString()}>
+                {duration.label} · {Number(stakingPlanRoiForDuration(pool?.plans, duration.seconds)) / 100}% yearly ROI
+                </option>
+                ))}
                 </select>
               </label>
 
@@ -980,22 +1194,40 @@ const annualRoiPercent = pool
 
                 <form onSubmit={updateRoi} className="grid gap-3">
                   <label>
-                    <span className={labelClass}>Annual ROI (%)</span>
+                    <span className={labelClass}>Staking duration plan</span>
+                    <select
+                      className={inputClass}
+                      value={roiDurationDays}
+                      onChange={event => setRoiDurationDays(event.target.value)}
+                    >
+                      {[...STAKING_DURATIONS]
+                        .sort((a, b) => Number(a.seconds - b.seconds))
+                        .map(duration => {
+                          const days = durationDaysFromSeconds(duration.seconds);
+                          return (
+                            <option key={duration.seconds.toString()} value={String(days)}>
+                              {duration.label} ({days} days)
+                            </option>
+                          );
+                        })}
+                    </select>
+                  </label>
+
+                  <label>
+                    <span className={labelClass}>Annual ROI for selected duration (%)</span>
                     <input className={inputClass} type="number" min="0" max="1000" step="0.01" value={roiPercent} onChange={event => setRoiPercent(event.target.value)} />
                   </label>
 
                   <button type="submit" disabled={action === 'roi'} className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] px-4 py-2.5 text-xs font-bold text-slate-300 disabled:opacity-50">
                     {action === 'roi' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Gauge className="h-4 w-4" />}
-                    Update on-chain ROI
+                    Update duration ROI
                   </button>
                 </form>
 
                 <div className="border-t border-white/[0.08] pt-5">
                   <h4 className="text-xs font-bold text-white">Recover contract assets</h4>
                   <p className="mt-2 text-[11px] leading-5 text-slate-500">
-                    Owner-only recovery. TON can be withdrawn without a retained reserve.
-                    GRAMX withdrawal uses collected FLEX fees first, then reward reserve.
-                    Active stake principal cannot be withdrawn.
+                    Owner-only emergency recovery. TON, GRAMX, and any Jetton wallet owned by this staking contract can be withdrawn without staking-status restrictions.
                   </p>
                 </div>
 
@@ -1027,10 +1259,7 @@ const annualRoiPercent = pool
                 <form onSubmit={withdrawOwnerGramx} className="grid gap-3">
                   <label>
                     <span className={labelClass}>
-                      Withdraw GRAMX reserve + fees (available{' '}
-                      {formatTokenAmount(
-                        (pool?.rewardReserve || 0n) + (pool?.totalFeesCollected || 0n)
-                      )})
+                      Withdraw GRAMX amount
                     </span>
                     <input
                       className={inputClass}
@@ -1046,14 +1275,51 @@ const annualRoiPercent = pool
 
                   <button
                     type="submit"
-                    disabled={
-                      action === 'withdraw-gramx' ||
-                      (pool?.rewardReserve || 0n) + (pool?.totalFeesCollected || 0n) <= 0n
-                    }
+                    disabled={action === 'withdraw-gramx'}
                     className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] px-4 py-2.5 text-xs font-bold text-slate-300 disabled:opacity-50"
                   >
                     {action === 'withdraw-gramx' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Coins className="h-4 w-4" />}
                     Withdraw GRAMX
+                  </button>
+                </form>
+
+                <form onSubmit={withdrawOwnerAnyJetton} className="grid gap-3 rounded-2xl border border-rose-400/15 bg-rose-400/[0.04] p-4">
+                  <div>
+                    <h4 className="text-xs font-bold text-rose-300">Withdraw any Jetton wallet</h4>
+                    <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                      Enter the Jetton wallet address owned by this staking contract and the exact token amount in base units.
+                    </p>
+                  </div>
+
+                  <label>
+                    <span className={labelClass}>Jetton wallet address</span>
+                    <input
+                      className={inputClass}
+                      required
+                      value={withdrawAnyJettonWallet}
+                      onChange={event => setWithdrawAnyJettonWallet(event.target.value)}
+                      placeholder="EQ..."
+                    />
+                  </label>
+
+                  <label>
+                    <span className={labelClass}>Token amount base units</span>
+                    <input
+                      className={inputClass}
+                      required
+                      value={withdrawAnyJettonAmount}
+                      onChange={event => setWithdrawAnyJettonAmount(event.target.value)}
+                      placeholder="1000000"
+                    />
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={action === 'withdraw-any-jetton'}
+                    className="flex items-center justify-center gap-2 rounded-xl border border-rose-400/25 bg-rose-400/10 px-4 py-2.5 text-xs font-bold text-rose-200 disabled:opacity-50"
+                  >
+                    {action === 'withdraw-any-jetton' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Coins className="h-4 w-4" />}
+                    Withdraw Any Token
                   </button>
                 </form>
 

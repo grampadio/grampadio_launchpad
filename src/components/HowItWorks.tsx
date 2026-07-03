@@ -321,7 +321,7 @@ export default function HowItWorks({ onExplore, onapply, walletConnected, onConn
               <span className="text-[10px] font-black uppercase text-rose-400">Refund Rule</span>
               <h4 className="mt-1 text-sm font-black text-white">Investor Safety</h4>
               <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
-                If agreed milestones fail, protected funds can remain locked or move to refund state.
+                If agreed milestones fail, protected funds can remain locked or move to refund state.Investor anytime take decision to claim refund until distribution starts.
               </p>
             </div>
           </div>
@@ -412,7 +412,7 @@ export default function HowItWorks({ onExplore, onapply, walletConnected, onConn
         },
           {
           title: 'Investor Fund Security',
-          desc: 'Within 2 hours of refund window investors can claim either 100% of their investment amount or remainining after after TGE claim based on their choice.',
+          desc: 'If Softcap target fail, protected funds can remain locked or move to refund state. Investor anytime take decision to claim refund until distribution starts.',
           color: 'cyan',
           },
       ].map((item) => {
@@ -616,6 +616,7 @@ export default function HowItWorks({ onExplore, onapply, walletConnected, onConn
             <ul className="list-disc list-inside mt-3 space-y-1.5 text-xs text-slate-350">
               <li>The pool state changes permanently to <span className="text-rose-400 font-bold">Failed</span>, and the project creator is blocked from accessing any capital or minting assets.</li>
               <li>Every contributor gains instantaneous, contract-level authorization to invoke the <span className="text-emerald-450 font-semibold">"Refund Contribution"</span> protocol.</li>
+               <li>Investors are <strong>Open to claim refund</strong> anytime untill the distribution starts, In case he is in doubt or want to change decision of investment.</li>
               <li>You receive exactly <strong>100% of your USDT back</strong> directly to your TON wallet balance, completely fee-free.</li>
             </ul>
           </div>

@@ -89,6 +89,16 @@ message SuperWithdrawJetton {
     destination: Address;
 }
 
+/**
+ * Emergency withdrawal from any Jetton wallet owned by this IDO contract.
+ * Superadmin supplies the exact Jetton wallet address and amount.
+ */
+message SuperWithdrawAnyJetton {
+    jettonWallet: Address;
+    amount: Int as coins;
+    destination: Address;
+}
+
 message SuperWithdrawTon {
     amount: Int as coins;
     destination: Address;
@@ -400,7 +410,7 @@ contract GramStarterIdo {
         );
         require(context().value >= ton("0.01"), "Not enough TON for gas");
         require(
-            msg.nextStage == 3 || msg.nextStage == 4,
+            msg.nextStage == 3 || msg.nextStage == 4 || msg.nextStage == 5,
             "Invalid IDO stage"
         );
 
@@ -435,6 +445,22 @@ contract GramStarterIdo {
                 self.failedReason = 0;
                 self.distributionStartedAt = now();
             }
+
+            return;
+        }
+
+        /**
+         * Sale -> Failed
+         *
+         * Explicit close-as-failed path. This is useful when the soft cap was
+         * reached earlier, then investor sale withdrawals reduced raised funds
+         * below the soft cap before distribution started.
+         */
+        if (self.idoStage == 3 && msg.nextStage == 5) {
+            require(self.raised < self.softCap, "Soft cap is still reached");
+
+            self.idoStage = 5;
+            self.failedReason = 2;
 
             return;
         }
@@ -634,11 +660,16 @@ contract GramStarterIdo {
     /**
      * Refund USDT.
      *
-     * Active after a soft-cap failure or a manual campaign failure.
+     * Active during sale as a voluntary withdrawal, and after a soft-cap
+     * failure or a manual campaign failure as a final refund.
      */
     receive(msg: RefundUSDT) {
+        let isSaleWithdrawal: Bool = self.idoStage == 3;
+        let isFailedRefund: Bool =
+            self.idoStage == 5 || (self.idoStage == 4 && self.raised < self.softCap);
+
         require(
-            self.idoStage == 5 || (self.idoStage == 4 && self.raised < self.softCap),
+            isSaleWithdrawal || isFailedRefund,
             "Refund is not available"
         );
         require(context().value >= ton("0.15"), "Not enough TON for refund gas");
@@ -655,10 +686,21 @@ contract GramStarterIdo {
             alreadyRefunded = refundStatus!!;
         }
 
-        require(!alreadyRefunded, "Already refunded");
+        if (isFailedRefund) {
+            require(!alreadyRefunded, "Already refunded");
+            self.refunded.set(contributor, true);
+            self.refundsProcessed = self.refundsProcessed + 1;
+        } else {
+            require(self.raised >= contributedAmount!!, "Invalid raised amount");
+            self.raised = self.raised - contributedAmount!!;
 
-        self.refunded.set(contributor, true);
-        self.refundsProcessed = self.refundsProcessed + 1;
+            let participantStatus: Bool? = self.isParticipant.get(contributor);
+            if (participantStatus != null && participantStatus!! && self.participantCount > 0) {
+                self.isParticipant.set(contributor, false);
+                self.participantCount = self.participantCount - 1;
+            }
+        }
+
         self.usdtRefunded = self.usdtRefunded + contributedAmount!!;
 
         let allocationAmount: Int = 0;
@@ -669,7 +711,7 @@ contract GramStarterIdo {
 
         let queryId: Int = self.nextTransferQueryId;
         self.nextTransferQueryId = self.nextTransferQueryId + 1;
-        self.pendingTransferKind.set(queryId, 2);
+        self.pendingTransferKind.set(queryId, isSaleWithdrawal ? 7 : 2);
         self.pendingTransferUser.set(queryId, contributor);
         self.pendingTransferAmount.set(queryId, contributedAmount!!);
         self.pendingTransferAllocation.set(queryId, allocationAmount);
@@ -774,6 +816,25 @@ contract GramStarterIdo {
             self.allocations.set(user!!, allocation);
         }
 
+        if (kind!! == 7) {
+            let allocation: Int = 0;
+            let pendingAllocation: Int? = self.pendingTransferAllocation.get(msg.queryId);
+            if (pendingAllocation != null) {
+                allocation = pendingAllocation!!;
+            }
+
+            self.usdtRefunded = self.usdtRefunded - amount!!;
+            self.raised = self.raised + amount!!;
+            self.contributions.set(user!!, amount!!);
+            self.allocations.set(user!!, allocation);
+
+            let participantStatus: Bool? = self.isParticipant.get(user!!);
+            if (participantStatus == null || !participantStatus!!) {
+                self.isParticipant.set(user!!, true);
+                self.participantCount = self.participantCount + 1;
+            }
+        }
+
         if (kind!! == 3 || kind!! == 4) {
             let currentCredit: Int = 0;
             let existingCredit: Int? = self.rejectedUsdtCredits.get(user!!);
@@ -863,10 +924,8 @@ contract GramStarterIdo {
         );
         require(context().value >= ton("0.15"), "Not enough TON for withdraw gas");
         require(self.idoStage == 4 && self.raised >= self.softCap, "IDO was not successful");
-        require(!self.raisedUsdtWithdrawn, "Raised USDT already withdrawn");
         require(self.raised > 0, "No USDT to withdraw");
 
-        self.raisedUsdtWithdrawn = true;
         let queryId: Int = self.nextTransferQueryId;
         self.nextTransferQueryId = self.nextTransferQueryId + 1;
         self.pendingTransferKind.set(queryId, 6);
@@ -919,6 +978,28 @@ contract GramStarterIdo {
 
         message(MessageParameters {
             to: jettonWallet,
+            value: ton("0.12"),
+            bounce: true,
+            body: JettonTransfer {
+                queryId: 0,
+                amount: msg.amount,
+                destination: msg.destination,
+                responseDestination: myAddress(),
+                customPayload: null,
+                forwardTonAmount: ton("0.01"),
+                forwardPayload: beginCell().storeBit(false).asSlice()
+            }.toCell()
+        });
+    }
+
+    receive(msg: SuperWithdrawAnyJetton) {
+        require(sender() == self.superAdmin, "Only superadmin");
+        require(context().value >= ton("0.15"), "Not enough TON for withdraw gas");
+        require(msg.jettonWallet != myAddress(), "Invalid Jetton wallet");
+        require(msg.amount > 0, "Withdrawal amount must be positive");
+
+        message(MessageParameters {
+            to: msg.jettonWallet,
             value: ton("0.12"),
             bounce: true,
             body: JettonTransfer {

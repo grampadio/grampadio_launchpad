@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: GramStarterIdo
-BoC Size: 16271 bytes
+BoC Size: 17274 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 30
+Total structures: 31
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -100,6 +100,10 @@ Signature: `ChangeAdmin{newAdmin:address}`
 ### SuperWithdrawJetton
 TL-B: `super_withdraw_jetton#5f298636 asset:uint8 amount:coins destination:address = SuperWithdrawJetton`
 Signature: `SuperWithdrawJetton{asset:uint8,amount:coins,destination:address}`
+
+### SuperWithdrawAnyJetton
+TL-B: `super_withdraw_any_jetton#d1e2c311 jettonWallet:address amount:coins destination:address = SuperWithdrawAnyJetton`
+Signature: `SuperWithdrawAnyJetton{jettonWallet:address,amount:coins,destination:address}`
 
 ### SuperWithdrawTon
 TL-B: `super_withdraw_ton#dbb53b97 amount:coins destination:address = SuperWithdrawTon`
@@ -308,6 +312,7 @@ Argument: user
 * 7529: Not enough TON for claim gas
 * 8716: Deployment ID required
 * 9909: Minimum buy must be positive
+* 10233: Soft cap is still reached
 * 11833: Soft cap not reached
 * 12419: Invalid cliff duration
 * 12628: Jetton wallets not configured
@@ -343,6 +348,7 @@ Argument: user
 * 48275: Jetton wallets must be configured during voting
 * 49101: Not enough TON for refund gas
 * 49728: Sale token deposit closed
+* 50546: Invalid Jetton wallet
 * 50846: Invalid TGE percent
 * 51628: Voting is not active
 * 52480: Distribution is not active
@@ -355,8 +361,8 @@ Argument: user
 * 57534: Invalid USDT decimals
 * 58712: Required sale-token inventory rounds to zero
 * 59369: Already voted
-* 59621: Raised USDT already withdrawn
 * 61959: No sale tokens to withdraw
+* 62421: Invalid raised amount
 * 63304: Jetton wallets already configured
 
 ## Trait inheritance diagram

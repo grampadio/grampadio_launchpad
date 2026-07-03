@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: GramPadGramxStaking
-BoC Size: 12442 bytes
+BoC Size: 17717 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 32
+Total structures: 35
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -69,6 +69,10 @@ Signature: `SetGramxJettonWallet{gramxJettonWallet:address}`
 TL-B: `set_annual_roi#484c524f annualRoiBasisPoints:uint16 = SetAnnualRoi`
 Signature: `SetAnnualRoi{annualRoiBasisPoints:uint16}`
 
+### SetDurationRoi
+TL-B: `set_duration_roi#c81c6299 durationDays:uint16 annualRoiBasisPoints:uint16 = SetDurationRoi`
+Signature: `SetDurationRoi{durationDays:uint16,annualRoiBasisPoints:uint16}`
+
 ### SetFlexUnstakeFee
 TL-B: `set_flex_unstake_fee#ff8b4afa flexUnstakeFeeBasisPoints:uint16 = SetFlexUnstakeFee`
 Signature: `SetFlexUnstakeFee{flexUnstakeFeeBasisPoints:uint16}`
@@ -101,6 +105,10 @@ Signature: `OwnerWithdrawTon{amount:coins,destination:address}`
 TL-B: `owner_withdraw_gramx#bee64f35 amount:coins destination:address = OwnerWithdrawGramx`
 Signature: `OwnerWithdrawGramx{amount:coins,destination:address}`
 
+### OwnerWithdrawAnyJetton
+TL-B: `owner_withdraw_any_jetton#df40f66e jettonWallet:address amount:coins destination:address = OwnerWithdrawAnyJetton`
+Signature: `OwnerWithdrawAnyJetton{jettonWallet:address,amount:coins,destination:address}`
+
 ### JettonTransferNotification
 TL-B: `jetton_transfer_notification#7362d09c queryId:uint64 amount:coins sender:address forwardPayload:remainder<slice> = JettonTransferNotification`
 Signature: `JettonTransferNotification{queryId:uint64,amount:coins,sender:address,forwardPayload:remainder<slice>}`
@@ -117,6 +125,10 @@ Signature: `JettonExcesses{queryId:uint64}`
 TL-B: `_ owner:address deploymentId:int257 gramxJettonMaster:address gramxJettonWallet:address jettonWalletConfigured:bool annualRoiBasisPoints:int257 flexUnstakeFeeBasisPoints:int257 minStake:int257 paused:bool totalStaked:int257 rewardReserve:int257 totalRewardsPaid:int257 totalFeesCollected:int257 activeStakerCount:int257 totalStakePositions:int257 nextStakeId:int257 = ContractDetails`
 Signature: `ContractDetails{owner:address,deploymentId:int257,gramxJettonMaster:address,gramxJettonWallet:address,jettonWalletConfigured:bool,annualRoiBasisPoints:int257,flexUnstakeFeeBasisPoints:int257,minStake:int257,paused:bool,totalStaked:int257,rewardReserve:int257,totalRewardsPaid:int257,totalFeesCollected:int257,activeStakerCount:int257,totalStakePositions:int257,nextStakeId:int257}`
 
+### StakingPlans
+TL-B: `_ sevenDaysRoiBasisPoints:int257 thirtyDaysRoiBasisPoints:int257 threeMonthsRoiBasisPoints:int257 nineMonthsRoiBasisPoints:int257 twelveMonthsRoiBasisPoints:int257 = StakingPlans`
+Signature: `StakingPlans{sevenDaysRoiBasisPoints:int257,thirtyDaysRoiBasisPoints:int257,threeMonthsRoiBasisPoints:int257,nineMonthsRoiBasisPoints:int257,twelveMonthsRoiBasisPoints:int257}`
+
 ### UserSummary
 TL-B: `_ user:address totalStakePositions:int257 activeStakePositions:int257 = UserSummary`
 Signature: `UserSummary{user:address,totalStakePositions:int257,activeStakePositions:int257}`
@@ -126,20 +138,23 @@ TL-B: `_ stakeId:int257 owner:address active:bool amount:int257 pendingReward:in
 Signature: `StakeDetails{stakeId:int257,owner:address,active:bool,amount:int257,pendingReward:int257,roiBasisPoints:int257,stakeKind:int257,startedAt:int257,duration:int257,maturityAt:int257,claimedRewards:int257}`
 
 ### StakingDashboard
-TL-B: `_ contractDetails:ContractDetails{owner:address,deploymentId:int257,gramxJettonMaster:address,gramxJettonWallet:address,jettonWalletConfigured:bool,annualRoiBasisPoints:int257,flexUnstakeFeeBasisPoints:int257,minStake:int257,paused:bool,totalStaked:int257,rewardReserve:int257,totalRewardsPaid:int257,totalFeesCollected:int257,activeStakerCount:int257,totalStakePositions:int257,nextStakeId:int257} userSummary:UserSummary{user:address,totalStakePositions:int257,activeStakePositions:int257} offset:int257 nextOffset:int257 hasMore:bool positions:dict<int, ^StakeDetails{stakeId:int257,owner:address,active:bool,amount:int257,pendingReward:int257,roiBasisPoints:int257,stakeKind:int257,startedAt:int257,duration:int257,maturityAt:int257,claimedRewards:int257}> = StakingDashboard`
-Signature: `StakingDashboard{contractDetails:ContractDetails{owner:address,deploymentId:int257,gramxJettonMaster:address,gramxJettonWallet:address,jettonWalletConfigured:bool,annualRoiBasisPoints:int257,flexUnstakeFeeBasisPoints:int257,minStake:int257,paused:bool,totalStaked:int257,rewardReserve:int257,totalRewardsPaid:int257,totalFeesCollected:int257,activeStakerCount:int257,totalStakePositions:int257,nextStakeId:int257},userSummary:UserSummary{user:address,totalStakePositions:int257,activeStakePositions:int257},offset:int257,nextOffset:int257,hasMore:bool,positions:dict<int, ^StakeDetails{stakeId:int257,owner:address,active:bool,amount:int257,pendingReward:int257,roiBasisPoints:int257,stakeKind:int257,startedAt:int257,duration:int257,maturityAt:int257,claimedRewards:int257}>}`
+TL-B: `_ contractDetails:ContractDetails{owner:address,deploymentId:int257,gramxJettonMaster:address,gramxJettonWallet:address,jettonWalletConfigured:bool,annualRoiBasisPoints:int257,flexUnstakeFeeBasisPoints:int257,minStake:int257,paused:bool,totalStaked:int257,rewardReserve:int257,totalRewardsPaid:int257,totalFeesCollected:int257,activeStakerCount:int257,totalStakePositions:int257,nextStakeId:int257} stakingPlans:StakingPlans{sevenDaysRoiBasisPoints:int257,thirtyDaysRoiBasisPoints:int257,threeMonthsRoiBasisPoints:int257,nineMonthsRoiBasisPoints:int257,twelveMonthsRoiBasisPoints:int257} userSummary:UserSummary{user:address,totalStakePositions:int257,activeStakePositions:int257} offset:int257 nextOffset:int257 hasMore:bool positions:dict<int, ^StakeDetails{stakeId:int257,owner:address,active:bool,amount:int257,pendingReward:int257,roiBasisPoints:int257,stakeKind:int257,startedAt:int257,duration:int257,maturityAt:int257,claimedRewards:int257}> = StakingDashboard`
+Signature: `StakingDashboard{contractDetails:ContractDetails{owner:address,deploymentId:int257,gramxJettonMaster:address,gramxJettonWallet:address,jettonWalletConfigured:bool,annualRoiBasisPoints:int257,flexUnstakeFeeBasisPoints:int257,minStake:int257,paused:bool,totalStaked:int257,rewardReserve:int257,totalRewardsPaid:int257,totalFeesCollected:int257,activeStakerCount:int257,totalStakePositions:int257,nextStakeId:int257},stakingPlans:StakingPlans{sevenDaysRoiBasisPoints:int257,thirtyDaysRoiBasisPoints:int257,threeMonthsRoiBasisPoints:int257,nineMonthsRoiBasisPoints:int257,twelveMonthsRoiBasisPoints:int257},userSummary:UserSummary{user:address,totalStakePositions:int257,activeStakePositions:int257},offset:int257,nextOffset:int257,hasMore:bool,positions:dict<int, ^StakeDetails{stakeId:int257,owner:address,active:bool,amount:int257,pendingReward:int257,roiBasisPoints:int257,stakeKind:int257,startedAt:int257,duration:int257,maturityAt:int257,claimedRewards:int257}>}`
 
 ### GramPadGramxStaking$Data
-TL-B: `_ owner:address deploymentId:uint64 gramxJettonMaster:address gramxJettonWallet:address jettonWalletConfigured:bool annualRoiBasisPoints:uint16 flexUnstakeFeeBasisPoints:uint16 minStake:coins paused:bool totalStaked:coins rewardReserve:coins totalRewardsPaid:coins totalFeesCollected:coins activeStakerCount:uint32 nextTransferQueryId:uint64 nextStakeId:uint64 pendingStakeKind:dict<address, int> pendingStakeDuration:dict<address, int> userStakeCount:dict<address, int> userActiveStakeCount:dict<address, int> userStakeIdByIndex:dict<int, int> stakeOwner:dict<int, address> stakeAmount:dict<int, int> stakeRoiBasisPoints:dict<int, int> stakeKind:dict<int, int> stakeStartedAt:dict<int, int> stakeDuration:dict<int, int> stakeClaimedRewards:dict<int, int> stakeActive:dict<int, bool> = GramPadGramxStaking`
-Signature: `GramPadGramxStaking{owner:address,deploymentId:uint64,gramxJettonMaster:address,gramxJettonWallet:address,jettonWalletConfigured:bool,annualRoiBasisPoints:uint16,flexUnstakeFeeBasisPoints:uint16,minStake:coins,paused:bool,totalStaked:coins,rewardReserve:coins,totalRewardsPaid:coins,totalFeesCollected:coins,activeStakerCount:uint32,nextTransferQueryId:uint64,nextStakeId:uint64,pendingStakeKind:dict<address, int>,pendingStakeDuration:dict<address, int>,userStakeCount:dict<address, int>,userActiveStakeCount:dict<address, int>,userStakeIdByIndex:dict<int, int>,stakeOwner:dict<int, address>,stakeAmount:dict<int, int>,stakeRoiBasisPoints:dict<int, int>,stakeKind:dict<int, int>,stakeStartedAt:dict<int, int>,stakeDuration:dict<int, int>,stakeClaimedRewards:dict<int, int>,stakeActive:dict<int, bool>}`
+TL-B: `_ owner:address deploymentId:uint64 gramxJettonMaster:address gramxJettonWallet:address jettonWalletConfigured:bool annualRoiBasisPoints:uint16 sevenDaysRoiBasisPoints:uint16 thirtyDaysRoiBasisPoints:uint16 threeMonthsRoiBasisPoints:uint16 nineMonthsRoiBasisPoints:uint16 twelveMonthsRoiBasisPoints:uint16 flexUnstakeFeeBasisPoints:uint16 minStake:coins paused:bool totalStaked:coins rewardReserve:coins totalRewardsPaid:coins totalFeesCollected:coins activeStakerCount:uint32 nextTransferQueryId:uint64 nextStakeId:uint64 pendingStakeKind:dict<address, int> pendingStakeDuration:dict<address, int> userStakeCount:dict<address, int> userActiveStakeCount:dict<address, int> userStakeIdByIndex:dict<int, int> stakeOwner:dict<int, address> stakeAmount:dict<int, int> stakeRoiBasisPoints:dict<int, int> stakeKind:dict<int, int> stakeStartedAt:dict<int, int> stakeDuration:dict<int, int> stakeClaimedRewards:dict<int, int> stakeActive:dict<int, bool> = GramPadGramxStaking`
+Signature: `GramPadGramxStaking{owner:address,deploymentId:uint64,gramxJettonMaster:address,gramxJettonWallet:address,jettonWalletConfigured:bool,annualRoiBasisPoints:uint16,sevenDaysRoiBasisPoints:uint16,thirtyDaysRoiBasisPoints:uint16,threeMonthsRoiBasisPoints:uint16,nineMonthsRoiBasisPoints:uint16,twelveMonthsRoiBasisPoints:uint16,flexUnstakeFeeBasisPoints:uint16,minStake:coins,paused:bool,totalStaked:coins,rewardReserve:coins,totalRewardsPaid:coins,totalFeesCollected:coins,activeStakerCount:uint32,nextTransferQueryId:uint64,nextStakeId:uint64,pendingStakeKind:dict<address, int>,pendingStakeDuration:dict<address, int>,userStakeCount:dict<address, int>,userActiveStakeCount:dict<address, int>,userStakeIdByIndex:dict<int, int>,stakeOwner:dict<int, address>,stakeAmount:dict<int, int>,stakeRoiBasisPoints:dict<int, int>,stakeKind:dict<int, int>,stakeStartedAt:dict<int, int>,stakeDuration:dict<int, int>,stakeClaimedRewards:dict<int, int>,stakeActive:dict<int, bool>}`
 
 ## Get methods
-Total get methods: 6
+Total get methods: 7
 
 ## get_contract_version
 No arguments
 
 ## get_contract_details
+No arguments
+
+## get_staking_plans
 No arguments
 
 ## get_user_summary
@@ -195,9 +210,11 @@ Argument: limit
 * 136: Invalid standard address
 * 138: Not a basechain address
 * 1173: Invalid index
+* 2076: Invalid 3-month ROI
 * 2512: Stake not found
 * 5637: No rewards available
 * 6699: Stake not active
+* 6974: Invalid 7-day ROI
 * 7529: Not enough TON for claim gas
 * 8808: Reward reserve too low
 * 12648: Below minimum stake
@@ -207,8 +224,11 @@ Argument: limit
 * 18624: Wallet already configured
 * 23376: Not enough TON for gas
 * 23773: Not stake owner
+* 27530: Invalid 12-month ROI
 * 28788: Not enough TON for unstake gas
 * 28937: Not enough TON for withdraw gas
+* 29751: Invalid 30-day ROI
+* 31360: Invalid 9-month ROI
 * 32101: Jetton wallet not configured
 * 33750: Invalid page size
 * 33848: Withdrawal exceeds TON balance
@@ -220,7 +240,6 @@ Argument: limit
 * 46136: Fee too high
 * 46992: Staking paused
 * 48572: Invalid offset
-* 49336: Exceeds withdrawable GRAMX
 * 50546: Invalid Jetton wallet
 * 53544: Stake not configured
 * 56230: TON funding required

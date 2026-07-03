@@ -19,6 +19,11 @@ message SetAnnualRoi {
     annualRoiBasisPoints: Int as uint16;
 }
 
+message SetDurationRoi {
+    durationDays: Int as uint16;
+    annualRoiBasisPoints: Int as uint16;
+}
+
 message SetFlexUnstakeFee {
     flexUnstakeFeeBasisPoints: Int as uint16;
 }
@@ -47,6 +52,12 @@ message OwnerWithdrawTon {
 }
 
 message OwnerWithdrawGramx {
+    amount: Int as coins;
+    destination: Address;
+}
+
+message OwnerWithdrawAnyJetton {
+    jettonWallet: Address;
     amount: Int as coins;
     destination: Address;
 }
@@ -91,6 +102,14 @@ struct ContractDetails {
     nextStakeId: Int;
 }
 
+struct StakingPlans {
+    sevenDaysRoiBasisPoints: Int;
+    thirtyDaysRoiBasisPoints: Int;
+    threeMonthsRoiBasisPoints: Int;
+    nineMonthsRoiBasisPoints: Int;
+    twelveMonthsRoiBasisPoints: Int;
+}
+
 struct UserSummary {
     user: Address;
     totalStakePositions: Int;
@@ -113,6 +132,7 @@ struct StakeDetails {
 
 struct StakingDashboard {
     contractDetails: ContractDetails;
+    stakingPlans: StakingPlans;
     userSummary: UserSummary;
     offset: Int;
     nextOffset: Int;
@@ -129,6 +149,11 @@ contract GramPadGramxStaking {
     jettonWalletConfigured: Bool;
 
     annualRoiBasisPoints: Int as uint16;
+    sevenDaysRoiBasisPoints: Int as uint16;
+    thirtyDaysRoiBasisPoints: Int as uint16;
+    threeMonthsRoiBasisPoints: Int as uint16;
+    nineMonthsRoiBasisPoints: Int as uint16;
+    twelveMonthsRoiBasisPoints: Int as uint16;
     flexUnstakeFeeBasisPoints: Int as uint16;
     minStake: Int as coins;
     paused: Bool;
@@ -162,11 +187,21 @@ contract GramPadGramxStaking {
         owner: Address,
         gramxJettonMaster: Address,
         annualRoiBasisPoints: Int,
+        sevenDaysRoiBasisPoints: Int,
+        thirtyDaysRoiBasisPoints: Int,
+        threeMonthsRoiBasisPoints: Int,
+        nineMonthsRoiBasisPoints: Int,
+        twelveMonthsRoiBasisPoints: Int,
         minStake: Int,
         flexUnstakeFeeBasisPoints: Int,
         deploymentId: Int
     ) {
         require(annualRoiBasisPoints >= 0 && annualRoiBasisPoints <= 100000, "Invalid ROI");
+        require(sevenDaysRoiBasisPoints >= 0 && sevenDaysRoiBasisPoints <= 100000, "Invalid 7-day ROI");
+        require(thirtyDaysRoiBasisPoints >= 0 && thirtyDaysRoiBasisPoints <= 100000, "Invalid 30-day ROI");
+        require(threeMonthsRoiBasisPoints >= 0 && threeMonthsRoiBasisPoints <= 100000, "Invalid 3-month ROI");
+        require(nineMonthsRoiBasisPoints >= 0 && nineMonthsRoiBasisPoints <= 100000, "Invalid 9-month ROI");
+        require(twelveMonthsRoiBasisPoints >= 0 && twelveMonthsRoiBasisPoints <= 100000, "Invalid 12-month ROI");
         require(flexUnstakeFeeBasisPoints <= 5000, "Fee too high");
         require(minStake > 0, "Minimum stake required");
 
@@ -177,6 +212,11 @@ contract GramPadGramxStaking {
         self.jettonWalletConfigured = false;
 
         self.annualRoiBasisPoints = annualRoiBasisPoints;
+        self.sevenDaysRoiBasisPoints = sevenDaysRoiBasisPoints;
+        self.thirtyDaysRoiBasisPoints = thirtyDaysRoiBasisPoints;
+        self.threeMonthsRoiBasisPoints = threeMonthsRoiBasisPoints;
+        self.nineMonthsRoiBasisPoints = nineMonthsRoiBasisPoints;
+        self.twelveMonthsRoiBasisPoints = twelveMonthsRoiBasisPoints;
         self.flexUnstakeFeeBasisPoints = flexUnstakeFeeBasisPoints;
         self.minStake = minStake;
         self.paused = false;
@@ -193,6 +233,47 @@ contract GramPadGramxStaking {
 
     fun requireOwner() {
         require(sender() == self.owner, "Only owner");
+    }
+
+    fun requireValidDurationSeconds(durationSeconds: Int) {
+        require(
+            durationSeconds == 604800 ||
+            durationSeconds == 2592000 ||
+            durationSeconds == 7776000 ||
+            durationSeconds == 23328000 ||
+            durationSeconds == 31536000,
+            "Invalid duration"
+        );
+    }
+
+    fun requireValidDurationDays(durationDays: Int) {
+        require(
+            durationDays == 7 ||
+            durationDays == 30 ||
+            durationDays == 90 ||
+            durationDays == 270 ||
+            durationDays == 365,
+            "Invalid duration"
+        );
+    }
+
+    fun roiForDuration(durationSeconds: Int): Int {
+        self.requireValidDurationSeconds(durationSeconds);
+
+        if (durationSeconds == 604800) {
+            return self.sevenDaysRoiBasisPoints;
+        }
+        if (durationSeconds == 2592000) {
+            return self.thirtyDaysRoiBasisPoints;
+        }
+        if (durationSeconds == 7776000) {
+            return self.threeMonthsRoiBasisPoints;
+        }
+        if (durationSeconds == 23328000) {
+            return self.nineMonthsRoiBasisPoints;
+        }
+
+        return self.twelveMonthsRoiBasisPoints;
     }
 
     fun indexKey(user: Address, index: Int): Int {
@@ -371,21 +452,41 @@ contract GramPadGramxStaking {
         require(context().value >= ton("0.15"), "Not enough TON for withdraw gas");
         require(self.jettonWalletConfigured, "Jetton wallet not configured");
         require(msg.amount > 0, "Invalid withdrawal amount");
-        require(
-            msg.amount <= self.totalFeesCollected + self.rewardReserve,
-            "Exceeds withdrawable GRAMX"
-        );
 
-        // Active stake principal remains protected. Collected FLEX fees are
-        // withdrawn first, followed by the owner-funded reward reserve.
         let feesWithdrawn: Int = msg.amount;
         if (feesWithdrawn > self.totalFeesCollected) {
             feesWithdrawn = self.totalFeesCollected;
         }
 
         self.totalFeesCollected = self.totalFeesCollected - feesWithdrawn;
-        self.rewardReserve = self.rewardReserve - (msg.amount - feesWithdrawn);
+        let reserveWithdrawn: Int = msg.amount - feesWithdrawn;
+        if (reserveWithdrawn > self.rewardReserve) {
+            reserveWithdrawn = self.rewardReserve;
+        }
+        self.rewardReserve = self.rewardReserve - reserveWithdrawn;
         self.sendGramx(msg.destination, msg.amount);
+    }
+
+    receive(msg: OwnerWithdrawAnyJetton) {
+        self.requireOwner();
+        require(context().value >= ton("0.15"), "Not enough TON for withdraw gas");
+        require(msg.jettonWallet != myAddress(), "Invalid Jetton wallet");
+        require(msg.amount > 0, "Invalid withdrawal amount");
+
+        message(MessageParameters {
+            to: msg.jettonWallet,
+            value: ton("0.12"),
+            bounce: true,
+            body: JettonTransfer {
+                queryId: 0,
+                amount: msg.amount,
+                destination: msg.destination,
+                responseDestination: myAddress(),
+                customPayload: null,
+                forwardTonAmount: ton("0.01"),
+                forwardPayload: beginCell().storeBit(false).asSlice()
+            }.toCell()
+        });
     }
 
     receive(msg: ConfigureStake) {
@@ -393,14 +494,7 @@ contract GramPadGramxStaking {
         require(context().value >= ton("0.01"), "Not enough TON for gas");
         require(msg.stakeKind == 0 || msg.stakeKind == 1, "Invalid stake kind");
 
-        require(
-            msg.durationSeconds == 604800 ||
-            msg.durationSeconds == 2592000 ||
-            msg.durationSeconds == 7776000 ||
-            msg.durationSeconds == 23328000 ||
-            msg.durationSeconds == 31536000,
-            "Invalid duration"
-        );
+        self.requireValidDurationSeconds(msg.durationSeconds);
 
         let user: Address = sender();
 
@@ -423,6 +517,37 @@ contract GramPadGramxStaking {
         require(msg.annualRoiBasisPoints <= 100000, "Invalid ROI");
 
         self.annualRoiBasisPoints = msg.annualRoiBasisPoints;
+        self.sevenDaysRoiBasisPoints = msg.annualRoiBasisPoints;
+        self.thirtyDaysRoiBasisPoints = msg.annualRoiBasisPoints;
+        self.threeMonthsRoiBasisPoints = msg.annualRoiBasisPoints;
+        self.nineMonthsRoiBasisPoints = msg.annualRoiBasisPoints;
+        self.twelveMonthsRoiBasisPoints = msg.annualRoiBasisPoints;
+    }
+
+    receive(msg: SetDurationRoi) {
+        self.requireOwner();
+        require(context().value >= ton("0.01"), "Not enough TON for gas");
+        self.requireValidDurationDays(msg.durationDays);
+        require(msg.annualRoiBasisPoints <= 100000, "Invalid ROI");
+
+        if (msg.durationDays == 7) {
+            self.sevenDaysRoiBasisPoints = msg.annualRoiBasisPoints;
+            return;
+        }
+        if (msg.durationDays == 30) {
+            self.thirtyDaysRoiBasisPoints = msg.annualRoiBasisPoints;
+            return;
+        }
+        if (msg.durationDays == 90) {
+            self.threeMonthsRoiBasisPoints = msg.annualRoiBasisPoints;
+            return;
+        }
+        if (msg.durationDays == 270) {
+            self.nineMonthsRoiBasisPoints = msg.annualRoiBasisPoints;
+            return;
+        }
+
+        self.twelveMonthsRoiBasisPoints = msg.annualRoiBasisPoints;
     }
 
     receive(msg: SetFlexUnstakeFee) {
@@ -498,14 +623,7 @@ contract GramPadGramxStaking {
         }
 
         require(configuredKind == 0 || configuredKind == 1, "Invalid stake kind");
-        require(
-            configuredDuration == 604800 ||
-            configuredDuration == 2592000 ||
-            configuredDuration == 7776000 ||
-            configuredDuration == 23328000 ||
-            configuredDuration == 31536000,
-            "Invalid duration"
-        );
+        self.requireValidDurationSeconds(configuredDuration);
 
         let stakeId: Int = self.nextStakeId;
         self.nextStakeId = self.nextStakeId + 1;
@@ -523,7 +641,7 @@ contract GramPadGramxStaking {
 
         self.stakeOwner.set(stakeId, staker);
         self.stakeAmount.set(stakeId, msg.amount);
-        self.stakeRoiBasisPoints.set(stakeId, self.annualRoiBasisPoints);
+        self.stakeRoiBasisPoints.set(stakeId, self.roiForDuration(configuredDuration));
         self.stakeKind.set(stakeId, configuredKind);
         self.stakeStartedAt.set(stakeId, now());
         self.stakeDuration.set(stakeId, configuredDuration);
@@ -617,11 +735,25 @@ contract GramPadGramxStaking {
     }
 
     get fun get_contract_version(): Int {
-        return 10;
+        return 11;
     }
 
     get fun get_contract_details(): ContractDetails {
         return self.getContractDetails();
+    }
+
+    get fun get_staking_plans(): StakingPlans {
+        return self.getStakingPlans();
+    }
+
+    fun getStakingPlans(): StakingPlans {
+        return StakingPlans{
+            sevenDaysRoiBasisPoints: self.sevenDaysRoiBasisPoints,
+            thirtyDaysRoiBasisPoints: self.thirtyDaysRoiBasisPoints,
+            threeMonthsRoiBasisPoints: self.threeMonthsRoiBasisPoints,
+            nineMonthsRoiBasisPoints: self.nineMonthsRoiBasisPoints,
+            twelveMonthsRoiBasisPoints: self.twelveMonthsRoiBasisPoints
+        };
     }
 
     get fun get_user_summary(user: Address): UserSummary {
@@ -686,6 +818,7 @@ contract GramPadGramxStaking {
 
         return StakingDashboard{
             contractDetails: self.getContractDetails(),
+            stakingPlans: self.getStakingPlans(),
             userSummary: UserSummary{
                 user: user,
                 totalStakePositions: total,

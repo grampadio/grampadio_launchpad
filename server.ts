@@ -84,7 +84,7 @@ const loginAttempts = new Map<string, { count: number; resetAt: number }>();
 const applicationAttempts = new Map<string, number>();
 
 const tonClient = new TonClient({
-  endpoint: process.env.VITE_TONCENTER_ENDPOINT || 'https://toncenter.com/api/v2/jsonRPC',
+  endpoint: process.env.VITE_TONCENTER_ENDPOINT || '',
   apiKey: process.env.VITE_TONCENTER_API_KEY,
 });
 
@@ -315,6 +315,7 @@ function formatProjectForUser(project: LaunchpadProject, walletAddress?: string)
     : [];
   const votedAddresses = project.votedAddresses || {};
   const voteProgressByAddress = project.voteProgressByAddress || {};
+  const contributionProgressByAddress = project.contributionProgressByAddress || {};
 
   let status = project.status;
   if (project.idoStage === 'upcoming') {
@@ -334,6 +335,9 @@ function formatProjectForUser(project: LaunchpadProject, walletAddress?: string)
   const userVoteProgress = address
     ? (userVoted ? 'done' : voteProgressByAddress[address]?.status)
     : undefined;
+  const userContributionProgress = address
+    ? contributionProgressByAddress[address]?.status
+    : undefined;
   const isUserWhitelisted = whitelistedAddresses && address ? whitelistedAddresses.includes(address) : false;
 
   return {
@@ -345,11 +349,13 @@ function formatProjectForUser(project: LaunchpadProject, walletAddress?: string)
     whitelistedAddresses,
     votedAddresses,
     voteProgressByAddress,
+    contributionProgressByAddress,
     votesUp,
     votesDown,
     whitelistCount,
     userVoted,
     userVoteProgress,
+    userContributionProgress,
     isUserWhitelisted
   };
 }
@@ -404,6 +410,91 @@ const syncVoteFromChain = async (
     confirmed: true,
     addressKey,
     voteType,
+  };
+};
+
+const syncContributionFromChain = async (
+  project: LaunchpadProject,
+  contributorAddress: string,
+  txHash = 'on-chain-contribution-sync'
+) => {
+  const contributor = parseContractGetterAddress(contributorAddress);
+  const addressKey = contributor.toRawString().toLowerCase();
+  const contract = openIdoContract(project);
+  const [chainContribution, chainRaised, chainAllocation, chainUsdtDecimals] = await Promise.all([
+    runUserBigIntGetter(project.idoContractAddress!, 'get_user_contribution', contributorAddress),
+    contract.getGetRaisedCapital(),
+    runUserBigIntGetter(project.idoContractAddress!, 'get_user_allocation', contributorAddress),
+    contract.getGetUsdtDecimals(),
+  ]);
+  const usdtDecimals = Number(chainUsdtDecimals);
+  const unit = 10 ** usdtDecimals;
+  const activeContributions = Array.isArray(project.contributions) ? project.contributions : [];
+  project.contributions = activeContributions;
+
+  const existingContribution = project.contributions
+    .filter(c => {
+      try {
+        return canonicalAddressKey(c.contributor) === addressKey && !c.refunded;
+      } catch {
+        return c.contributor.trim().toLowerCase() === contributorAddress.trim().toLowerCase() && !c.refunded;
+      }
+    })
+    .reduce((sum, c) => sum + c.usdtAmount, 0);
+  const existingContributionBase = toUsdtBaseUnits(existingContribution, usdtDecimals);
+
+  if (!project.contributionProgressByAddress) {
+    project.contributionProgressByAddress = {};
+  }
+
+  project.usdtDecimals = usdtDecimals;
+  project.raised = Number(chainRaised) / unit;
+
+  if (chainContribution <= existingContributionBase) {
+    delete project.contributionProgressByAddress[addressKey];
+    return {
+      confirmed: false,
+      addressKey,
+      deltaUsdt: 0,
+      tokenDelta: 0,
+    };
+  }
+
+  const deltaBase = chainContribution - existingContributionBase;
+  const deltaUsdt = Number(deltaBase) / unit;
+  const existingTokenAmount = project.contributions
+    .filter(c => {
+      try {
+        return canonicalAddressKey(c.contributor) === addressKey && !c.refunded;
+      } catch {
+        return c.contributor.trim().toLowerCase() === contributorAddress.trim().toLowerCase() && !c.refunded;
+      }
+    })
+    .reduce((sum, c) => sum + c.tokenAmount, 0);
+  const tokenDelta = Math.max(
+    0,
+    Number(chainAllocation) / (10 ** project.decimals) - existingTokenAmount
+  );
+
+  project.contributions.unshift({
+    contributor: contributorAddress,
+    usdtAmount: deltaUsdt,
+    tokenAmount: tokenDelta,
+    timestamp: Date.now(),
+  });
+  project.contributionsCount = project.contributions.filter(c => !c.refunded && c.usdtAmount > 0).length;
+  project.contributionProgressByAddress[addressKey] = {
+    status: 'done',
+    usdtAmount: deltaUsdt,
+    txHash,
+    updatedAt: Date.now(),
+  };
+
+  return {
+    confirmed: true,
+    addressKey,
+    deltaUsdt,
+    tokenDelta,
   };
 };
 
@@ -806,7 +897,7 @@ async function startServer() {
         }
       }
 
-      const urlFields = ['logo', 'banner', 'website', 'telegram', 'twitter', 'discord', 'github'] as const;
+      const urlFields = ['website', 'telegram', 'twitter', 'discord', 'github'] as const;
       for (const field of urlFields) {
         const value = (project as any)[field];
         if (!validOptionalUrl(value)) {
@@ -859,6 +950,31 @@ async function startServer() {
           return;
         }
         project.cliffDurationDays = cliffDurationDays;
+      }
+
+      const nextStartTime =
+        req.body.startTime !== undefined ? Number(req.body.startTime) : project.startTime;
+      const nextEndTime =
+        req.body.endTime !== undefined ? Number(req.body.endTime) : project.endTime;
+
+      if (req.body.startTime !== undefined || req.body.endTime !== undefined) {
+        if (!Number.isFinite(nextStartTime) || nextStartTime <= 0) {
+          res.status(400).json({ error: 'Start time must be a valid date.' });
+          return;
+        }
+
+        if (!Number.isFinite(nextEndTime) || nextEndTime <= 0) {
+          res.status(400).json({ error: 'End time must be a valid date.' });
+          return;
+        }
+
+        if (nextEndTime <= nextStartTime) {
+          res.status(400).json({ error: 'End time must be after start time.' });
+          return;
+        }
+
+        project.startTime = nextStartTime;
+        project.endTime = nextEndTime;
       }
 
       if (req.body.aiAudit !== undefined) {
@@ -1022,10 +1138,6 @@ async function startServer() {
         return;
       }
 
-      if (!validOptionalUrl(req.body.logo)) {
-        res.status(400).json({ error: 'Logo must be a valid HTTP or HTTPS URL.' });
-        return;
-      }
 
       const urlFields = [
         'website', 'whitepaper', 'pitchDeck', 'github', 'telegram', 'twitter', 'auditLink',
@@ -1234,7 +1346,9 @@ console.log('txHash:', txHash);
          return;
       }
 
-      const normalizedDurationDays = Number(durationDays);
+      const normalizedDurationDays = durationDays === undefined || durationDays === ''
+        ? 30
+        : Number(durationDays);
       if (
         !Number.isInteger(normalizedDurationDays) ||
         normalizedDurationDays < 1 ||
@@ -1341,6 +1455,7 @@ console.log('txHash:', txHash);
         votesUp: 0,
         votesDown: 0,
         voteProgressByAddress: {},
+        contributionProgressByAddress: {},
         whitelistCount: 0,
         isUserWhitelisted: false,
         vestingTgePercent: Number(req.body.vestingTgePercent) || 20,
@@ -1423,6 +1538,91 @@ console.log('txHash:', txHash);
     }
   });
 
+  app.post('/api/projects/:id/contribution-progress', async (req, res) => {
+    try {
+      const { contributor, usdtAmount, txHash } = req.body;
+      if (!contributor) {
+        res.status(400).json({ error: 'Contributor wallet address is required.' });
+        return;
+      }
+
+      const db = await getDatabase();
+      const index = db.findIndex(p => p.id === req.params.id);
+      if (index === -1) {
+        res.status(404).json({ error: 'Project not found' });
+        return;
+      }
+
+      const project = db[index];
+      if (!isProjectEnabled(project)) {
+        res.status(404).json({ error: 'Project not found' });
+        return;
+      }
+      if (project.idoStage !== 'sale') {
+        res.status(400).json({ error: 'Contribution is only open during the sale stage.' });
+        return;
+      }
+
+      const contributorKey = canonicalAddressKey(contributor);
+      if (!project.contributionProgressByAddress) {
+        project.contributionProgressByAddress = {};
+      }
+      project.contributionProgressByAddress[contributorKey] = {
+        status: 'pending',
+        usdtAmount: Number(usdtAmount) || undefined,
+        txHash,
+        updatedAt: Date.now(),
+      };
+
+      db[index] = project;
+      await saveDatabase(db);
+      res.json({ success: true, project: formatProjectForUser(project, contributor) });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post('/api/projects/:id/contribution/sync', async (req, res) => {
+    try {
+      const { contributor, txHash } = req.body;
+      if (!contributor) {
+        res.status(400).json({ error: 'Contributor wallet address is required.' });
+        return;
+      }
+
+      const db = await getDatabase();
+      const index = db.findIndex(p => p.id === req.params.id);
+      if (index === -1) {
+        res.status(404).json({ error: 'Project not found' });
+        return;
+      }
+
+      const project = db[index];
+      if (!isProjectEnabled(project)) {
+        res.status(404).json({ error: 'Project not found' });
+        return;
+      }
+      if (project.idoStage !== 'sale' && project.idoStage !== 'distribution') {
+        res.status(400).json({ error: 'Contribution sync is only available during sale or distribution.' });
+        return;
+      }
+
+      const syncResult = await syncContributionFromChain(project, contributor, txHash);
+      db[index] = project;
+      await saveDatabase(db);
+
+      res.json({
+        success: true,
+        confirmed: syncResult.confirmed,
+        usdtAmount: syncResult.deltaUsdt,
+        tokenAmount: syncResult.tokenDelta,
+        project: formatProjectForUser(project, contributor),
+      });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // Contribute (Buy) inside Sale stage using USDT on TON
   app.post('/api/projects/:id/contribute', async (req, res) => {
     try {
@@ -1473,7 +1673,13 @@ console.log('txHash:', txHash);
       }
 
       const existingContribution = project.contributions
-        .filter(c => c.contributor.toLowerCase() === contributor.toLowerCase())
+        .filter(c => {
+          try {
+            return canonicalAddressKey(c.contributor) === contributorKey && !c.refunded;
+          } catch {
+            return c.contributor.trim().toLowerCase() === contributor.trim().toLowerCase() && !c.refunded;
+          }
+        })
         .reduce((sum, c) => sum + c.usdtAmount, 0);
       const contract = openIdoContract(project);
       const [chainContribution, chainRaised, chainAllocation, chainUsdtDecimals] = await Promise.all([
@@ -1489,7 +1695,13 @@ console.log('txHash:', txHash);
       }
 
       const existingTokenAmount = project.contributions
-        .filter(c => c.contributor.toLowerCase() === contributor.toLowerCase())
+        .filter(c => {
+          try {
+            return canonicalAddressKey(c.contributor) === contributorKey && !c.refunded;
+          } catch {
+            return c.contributor.trim().toLowerCase() === contributor.trim().toLowerCase() && !c.refunded;
+          }
+        })
         .reduce((sum, c) => sum + c.tokenAmount, 0);
       const tokenAmt = Math.max(
         0,
@@ -1504,8 +1716,17 @@ console.log('txHash:', txHash);
 
       project.raised = Number(chainRaised) / (10 ** usdtDecimals);
       project.usdtDecimals = usdtDecimals;
-      project.contributionsCount += 1;
       project.contributions.unshift(newContribution);
+      project.contributionsCount = project.contributions.filter(c => !c.refunded && c.usdtAmount > 0).length;
+      if (!project.contributionProgressByAddress) {
+        project.contributionProgressByAddress = {};
+      }
+      project.contributionProgressByAddress[contributorKey] = {
+        status: 'done',
+        usdtAmount: amt,
+        txHash,
+        updatedAt: Date.now(),
+      };
 
       db[index] = project;
       await saveDatabase(db);
@@ -1656,7 +1877,7 @@ console.log('txHash:', txHash);
       const gramxBalance = await getUserGramxBalance(voterAddress);
       if (gramxBalance < GRAMX_VOTING_MIN_BALANCE) {
         res.status(403).json({
-          error: 'At least 1 GRAMX is required to vote on GramPad.',
+          error: 'At least 1 GRAMX is required to vote on GramPad2.',
         });
         return;
       }
@@ -1843,6 +2064,7 @@ console.log('txHash:', txHash);
       project.idoStage = requestedStage as LaunchpadProject['idoStage'];
       project.usdtDecimals = Number(chainUsdtDecimals);
       project.raised = Number(chainRaised) / (10 ** project.usdtDecimals);
+      const transitionTime = Date.now();
       
       if (requestedStage !== 'distribution' && nextPhaseTime) {
         project.nextPhaseTime = Number(nextPhaseTime);
@@ -1854,6 +2076,7 @@ console.log('txHash:', txHash);
       if (confirmedStage === 5) {
         project.status = 'failed';
         project.idoStage = 'distribution';
+        project.endTime = transitionTime;
       } else if (requestedStage === 'upcoming') {
         project.status = 'upcoming';
       } else if (requestedStage === 'sale') {
@@ -1861,13 +2084,14 @@ console.log('txHash:', txHash);
       } else if (requestedStage === 'vote' || requestedStage === 'preparation' || requestedStage === 'whitelist') {
         project.status = 'active';
       } else if (requestedStage === 'distribution') {
+        project.endTime = transitionTime;
         if (project.raised < project.softCap) {
           project.status = 'failed';
         } else {
           project.status = 'success';
         }
         if (!project.distributionStartTime) {
-          project.distributionStartTime = Date.now();
+          project.distributionStartTime = transitionTime;
         }
       }
 
@@ -1973,7 +2197,7 @@ console.log('txHash:', txHash);
     }
   });
 
-  // Investor Refund if Soft Cap fails (raised < softCap) during Distribution phase
+  // Investor refund after failure, or voluntary contribution withdrawal during sale.
   app.post('/api/projects/:id/refund', async (req, res) => {
     try {
       const { contributor, txHash } = req.body;
@@ -1994,11 +2218,6 @@ console.log('txHash:', txHash);
         res.status(404).json({ error: 'Project not found' });
         return;
       }
-      // Refund is only valid if project didn't meet soft cap-target and is either in distribution/failed status or ended
-      if (project.raised >= project.softCap) {
-        res.status(400).json({ error: 'Soft cap was reached. Refund is not available. Please claim your vested tokens instead.' });
-        return;
-      }
 
       const matchingContributions = project.contributions.filter(c => {
         try {
@@ -2012,10 +2231,18 @@ console.log('txHash:', txHash);
         return;
       }
 
-      const chainRefunded = await openIdoContract(project)
-        .getGetUserRefunded(parseContractGetterAddress(contributor));
-      if (!chainRefunded) {
-        res.status(409).json({ error: 'USDT refund is not confirmed by the IDO contract.' });
+      const openedIdo = openIdoContract(project);
+      const contributorAddress = parseContractGetterAddress(contributor);
+      const [chainStage, chainRefunded, chainContribution, chainRaised, chainUsdtDecimals] = await Promise.all([
+        openedIdo.getGetIdoState(),
+        openedIdo.getGetUserRefunded(contributorAddress),
+        openedIdo.getGetUserContribution(contributorAddress),
+        openedIdo.getGetRaisedCapital(),
+        openedIdo.getGetUsdtDecimals(),
+      ]);
+      const isSaleWithdrawal = chainStage === 3n;
+      if (!chainRefunded && chainContribution !== 0n) {
+        res.status(409).json({ error: 'USDT refund or contribution withdrawal is not confirmed by the IDO contract.' });
         return;
       }
 
@@ -2040,11 +2267,19 @@ console.log('txHash:', txHash);
       }
 
       matchingContributions.forEach(contribution => {
-        contribution.refunded = true;
+        contribution.refunded = !isSaleWithdrawal;
+        if (isSaleWithdrawal) {
+          contribution.usdtAmount = 0;
+          contribution.tokenAmount = 0;
+        }
       });
-      
-      // We can optionally reduce project.raised if we want to show decrement, but generally raised is a historic sum.
-      // Let's keep raised historic, but flag contribution as refunded.
+
+      const usdtDecimalsNumber = Number(chainUsdtDecimals);
+      project.usdtDecimals = usdtDecimalsNumber;
+      project.raised = Number(chainRaised) / (10 ** usdtDecimalsNumber);
+      project.contributionsCount = project.contributions.filter(
+        contribution => !contribution.refunded && contribution.usdtAmount > 0
+      ).length;
 
       db[index] = project;
       await saveDatabase(db);

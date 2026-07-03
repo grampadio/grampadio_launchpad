@@ -358,7 +358,7 @@ export default function LaunchpadList({
                       </span>
                     </div>
                     <div>
-                      <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-600"><LockKeyhole className="h-3 w-3" /> Vesting</span>
+                      <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-600"><LockKeyhole className="h-3 w-3" /> Linear Vesting</span>
                       <span className="font-semibold text-emerald-400 mt-1 block font-mono">
                         {project.vestingMonths ?? Math.max(1, Math.ceil((project.vestingDays || 90) / 30))} months
                       </span>

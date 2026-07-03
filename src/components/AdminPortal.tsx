@@ -31,7 +31,21 @@ import {
 } from 'lucide-react';
 import { AIAudit, AdminSession, LaunchpadProject, ProjectApplication, SwapSettings, WalletState } from '../types.js';
 import TokenLauncher from './TokenLauncher.js';
-import { cellToBase64 } from '../ton/gramStarter.js';
+import {
+  buildChangeAdminPayload,
+  buildFundIdoTonPayload,
+  buildAdvanceStagePayload,
+  buildSetAdminBlockedPayload,
+  buildSetIdoJettonWalletsPayload,
+  buildSuperWithdrawAnyJettonPayload,
+  buildSuperWithdrawJettonPayload,
+  buildSuperWithdrawTonPayload,
+  buildWithdrawRaisedUsdtPayload,
+  buildWithdrawRemainingSaleTokensPayload,
+  cellToBase64,
+  getIdoAdminField,
+  getIdoContractLightStatus,
+} from '../ton/gramStarter.js';
 import {
   GramPadUniversalLocker,
   storeDeploy,
@@ -66,7 +80,7 @@ interface AdminPortalProps {
   onDeploySuccess: (project: LaunchpadProject) => void;
 }
 
-type AdminView = 'overview' | 'projects' | 'applications' | 'create' | 'swap' | 'lplocker';
+type AdminView = 'overview' | 'projects' | 'applications' | 'create' | 'swap' | 'lplocker' | 'idoContract';
 type ApplicationStatus = NonNullable<ProjectApplication['status']>;
 
 const inputClass =
@@ -74,6 +88,20 @@ const inputClass =
 
 const labelClass =
   'mb-2 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400';
+
+const toDateTimeLocalValue = (value?: number | string | Date) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
+};
+
+const fromDateTimeLocalValue = (value: string) => {
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
 
 const applicationStatusLabels: Record<ApplicationStatus, string> = {
   in_review: 'In review',
@@ -148,6 +176,24 @@ export default function AdminPortal({
     usdtAmount: '',
     destination: '',
   });
+  const [idoTools, setIdoTools] = useState({
+    contractAddress: '',
+    destination: '',
+    newAdmin: '',
+    superJettonAsset: '0',
+    superJettonAmount: '',
+    superAnyJettonWallet: '',
+    superAnyJettonAmount: '',
+    superTonAmount: '',
+    fundTonAmount: '0.5',
+    adminBlocked: false,
+    advanceStage: '3',
+    usdtWalletAddress: '',
+    saleTokenWalletAddress: '',
+  });
+  const [idoDetails, setIdoDetails] = useState<any | null>(null);
+  const [idoLoading, setIdoLoading] = useState(false);
+  const [idoFieldLoading, setIdoFieldLoading] = useState<string | null>(null);
   const UNIVERSAL_LOCKER_ADDRESS =
   (import.meta as any).env.VITE_UNIVERSAL_LOCKER_ADDRESS || '';
 
@@ -286,6 +332,8 @@ export default function AdminPortal({
       'promoted',
       'listingStatus',
       'cliffDurationDays',
+      'startTime',
+      'endTime',
       'aiAudit',
     ] as const;
 
@@ -425,6 +473,258 @@ export default function AdminPortal({
     } catch {
       setMessage({ type: 'error', text: 'Failed to copy.' });
     }
+  };
+
+  const loadIdoDetails = async () => {
+    setIdoLoading(true);
+    setActionError('');
+    setMessage(null);
+
+    try {
+      if (!idoTools.contractAddress.trim()) {
+        throw new Error('Enter an IDO smart contract address.');
+      }
+      const details = await getIdoContractLightStatus(idoTools.contractAddress);
+      setIdoDetails(details);
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Failed to load IDO contract.' });
+    } finally {
+      setIdoLoading(false);
+    }
+  };
+
+  const loadIdoField = async (field: string) => {
+    setIdoFieldLoading(field);
+    setMessage(null);
+
+    try {
+      if (!idoTools.contractAddress.trim()) {
+        throw new Error('Enter an IDO smart contract address.');
+      }
+      const value = await getIdoAdminField(idoTools.contractAddress, field);
+      setIdoDetails((current: any) => ({
+        ...(current || { address: idoTools.contractAddress.trim() }),
+        [field]: value,
+      }));
+      if (field === 'adminBlocked') {
+        setIdoTools(current => ({ ...current, adminBlocked: Boolean(value) }));
+      }
+      if (field === 'usdtWallet') {
+        setIdoTools(current => ({ ...current, usdtWalletAddress: value ? value.toString() : current.usdtWalletAddress }));
+      }
+      if (field === 'saleTokenWallet') {
+        setIdoTools(current => ({ ...current, saleTokenWalletAddress: value ? value.toString() : current.saleTokenWalletAddress }));
+      }
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || `Failed to load ${field}.` });
+    } finally {
+      setIdoFieldLoading(null);
+    }
+  };
+
+  const sendIdoAdminTransaction = async (
+    actionKey: string,
+    label: string,
+    payload: string,
+    amount: bigint
+  ) => {
+    setAction(actionKey);
+    setActionError('');
+    setMessage(null);
+
+    try {
+      requireWallet();
+      if (!idoTools.contractAddress.trim()) {
+        throw new Error('Enter an IDO smart contract address.');
+      }
+
+      await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        messages: [
+          {
+            address: idoTools.contractAddress.trim(),
+            amount: amount.toString(),
+            payload,
+          },
+        ],
+      });
+
+      setMessage({ type: 'success', text: `${label} transaction sent.` });
+      window.setTimeout(() => {
+        loadIdoDetails();
+      }, 5000);
+    } catch (error: any) {
+      if (error.message !== 'Connect wallet first.') {
+        setMessage({ type: 'error', text: error.message || `${label} failed.` });
+      }
+    } finally {
+      setAction(null);
+    }
+  };
+
+  const withdrawIdoRaisedUsdt = () =>
+    sendIdoAdminTransaction(
+      'ido-withdraw-raised',
+      'Withdraw raised USDT',
+      buildWithdrawRaisedUsdtPayload(),
+      toNano('0.35')
+    );
+
+  const advanceIdoStage = () =>
+    sendIdoAdminTransaction(
+      'ido-advance-stage',
+      `Advance IDO to stage ${idoTools.advanceStage}`,
+      buildAdvanceStagePayload(idoTools.advanceStage === '5' ? 5 : idoTools.advanceStage === '4' ? 4 : 3),
+      toNano('0.05')
+    );
+
+  const configureIdoJettonWallets = () => {
+    if (!idoTools.usdtWalletAddress.trim() || !idoTools.saleTokenWalletAddress.trim()) {
+      setMessage({ type: 'error', text: 'Enter both IDO USDT wallet and sale-token wallet addresses.' });
+      return;
+    }
+    sendIdoAdminTransaction(
+      'ido-configure-wallets',
+      'Configure IDO Jetton wallets',
+      buildSetIdoJettonWalletsPayload(
+        idoTools.usdtWalletAddress,
+        idoTools.saleTokenWalletAddress
+      ),
+      toNano('0.25')
+    );
+  };
+
+  const withdrawIdoSaleTokens = () =>
+    sendIdoAdminTransaction(
+      'ido-withdraw-sale-tokens',
+      'Withdraw remaining sale tokens',
+      buildWithdrawRemainingSaleTokensPayload(),
+      toNano('0.35')
+    );
+
+  const updateIdoAdminBlocked = () =>
+    sendIdoAdminTransaction(
+      'ido-admin-blocked',
+      idoTools.adminBlocked ? 'Block project admin' : 'Unblock project admin',
+      buildSetAdminBlockedPayload(idoTools.adminBlocked),
+      toNano('0.05')
+    );
+
+  const changeIdoAdmin = () => {
+    if (!idoTools.newAdmin.trim()) {
+      setMessage({ type: 'error', text: 'Enter the new admin address.' });
+      return;
+    }
+    sendIdoAdminTransaction(
+      'ido-change-admin',
+      'Change project admin',
+      buildChangeAdminPayload(idoTools.newAdmin),
+      toNano('0.05')
+    );
+  };
+
+  const superWithdrawIdoJetton = () => {
+    if (!idoTools.destination.trim()) {
+      setMessage({ type: 'error', text: 'Enter destination address.' });
+      return;
+    }
+    let amount = 0n;
+    try {
+      amount = BigInt(String(idoTools.superJettonAmount || '0'));
+    } catch {
+      setMessage({ type: 'error', text: 'Jetton amount must be a whole number in base units.' });
+      return;
+    }
+    if (amount <= 0n) {
+      setMessage({ type: 'error', text: 'Enter a positive Jetton amount in base units.' });
+      return;
+    }
+    sendIdoAdminTransaction(
+      'ido-super-withdraw-jetton',
+      'Emergency Jetton withdraw',
+      buildSuperWithdrawJettonPayload(
+        idoTools.superJettonAsset === '1' ? 1 : 0,
+        amount,
+        idoTools.destination
+      ),
+      toNano('0.35')
+    );
+  };
+
+  const superWithdrawAnyIdoJetton = () => {
+    if (!idoTools.destination.trim()) {
+      setMessage({ type: 'error', text: 'Enter destination address.' });
+      return;
+    }
+    if (!idoTools.superAnyJettonWallet.trim()) {
+      setMessage({ type: 'error', text: 'Enter the Jetton wallet address to withdraw from.' });
+      return;
+    }
+    let amount = 0n;
+    try {
+      amount = BigInt(String(idoTools.superAnyJettonAmount || '0'));
+    } catch {
+      setMessage({ type: 'error', text: 'Jetton amount must be a whole number in base units.' });
+      return;
+    }
+    if (amount <= 0n) {
+      setMessage({ type: 'error', text: 'Enter a positive Jetton amount in base units.' });
+      return;
+    }
+    sendIdoAdminTransaction(
+      'ido-super-withdraw-any-jetton',
+      'Emergency any Jetton withdraw',
+      buildSuperWithdrawAnyJettonPayload(
+        idoTools.superAnyJettonWallet,
+        amount,
+        idoTools.destination
+      ),
+      toNano('0.35')
+    );
+  };
+
+  const superWithdrawIdoTon = () => {
+    if (!idoTools.destination.trim()) {
+      setMessage({ type: 'error', text: 'Enter destination address.' });
+      return;
+    }
+    let amount = 0n;
+    try {
+      amount = toNano(idoTools.superTonAmount || '0');
+    } catch {
+      setMessage({ type: 'error', text: 'TON amount must be a valid decimal number.' });
+      return;
+    }
+    if (amount <= 0n) {
+      setMessage({ type: 'error', text: 'Enter a positive TON amount.' });
+      return;
+    }
+    sendIdoAdminTransaction(
+      'ido-super-withdraw-ton',
+      'Emergency TON withdraw',
+      buildSuperWithdrawTonPayload(amount, idoTools.destination),
+      toNano('0.05')
+    );
+  };
+
+  const fundIdoTon = () => {
+    let amount = 0n;
+    try {
+      amount = toNano(idoTools.fundTonAmount || '0');
+    } catch {
+      setMessage({ type: 'error', text: 'Funding amount must be a valid TON decimal number.' });
+      return;
+    }
+    if (amount <= 0n) {
+      setMessage({ type: 'error', text: 'Enter a positive TON funding amount.' });
+      return;
+    }
+    sendIdoAdminTransaction(
+      'ido-fund-ton',
+      'Fund IDO TON reserve',
+      buildFundIdoTonPayload(),
+      amount
+    );
   };
 
   const saveSwapSettingsDraft = async (next: SwapSettings) => {
@@ -889,6 +1189,7 @@ export default function AdminPortal({
     { id: 'projects' as const, label: 'Projects', icon: FileText },
     { id: 'applications' as const, label: 'Applications', icon: CheckCircle2 },
     { id: 'create' as const, label: 'Create project', icon: Plus },
+    { id: 'idoContract' as const, label: 'IDO Contract', icon: ShieldCheck },
     { id: 'swap' as const, label: 'Swap', icon: Shuffle },
     { id: 'lplocker' as const, label: 'LP Locker', icon: UploadIcon },
   ];
@@ -900,6 +1201,47 @@ export default function AdminPortal({
       : applications.filter(
           app => (app.status || 'in_review') === applicationFilter
         );
+
+  const idoStageLabel = (stage: unknown) => {
+    if (stage === null || stage === undefined || stage === '') return 'Not loaded';
+    const value = Number(stage);
+    if (value === 0) return '0 - Vote';
+    if (value === 3) return '3 - Sale';
+    if (value === 4) return '4 - Distribution';
+    if (value === 5) return '5 - Failed';
+    return String(stage ?? 'Unknown');
+  };
+
+  const idoValue = (value: unknown) => {
+    if (typeof value === 'bigint') return value.toString();
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (value && typeof value === 'object' && 'toString' in value) return String(value);
+    if (value === null || value === undefined || value === '') return 'Not set';
+    return String(value);
+  };
+
+  const idoUsdtDisplay = (value: unknown) => {
+    if (!idoDetails || value === null || value === undefined || value === '') return 'Not loaded';
+    const raw = typeof value === 'bigint' ? value : BigInt(String(value || '0'));
+    return `${Number(raw) / (10 ** Number(idoDetails.usdtDecimals || 6))} USDT`;
+  };
+
+  const idoTonDisplay = (value: unknown) => {
+    if (value === null || value === undefined || value === '') return 'Not loaded';
+    const raw = typeof value === 'bigint' ? value : BigInt(String(value || '0'));
+    return `${Number(raw) / 1e9} TON`;
+  };
+
+  const renderIdoFieldButton = (field: string) => (
+    <button
+      type="button"
+      onClick={() => loadIdoField(field)}
+      disabled={idoFieldLoading !== null}
+      className="shrink-0 rounded-lg border border-sky-400/20 bg-sky-400/10 px-2.5 py-1 text-[10px] font-black text-sky-300 transition hover:bg-sky-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {idoFieldLoading === field ? 'Loading...' : 'Call'}
+    </button>
+  );
 
   return (
     <div className="mx-auto max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
@@ -1071,6 +1413,396 @@ export default function AdminPortal({
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {view === 'idoContract' && (
+        <div className="space-y-5">
+          <div className="gp-panel rounded-2xl p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <h2 className="font-bold text-white">IDO smart contract console</h2>
+                <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500">
+                  Load validates the contract with one lightweight RPC call. Use the Call button beside each field to fetch only that on-chain value.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={loadIdoDetails}
+                disabled={idoLoading}
+                className="flex items-center justify-center gap-2 rounded-xl bg-[#0098EA] px-4 py-3 text-xs font-black text-white disabled:opacity-50"
+              >
+                {idoLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                Load Contract
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto]">
+              <label>
+                <span className={labelClass}>IDO contract address</span>
+                <input
+                  className={inputClass}
+                  value={idoTools.contractAddress}
+                  onChange={event => setIdoTools(current => ({ ...current, contractAddress: event.target.value }))}
+                  placeholder="EQ..."
+                />
+              </label>
+
+              <label>
+                <span className={labelClass}>Connected wallet</span>
+                <input
+                  className={inputClass}
+                  value={wallet.connected && wallet.address ? wallet.address : 'Not connected'}
+                  readOnly
+                />
+              </label>
+            </div>
+          </div>
+
+          {idoDetails && (
+            <>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {[
+                  ['Stage', idoStageLabel(idoDetails.stage), 'stage'],
+                  ['Raised', idoUsdtDisplay(idoDetails.raised), 'raised'],
+                  ['Soft cap', idoUsdtDisplay(idoDetails.softCap), 'softCap'],
+                  ['Hard cap', idoUsdtDisplay(idoDetails.hardCap), 'hardCap'],
+                  ['Participants', idoValue(idoDetails.participantCount), 'participantCount'],
+                  ['Claims processed', idoValue(idoDetails.claimsProcessed), 'claimsProcessed'],
+                  ['Refunds processed', idoValue(idoDetails.refundsProcessed), 'refundsProcessed'],
+                  ['Wallets configured', idoValue(idoDetails.walletsConfigured), 'walletsConfigured'],
+                ].map(([label, value, field]) => (
+                  <div key={label} className="gp-panel rounded-2xl p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</span>
+                      {renderIdoFieldButton(String(field))}
+                    </div>
+                    <strong className="mt-2 block break-all text-sm font-black text-white">{value}</strong>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+                <div className="gp-panel rounded-2xl p-5">
+                  <h3 className="text-sm font-bold text-white">Contract details</h3>
+                  <div className="mt-4 grid gap-3">
+                    {[
+                      ['Address', idoDetails.address, ''],
+                      ['Version', idoValue(idoDetails.version), 'version'],
+                      ['TON balance', idoTonDisplay(idoDetails.tonBalance), 'tonBalance'],
+                      ['TON reserve', idoTonDisplay(idoDetails.tonReserve), 'tonReserve'],
+                      ['Deployment ID', idoValue(idoDetails.deploymentId), 'deploymentId'],
+                      ['Owner/admin', idoValue(idoDetails.owner), 'owner'],
+                      ['Superadmin', idoValue(idoDetails.superAdmin), 'superAdmin'],
+                      ['Admin blocked', idoValue(idoDetails.adminBlocked), 'adminBlocked'],
+                      ['Failed reason', idoValue(idoDetails.failedReason), 'failedReason'],
+                      ['Raised USDT withdrawn flag', idoValue(idoDetails.raisedUsdtWithdrawn), 'raisedUsdtWithdrawn'],
+                      ['Remaining sale tokens withdrawn', idoValue(idoDetails.remainingSaleTokensWithdrawn), 'remainingSaleTokensWithdrawn'],
+                      ['USDT decimals', idoValue(idoDetails.usdtDecimals), 'usdtDecimals'],
+                      ['USDT master', idoValue(idoDetails.usdtMaster), 'usdtMaster'],
+                      ['Sale token master', idoValue(idoDetails.saleTokenMaster), 'saleTokenMaster'],
+                      ['USDT wallet', idoValue(idoDetails.usdtWallet), 'usdtWallet'],
+                      ['Sale token wallet', idoValue(idoDetails.saleTokenWallet), 'saleTokenWallet'],
+                      ['Sale token required', idoValue(idoDetails.saleTokenRequired), 'saleTokenRequired'],
+                      ['Sale token deposited', idoValue(idoDetails.saleTokenDeposited), 'saleTokenDeposited'],
+                      ['Sale token claimed', idoValue(idoDetails.saleTokenClaimed), 'saleTokenClaimed'],
+                      ['USDT refunded', idoValue(idoDetails.usdtRefunded), 'usdtRefunded'],
+                      ['Sold tokens', idoValue(idoDetails.soldTokens), 'soldTokens'],
+                      ['Upvotes', idoValue(idoDetails.upvotes), 'upvotes'],
+                      ['Downvotes', idoValue(idoDetails.downvotes), 'downvotes'],
+                      ['TGE basis points', idoValue(idoDetails.tgeBasisPoints), 'tgeBasisPoints'],
+                      ['Cliff seconds', idoValue(idoDetails.cliffDuration), 'cliffDuration'],
+                      ['Vesting periods', idoValue(idoDetails.vestingPeriods), 'vestingPeriods'],
+                      ['Distribution started at', idoValue(idoDetails.distributionStartedAt), 'distributionStartedAt'],
+                    ].map(([label, value, field]) => (
+                      <div
+                        key={String(label)}
+                        className="grid gap-2 rounded-xl border border-white/[0.07] bg-white/[0.025] p-3 text-xs sm:grid-cols-[180px_1fr] sm:items-center"
+                      >
+                        <span className="font-bold uppercase tracking-[0.1em] text-slate-500">{label}</span>
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="min-w-0 break-all font-mono text-slate-200">{value}</span>
+                          {String(value || '').length > 20 && (
+                            <button
+                              type="button"
+                              onClick={() => copyText(String(value))}
+                              className="shrink-0 rounded-lg border border-white/[0.08] p-1 text-slate-400 hover:text-white"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                          )}
+                          {field && renderIdoFieldButton(String(field))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  <div className="gp-panel rounded-2xl p-5">
+                    <h3 className="text-sm font-bold text-white">Setup and stage functions</h3>
+                    <div className="mt-4 space-y-4">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label>
+                          <span className={labelClass}>IDO USDT Jetton wallet</span>
+                          <input
+                            className={inputClass}
+                            value={idoTools.usdtWalletAddress}
+                            onChange={event => setIdoTools(current => ({ ...current, usdtWalletAddress: event.target.value }))}
+                            placeholder="EQ..."
+                          />
+                        </label>
+
+                        <label>
+                          <span className={labelClass}>IDO sale-token Jetton wallet</span>
+                          <input
+                            className={inputClass}
+                            value={idoTools.saleTokenWalletAddress}
+                            onChange={event => setIdoTools(current => ({ ...current, saleTokenWalletAddress: event.target.value }))}
+                            placeholder="EQ..."
+                          />
+                        </label>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={configureIdoJettonWallets}
+                        disabled={!!action}
+                        className="w-full rounded-xl border border-sky-400/20 bg-sky-400/10 px-4 py-3 text-xs font-black text-sky-300 disabled:opacity-50"
+                      >
+                        Configure Jetton Wallets
+                      </button>
+
+                      <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                        <label>
+                          <span className={labelClass}>Advance to contract stage</span>
+                          <select
+                            className={inputClass}
+                            value={idoTools.advanceStage}
+                            onChange={event => setIdoTools(current => ({ ...current, advanceStage: event.target.value }))}
+                          >
+                            <option value="3">3 - Sale</option>
+                            <option value="4">4 - Distribution / Failed result</option>
+                            <option value="5">5 - Failed if soft cap not reached</option>
+                          </select>
+                        </label>
+
+                        <button
+                          type="button"
+                          onClick={advanceIdoStage}
+                          disabled={!!action}
+                          className="rounded-xl bg-[#0098EA] px-4 py-3 text-xs font-black text-white disabled:opacity-50"
+                        >
+                          Advance Stage
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="gp-panel rounded-2xl p-5">
+                    <h3 className="text-sm font-bold text-white">Owner/admin functions</h3>
+                    <div className="mt-4 grid gap-3">
+                      <button
+                        type="button"
+                        onClick={withdrawIdoRaisedUsdt}
+                        disabled={!!action}
+                        className="rounded-xl bg-emerald-500 px-4 py-3 text-xs font-black text-white disabled:opacity-50"
+                      >
+                        Withdraw Raised USDT
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={withdrawIdoSaleTokens}
+                        disabled={!!action}
+                        className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-xs font-black text-emerald-300 disabled:opacity-50"
+                      >
+                        Withdraw Remaining Sale Tokens
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="gp-panel rounded-2xl p-5">
+                    <h3 className="text-sm font-bold text-white">Superadmin controls</h3>
+                    <div className="mt-4 space-y-4">
+                      <label>
+                        <span className={labelClass}>Block project admin</span>
+                        <select
+                          className={inputClass}
+                          value={idoTools.adminBlocked ? 'true' : 'false'}
+                          onChange={event => setIdoTools(current => ({ ...current, adminBlocked: event.target.value === 'true' }))}
+                        >
+                          <option value="false">Unblocked</option>
+                          <option value="true">Blocked</option>
+                        </select>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={updateIdoAdminBlocked}
+                        disabled={!!action}
+                        className="w-full rounded-xl bg-[#0098EA] px-4 py-3 text-xs font-black text-white disabled:opacity-50"
+                      >
+                        Apply Admin Block State
+                      </button>
+
+                      <label>
+                        <span className={labelClass}>New project admin address</span>
+                        <input
+                          className={inputClass}
+                          value={idoTools.newAdmin}
+                          onChange={event => setIdoTools(current => ({ ...current, newAdmin: event.target.value }))}
+                          placeholder="EQ..."
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={changeIdoAdmin}
+                        disabled={!!action}
+                        className="w-full rounded-xl border border-sky-400/20 bg-sky-400/10 px-4 py-3 text-xs font-black text-sky-300 disabled:opacity-50"
+                      >
+                        Change Project Admin
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="gp-panel rounded-2xl p-5">
+                    <h3 className="text-sm font-bold text-white">Emergency withdrawals</h3>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      Superadmin only. Jetton amount is exact base units. Asset `0` = USDT, asset `1` = sale token.
+                    </p>
+
+                    <div className="mt-4 grid gap-3">
+                      <label>
+                        <span className={labelClass}>Destination address</span>
+                        <input
+                          className={inputClass}
+                          value={idoTools.destination}
+                          onChange={event => setIdoTools(current => ({ ...current, destination: event.target.value }))}
+                          placeholder="EQ..."
+                        />
+                      </label>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label>
+                          <span className={labelClass}>Jetton asset</span>
+                          <select
+                            className={inputClass}
+                            value={idoTools.superJettonAsset}
+                            onChange={event => setIdoTools(current => ({ ...current, superJettonAsset: event.target.value }))}
+                          >
+                            <option value="0">USDT</option>
+                            <option value="1">Sale token</option>
+                          </select>
+                        </label>
+
+                        <label>
+                          <span className={labelClass}>Jetton amount base units</span>
+                          <input
+                            className={inputClass}
+                            value={idoTools.superJettonAmount}
+                            onChange={event => setIdoTools(current => ({ ...current, superJettonAmount: event.target.value }))}
+                            placeholder="1000000"
+                          />
+                        </label>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={superWithdrawIdoJetton}
+                        disabled={!!action}
+                        className="rounded-xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-xs font-black text-rose-300 disabled:opacity-50"
+                      >
+                        Super Withdraw Jetton
+                      </button>
+
+                      <div className="rounded-2xl border border-rose-400/15 bg-rose-400/[0.04] p-4">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-rose-300">
+                          Any Jetton wallet emergency withdrawal
+                        </p>
+                        <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                          Use this only for a Jetton wallet owned by this IDO contract. Enter the exact Jetton wallet address and base-unit amount.
+                        </p>
+
+                        <div className="mt-3 grid gap-3">
+                          <label>
+                            <span className={labelClass}>Jetton wallet address</span>
+                            <input
+                              className={inputClass}
+                              value={idoTools.superAnyJettonWallet}
+                              onChange={event => setIdoTools(current => ({ ...current, superAnyJettonWallet: event.target.value }))}
+                              placeholder="EQ..."
+                            />
+                          </label>
+
+                          <label>
+                            <span className={labelClass}>Any Jetton amount base units</span>
+                            <input
+                              className={inputClass}
+                              value={idoTools.superAnyJettonAmount}
+                              onChange={event => setIdoTools(current => ({ ...current, superAnyJettonAmount: event.target.value }))}
+                              placeholder="1000000"
+                            />
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={superWithdrawAnyIdoJetton}
+                            disabled={!!action}
+                            className="rounded-xl border border-rose-400/25 bg-rose-400/10 px-4 py-3 text-xs font-black text-rose-200 disabled:opacity-50"
+                          >
+                            Super Withdraw Any Jetton Wallet
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label>
+                          <span className={labelClass}>TON amount</span>
+                          <input
+                            className={inputClass}
+                            value={idoTools.superTonAmount}
+                            onChange={event => setIdoTools(current => ({ ...current, superTonAmount: event.target.value }))}
+                            placeholder="0.2"
+                          />
+                        </label>
+
+                        <label>
+                          <span className={labelClass}>Fund TON amount</span>
+                          <input
+                            className={inputClass}
+                            value={idoTools.fundTonAmount}
+                            onChange={event => setIdoTools(current => ({ ...current, fundTonAmount: event.target.value }))}
+                            placeholder="0.5"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <button
+                          type="button"
+                          onClick={superWithdrawIdoTon}
+                          disabled={!!action}
+                          className="rounded-xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-xs font-black text-rose-300 disabled:opacity-50"
+                        >
+                          Super Withdraw TON
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={fundIdoTon}
+                          disabled={!!action}
+                          className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-xs font-black text-emerald-300 disabled:opacity-50"
+                        >
+                          Fund Contract TON
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -1779,7 +2511,7 @@ export default function AdminPortal({
                         field === 'twitter' ||
                         field === 'discord' ||
                         field === 'github'
-                          ? 'url'
+                          ? 'text'
                           : 'text'
                       }
                       placeholder={
@@ -1905,6 +2637,50 @@ export default function AdminPortal({
                 />
                 <span className="mt-1 block text-[10px] text-slate-500">
                   Metadata repair only. Keep it equal to the deployed IDO contract cliff.
+                </span>
+              </label>
+
+              <label>
+                <span className={labelClass}>Start time</span>
+                <input
+                  className={inputClass}
+                  type="datetime-local"
+                  value={toDateTimeLocalValue(editing.startTime)}
+                  onChange={event =>
+                    setEditing(current =>
+                      current
+                        ? {
+                            ...current,
+                            startTime: fromDateTimeLocalValue(event.target.value),
+                          }
+                        : current
+                    )
+                  }
+                />
+                <span className="mt-1 block text-[10px] text-slate-500">
+                  DB timer only. This does not change the deployed smart contract.
+                </span>
+              </label>
+
+              <label>
+                <span className={labelClass}>End time</span>
+                <input
+                  className={inputClass}
+                  type="datetime-local"
+                  value={toDateTimeLocalValue(editing.endTime)}
+                  onChange={event =>
+                    setEditing(current =>
+                      current
+                        ? {
+                            ...current,
+                            endTime: fromDateTimeLocalValue(event.target.value),
+                          }
+                        : current
+                    )
+                  }
+                />
+                <span className="mt-1 block text-[10px] text-slate-500">
+                  DB sale-end display only. Contract phase still advances by admin action.
                 </span>
               </label>
 

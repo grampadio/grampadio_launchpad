@@ -53,6 +53,13 @@ export interface LaunchpadProject {
     txHash?: string;
     updatedAt: number;
   }>;
+  userContributionProgress?: 'pending' | 'done';
+  contributionProgressByAddress?: Record<string, {
+    status: 'pending' | 'done';
+    usdtAmount?: number;
+    txHash?: string;
+    updatedAt: number;
+  }>;
   whitelistCount: number;
   isUserWhitelisted?: boolean;
   whitelistedAddresses?: string[];

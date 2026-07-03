@@ -32,7 +32,6 @@ export default function TokenLauncher({ wallet, onOpenConnect, onDeploySuccess, 
   const [hardCap, setHardCap] = useState(30000);
   const [minBuy, setMinBuy] = useState(50);
   const [maxBuy, setMaxBuy] = useState(1000);
-  const [durationDays, setDurationDays] = useState(4);
   const [vestingTgePercent, setVestingTgePercent] = useState(20);
   const [cliffDurationDays, setCliffDurationDays] = useState(0);
   const [vestingMonths, setVestingMonths] = useState(3);
@@ -285,10 +284,6 @@ const handleAIGenerate = async () => {
       return;
     }
 
-    if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 365) {
-      setErrorMsg('IDO Sale Duration must be a whole number between 1 and 365 days.');
-      return;
-    }
     if (!Number.isInteger(cliffDurationDays) || cliffDurationDays < 0 || cliffDurationDays > 3650) {
       setErrorMsg('Cliff Duration must be a whole number between 0 and 3650 days.');
       return;
@@ -384,6 +379,10 @@ const handleAIGenerate = async () => {
         ...current,
         deployed: true,
         configured: current.configured || status.configured,
+        deposited:
+          current.deposited ||
+          (status.saleTokenRequired > 0n &&
+            status.saleTokenDeposited >= status.saleTokenRequired),
       }));
     } catch (err: any) {
       setErrorMsg(
@@ -452,6 +451,26 @@ const handleAIGenerate = async () => {
     setDeployStep('signing');
 
     try {
+      const status = await getIdoConfigurationStatus(
+        pendingDeployment.contract.address.toString()
+      );
+
+      if (!status.configured) {
+        throw new Error('IDO Jetton wallets are not configured yet. Complete step 2 first.');
+      }
+
+      if (status.saleTokenDeposited >= pendingDeployment.saleTokenRequired) {
+        setDeploymentProgress(current => ({ ...current, deployed: true, configured: true, deposited: true }));
+        setDeployStep('idle');
+        return;
+      }
+
+      if (status.stage !== 0n && status.stage !== 3n) {
+        throw new Error(
+          `Sale-token deposit is closed on-chain. The contract accepts deposits only in stage 0 or 3, current stage is ${status.stage.toString()}.`
+        );
+      }
+
       await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 600,
         network: idoNetwork,
@@ -466,6 +485,27 @@ const handleAIGenerate = async () => {
       setDeploymentProgress(current => ({ ...current, deposited: true }));
       setDeployStep('idle');
     } catch (err: any) {
+      try {
+        if (pendingDeployment) {
+          const status = await getIdoConfigurationStatus(
+            pendingDeployment.contract.address.toString()
+          );
+          if (status.saleTokenDeposited >= pendingDeployment.saleTokenRequired) {
+            setDeploymentProgress(current => ({
+              ...current,
+              deployed: true,
+              configured: true,
+              deposited: true,
+            }));
+            setErrorMsg(null);
+            setDeployStep('idle');
+            return;
+          }
+        }
+      } catch {
+        // Keep the original wallet/RPC error below.
+      }
+
       setErrorMsg(err.message || 'Sale-token deposit failed.');
       setDeployStep('idle');
     }
@@ -512,7 +552,7 @@ const handleAIGenerate = async () => {
         hardCap: String(hardCap),
         minBuy: String(minBuy),
         maxBuy: String(maxBuy),
-        durationDays: String(durationDays),
+        durationDays: '30',
         vestingTgePercent: String(vestingTgePercent),
         cliffDurationDays: String(cliffDurationDays || 0),
         vestingMonths: String(vestingMonths),
@@ -994,22 +1034,6 @@ const handleAIGenerate = async () => {
                 <span className="text-[10px] text-slate-500 mt-1 block font-semibold">
                Buyers will receive {rate.toLocaleString()} {symbol || 'JETTON'} tokens for every 1 USDT contributed, at a token price of {(1 / rate).toFixed(6)} USDT.
                 </span>
-              </div>
-
-              {/* Duration deployment */}
-              <div>
-                <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-400">IDO Sale Duration (Days)</label>
-                <input
-                  type="number"
-                  value={durationDays>0?durationDays:""}
-                  onChange={(e) => setDurationDays(Number(e.target.value))}
-                  className="w-full rounded-xl border border-[#1E2E4E]/60 bg-[#0B0F19]/40 px-4 py-2.5 text-sm text-white focus:border-[#0098EA] focus:outline-none"
-                  min="1"
-                  max="365"
-                  step="1"
-                  required
-                />
-                <span className="mt-1 block text-[10px] text-slate-500">Supported sale duration: 1 to 365 days.</span>
               </div>
 
               {/* Soft Cap */}

@@ -12,9 +12,11 @@ import {
   storeConfigureStake,
   storeDeploy,
   storeFundContractTon,
+  storeOwnerWithdrawAnyJetton,
   storeOwnerWithdrawGramx,
   storeOwnerWithdrawTon,
   storeSetAnnualRoi,
+  storeSetDurationRoi,
   storeSetFlexUnstakeFee,
   storeSetGramxJettonWallet,
   storeUnstake,
@@ -26,7 +28,7 @@ import {
   parseTokenAmount,
 } from './gramStarter.js';
 
-export const GRAMX_DECIMALS = Number((import.meta as any).env.VITE_GRAMX_DECIMALS || 9);
+export const GRAMX_DECIMALS = Number((import.meta as any).env.VITE_GRAMX_DECIMALS);
 export const GRAMX_MASTER_ADDRESS = String((import.meta as any).env.VITE_GRAMX_MASTER || '').trim();
 export const STAKING_CONTRACT_ADDRESS = String((import.meta as any).env.VITE_STAKING_CONTRACT_ADDRESS || '').trim();
 export const STAKING_DEFAULT_APR_BPS = Number((import.meta as any).env.VITE_STAKING_DEFAULT_APR_BPS || 0);
@@ -100,12 +102,33 @@ const dedupeStakingRead = <T>(key: string, read: () => Promise<T>): Promise<T> =
 };
 
 export const STAKING_DURATIONS = [
-  { label: '7 days', seconds: 604800n, monthsLabel: '7 days' },
-  { label: '30 days', seconds: 2592000n, monthsLabel: '30 days' },
-  { label: '3 months', seconds: 7776000n, monthsLabel: '3 months' },
-  { label: '9 months', seconds: 23328000n, monthsLabel: '9 months' },
-  { label: '12 months', seconds: 31536000n, monthsLabel: '12 months' },
+{ label: '12 months', seconds: 31536000n, monthsLabel: '12 months' },
+{ label: '9 months', seconds: 23328000n, monthsLabel: '9 months' },
+{ label: '3 months', seconds: 7776000n, monthsLabel: '3 months' },
+{ label: '30 days', seconds: 2592000n, monthsLabel: '30 days' },
+{ label: '7 days', seconds: 604800n, monthsLabel: '7 days' },
 ] as const;
+
+const fallbackPlans = (roiBasisPoints: bigint) => ({
+  sevenDaysRoiBasisPoints: roiBasisPoints,
+  thirtyDaysRoiBasisPoints: roiBasisPoints,
+  threeMonthsRoiBasisPoints: roiBasisPoints,
+  nineMonthsRoiBasisPoints: roiBasisPoints,
+  twelveMonthsRoiBasisPoints: roiBasisPoints,
+});
+
+export const stakingPlanRoiForDuration = (
+  plans: ReturnType<typeof fallbackPlans> | undefined,
+  durationSeconds: bigint | number | string
+) => {
+  const duration = BigInt(durationSeconds);
+  if (!plans) return 0n;
+  if (duration === 604800n) return plans.sevenDaysRoiBasisPoints;
+  if (duration === 2592000n) return plans.thirtyDaysRoiBasisPoints;
+  if (duration === 7776000n) return plans.threeMonthsRoiBasisPoints;
+  if (duration === 23328000n) return plans.nineMonthsRoiBasisPoints;
+  return plans.twelveMonthsRoiBasisPoints;
+};
 
 export type StakeKind = 'flex' | 'locked';
 
@@ -137,6 +160,9 @@ export const formatTokenAmount = (
 
   return fractionText ? `${whole}.${fractionText}` : whole.toString();
 };
+
+export const getUserTonBalance = async (ownerAddress: string) =>
+  getTonClient().getBalance(Address.parse(ownerAddress));
 
 export const roiBpsFromPercent = (value: string | number) =>
   BigInt(Math.round(Math.max(0, Math.min(1000, Number(value) || 0)) * 100));
@@ -222,6 +248,20 @@ export const buildSetAnnualRoiPayload = (annualRoiBasisPoints: bigint) =>
       .endCell()
   );
 
+export const buildSetDurationRoiPayload = (
+  durationDays: number | bigint,
+  annualRoiBasisPoints: bigint
+) =>
+  cellToBase64(
+    beginCell()
+      .store(storeSetDurationRoi({
+        $$type: 'SetDurationRoi',
+        durationDays: BigInt(durationDays),
+        annualRoiBasisPoints,
+      }))
+      .endCell()
+  );
+
 export const buildSetFlexUnstakeFeePayload = (flexUnstakeFeeBasisPoints: bigint) =>
   cellToBase64(
     beginCell()
@@ -268,6 +308,22 @@ export const buildOwnerWithdrawGramxPayload = (
     beginCell()
       .store(storeOwnerWithdrawGramx({
         $$type: 'OwnerWithdrawGramx',
+        amount,
+        destination: Address.parse(destination),
+      }))
+      .endCell()
+  );
+
+export const buildOwnerWithdrawAnyJettonPayload = (
+  jettonWallet: string,
+  amount: bigint,
+  destination: string
+) =>
+  cellToBase64(
+    beginCell()
+      .store(storeOwnerWithdrawAnyJetton({
+        $$type: 'OwnerWithdrawAnyJetton',
+        jettonWallet: Address.parse(jettonWallet),
         amount,
         destination: Address.parse(destination),
       }))
@@ -344,10 +400,12 @@ export const getStakingPoolDetails = async (
   if (!address) throw new Error('Staking contract address is not configured.');
 
   const contract = getTonClient().open(getStakingContract(address));
-  const [version, details] = await Promise.all([
+  const [version, details, plansResult] = await Promise.all([
     contract.getGetContractVersion(),
     contract.getGetContractDetails(),
+    contract.getGetStakingPlans().catch(() => null),
   ]);
+  const plans = plansResult || fallbackPlans(details.annualRoiBasisPoints);
 
   return {
     contractVersion: Number(version),
@@ -357,6 +415,7 @@ export const getStakingPoolDetails = async (
     gramxWallet: details.gramxJettonWallet.toString(),
     walletConfigured: details.jettonWalletConfigured,
     annualRoiBasisPoints: details.annualRoiBasisPoints,
+    plans,
     flexUnstakeFeeBasisPoints: details.flexUnstakeFeeBasisPoints,
     minStake: details.minStake,
     paused: details.paused,
@@ -460,19 +519,21 @@ export const getStakingDashboard = async (
     }
 
     const details = dashboard.contractDetails;
+    const plans = dashboard.stakingPlans || fallbackPlans(details.annualRoiBasisPoints);
     const stakes = Array.from(dashboard.positions.values())
       .map(formatStakePosition)
       .sort((left, right) => Number(left.stakeId - right.stakeId));
 
     return {
       pool: {
-        contractVersion: 10,
+        contractVersion: 11,
         owner: details.owner.toString(),
         deploymentId: details.deploymentId,
         gramxMaster: details.gramxJettonMaster.toString(),
         gramxWallet: details.gramxJettonWallet.toString(),
         walletConfigured: details.jettonWalletConfigured,
         annualRoiBasisPoints: details.annualRoiBasisPoints,
+        plans,
         flexUnstakeFeeBasisPoints: details.flexUnstakeFeeBasisPoints,
         minStake: details.minStake,
         paused: details.paused,
@@ -522,6 +583,13 @@ interface StakingDeploymentInput {
   owner: string;
   gramxMaster: string;
   annualRoiPercent: number;
+  planRoiPercents?: {
+    sevenDays: number;
+    thirtyDays: number;
+    threeMonths: number;
+    nineMonths: number;
+    twelveMonths: number;
+  };
   minStake: string;
   flexUnstakeFeePercent: number;
 }
@@ -532,6 +600,18 @@ export const prepareStakingDeployment = async (
   const owner = Address.parse(input.owner);
   const gramxMaster = Address.parse(input.gramxMaster);
   const annualRoiBasisPoints = roiBpsFromPercent(input.annualRoiPercent);
+  const planRois = input.planRoiPercents || {
+    sevenDays: input.annualRoiPercent,
+    thirtyDays: input.annualRoiPercent,
+    threeMonths: input.annualRoiPercent,
+    nineMonths: input.annualRoiPercent,
+    twelveMonths: input.annualRoiPercent,
+  };
+  const sevenDaysRoiBasisPoints = roiBpsFromPercent(planRois.sevenDays);
+  const thirtyDaysRoiBasisPoints = roiBpsFromPercent(planRois.thirtyDays);
+  const threeMonthsRoiBasisPoints = roiBpsFromPercent(planRois.threeMonths);
+  const nineMonthsRoiBasisPoints = roiBpsFromPercent(planRois.nineMonths);
+  const twelveMonthsRoiBasisPoints = roiBpsFromPercent(planRois.twelveMonths);
   const minStake = parseGRAMXAmount(input.minStake);
   const flexUnstakeFeeBasisPoints = BigInt(
     Math.round(Math.max(0, Math.min(50, Number(input.flexUnstakeFeePercent) || 0)) * 100)
@@ -542,6 +622,11 @@ export const prepareStakingDeployment = async (
     owner,
     gramxMaster,
     annualRoiBasisPoints,
+    sevenDaysRoiBasisPoints,
+    thirtyDaysRoiBasisPoints,
+    threeMonthsRoiBasisPoints,
+    nineMonthsRoiBasisPoints,
+    twelveMonthsRoiBasisPoints,
     minStake,
     flexUnstakeFeeBasisPoints,
     deploymentId
@@ -574,16 +659,23 @@ export const prepareStakingDeployment = async (
     stakingGramxWallet,
     ownerGramxWallet,
     annualRoiBasisPoints,
+    plans: {
+      sevenDaysRoiBasisPoints,
+      thirtyDaysRoiBasisPoints,
+      threeMonthsRoiBasisPoints,
+      nineMonthsRoiBasisPoints,
+      twelveMonthsRoiBasisPoints,
+    },
     deploymentMessage: {
       address: contract.address.toString(),
-      amount: toNano('0.1').toString(),
+      amount: toNano('0.06').toString(),
       stateInit: cellToBase64(stateInitCell),
       payload: cellToBase64(deployPayload),
     },
     setupMessages: [
       {
         address: contract.address.toString(),
-        amount: toNano('0.12').toString(),
+        amount: toNano('0.03').toString(),
         payload: buildSetGramxJettonWalletPayload(stakingGramxWallet),
       },
       {

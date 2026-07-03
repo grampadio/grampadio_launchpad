@@ -106,6 +106,7 @@ export default function LaunchpadDetails({
   const [gramxBalanceLoading, setGramxBalanceLoading] = useState(false);
   const [voteGramxChecked, setVoteGramxChecked] = useState(false);
   const [voteSyncLoading, setVoteSyncLoading] = useState(false);
+  const [contributionSyncLoading, setContributionSyncLoading] = useState(false);
 
   // Creator advanced phase selector state
   const [showAdvanceModal, setShowAdvanceModal] = useState<boolean>(false);
@@ -352,6 +353,10 @@ export default function LaunchpadDetails({
     project.userVoteProgress === 'pending' &&
     !project.userVoted &&
     !userVoted;
+  const contributionIsPending =
+    wallet.connected &&
+    wallet.address &&
+    project.userContributionProgress === 'pending';
 
   // Fetch initial status on mount
   useEffect(() => {
@@ -438,9 +443,9 @@ export default function LaunchpadDetails({
       const nextBalance = await getUserGramxBalance(wallet.address);
       setGramxBalance(nextBalance);
       setVoteGramxChecked(true);
-
+      console.log("GRAMX:",nextBalance)
       if (nextBalance < 10n ** BigInt(GRAMX_DECIMALS)) {
-        throw new Error('At least 1 GRAMX is required to vote on GramPad.');
+        throw new Error('At least 1 GRAMX is required to vote on GramPad1.');
       }
 
       if (!project.idoContractAddress) {
@@ -551,6 +556,54 @@ export default function LaunchpadDetails({
       setVoteSyncLoading(false);
     }
   };
+
+  const handleRefreshContributionStatus = async () => {
+    if (!wallet.connected || !wallet.address) {
+      onOpenConnect();
+      return;
+    }
+
+    setContributionSyncLoading(true);
+    setAuditError(null);
+    try {
+      const res = await fetch(`/api/projects/${project.id}/contribution/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contributor: wallet.address,
+          txHash: 'on-chain-contribution-sync',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Could not refresh contribution status.');
+      }
+
+      if (data.project) {
+        setProject(data.project);
+        setAuditResult(data.project.aiAudit || null);
+      }
+      if (data.confirmed) {
+        setTxStep('complete');
+        onContributeSuccess();
+      } else {
+        setTxStep('idle');
+        setAuditError('No confirmed on-chain contribution was found yet. You can try refresh again if the wallet transaction is still confirming.');
+      }
+    } catch (err: any) {
+      setAuditError(err.message || 'Could not refresh contribution status.');
+    } finally {
+      setContributionSyncLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!contributionIsPending || contributionSyncLoading || txStep !== 'idle') return;
+    const timer = window.setTimeout(() => {
+      handleRefreshContributionStatus();
+    }, 30000);
+    return () => window.clearTimeout(timer);
+  }, [contributionIsPending, project.id, txStep, wallet.address]);
 
   // Whitelist join handler
   const handleJoinWhitelist = async () => {
@@ -865,7 +918,8 @@ export default function LaunchpadDetails({
       if (contributionBefore <= 0n) {
         throw new Error('The IDO contract has no refundable USDT contribution for this wallet.');
       }
-      if (stage !== 5n && !(stage === 4n && chainRaised < chainSoftCap)) {
+      const isSaleWithdrawal = stage === 3n;
+      if (!isSaleWithdrawal && stage !== 5n && !(stage === 4n && chainRaised < chainSoftCap)) {
         throw new Error(`Refund is not available in contract stage ${stage.toString()}.`);
       }
 
@@ -913,7 +967,7 @@ export default function LaunchpadDetails({
           opened.getGetUserRefunded(contributor),
           opened.getGetUserContribution(contributor),
         ]);
-        return refunded && remainingContribution === 0n;
+        return remainingContribution === 0n && (isSaleWithdrawal || refunded);
       }, 90_000, 'The refund transaction was not confirmed. It may have failed or the USDT Jetton transfer may have bounced.');
 
       // A bounced outgoing Jetton transfer restores the contribution. Give the
@@ -923,7 +977,7 @@ export default function LaunchpadDetails({
         openedIdo.getGetUserRefunded(contributor),
         openedIdo.getGetUserContribution(contributor),
       ]);
-      if (!refundStillConfirmed || contributionAfter !== 0n) {
+      if (contributionAfter !== 0n || (!isSaleWithdrawal && !refundStillConfirmed)) {
         throw new Error(
           'The IDO accepted the refund request, but its outgoing USDT transfer bounced. Check the configured IDO USDT Jetton wallet and its USDT balance.'
         );
@@ -958,7 +1012,11 @@ export default function LaunchpadDetails({
       transactions.unshift(newTx);
       localStorage.setItem('ton_launchpad_txs', JSON.stringify(transactions));
 
-      setClaimSuccess(`Successfully claimed 100% refund of ${refundVal.toLocaleString()} USDT back to your wallet! Transaction hash: ${txHash.slice(0, 10)}...`);
+      setClaimSuccess(
+        isSaleWithdrawal
+          ? `Successfully withdrew ${refundVal.toLocaleString()} USDT from the active sale. Transaction hash: ${txHash.slice(0, 10)}...`
+          : `Successfully claimed 100% refund of ${refundVal.toLocaleString()} USDT back to your wallet! Transaction hash: ${txHash.slice(0, 10)}...`
+      );
 
       await reloadProject();
       onContributeSuccess(); // Trigger parent fetch & toast notifications
@@ -1042,6 +1100,23 @@ export default function LaunchpadDetails({
         throw new Error(
           `Insufficient USDT balance. This contribution requires ${contAmount} USDT.`
         );
+      }
+
+      const pendingRes = await fetch(`/api/projects/${project.id}/contribution-progress`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contributor: wallet.address,
+          usdtAmount: amt,
+          txHash: 'wallet-confirmation-pending',
+        }),
+      });
+      const pendingData = await pendingRes.json();
+      if (!pendingRes.ok) {
+        throw new Error(pendingData.error || 'Could not prepare contribution tracking. Please try again.');
+      }
+      if (pendingRes.ok && pendingData.project) {
+        setProject(pendingData.project);
       }
 
       const jettonTransferPayload = beginCell()
@@ -1364,7 +1439,7 @@ export default function LaunchpadDetails({
                       <span className="text-[9px] font-bold uppercase text-emerald-400">
                         Trust Score
                       </span>
-                      <span className="font-mono text-[10px] btn-white-text text-sky-500 border-sky-700 rounded-full  bg-emerald-500 px-1">
+                      <span className="font-mono text-[10px] btn-white-text border-sky-700 rounded-full  bg-emerald-500 px-1">
                         {auditResult.trustScore}/100
                       </span>
                     </div>
@@ -1593,32 +1668,37 @@ export default function LaunchpadDetails({
                   </div>
 <div className="mt-4 grid gap-2">
   <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
-    <p className="text-[11px] leading-relaxed text-emerald-400">
-      <strong className="font-black text-emerald-400">Soft Cap:</strong> Minimum raise needed for sale success. If not reached, investors can claim refunds.
+    <p className="text-[11px] leading-relaxed text-emerald-600">
+      <strong className="font-black text-emerald-600">Soft Cap:</strong> Minimum raise needed for sale success. If not reached, investors can claim refunds.
     </p>
   </div>
 
   <div className="rounded-xl border border-sky-500/20 bg-sky-500/10 px-4 py-3">
-    <p className="text-[11px] leading-relaxed text-sky-400">
-      <strong className="font-black text-sky-400">Hard Cap:</strong> Maximum amount that can be raised. Contributions stop once reached.
+    <p className="text-[11px] leading-relaxed text-sky-600">
+      <strong className="font-black text-sky-600">Hard Cap:</strong> Maximum amount that can be raised. Contributions stop once reached.
     </p>
   </div>
 
   <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 px-4 py-3">
-    <p className="text-[11px] leading-relaxed text-violet-400">
-      <strong className="font-black text-violet-400">TGE Unlock:</strong> Percentage of purchased tokens released immediately at Token Generation Event.
+    <p className="text-[11px] leading-relaxed text-violet-600">
+      <strong className="font-black text-violet-600">TGE Unlock:</strong> Percentage of purchased tokens released immediately at Token Generation Event.
     </p>
   </div>
 
   <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3">
-    <p className="text-[11px] leading-relaxed text-amber-400">
-      <strong className="font-black text-amber-400">Linear Vesting:</strong> Remaining tokens unlock gradually over the vesting period.
+    <p className="text-[11px] leading-relaxed text-amber-600">
+      <strong className="font-black text-amber-600">Linear Vesting:</strong> Remaining tokens unlock gradually over the vesting period.
     </p>
   </div>
 
   <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3">
-    <p className="text-[11px] leading-relaxed text-rose-400">
-      <strong className="font-black text-rose-400">Cliff Duration:</strong> Initial waiting period before any vested tokens become claimable.
+    <p className="text-[11px] leading-relaxed text-rose-600">
+      <strong className="font-black text-rose-600">Cliff Duration:</strong> Initial waiting period before any vested tokens become claimable.
+    </p>
+  </div>
+    <div className="rounded-xl border border-slate-500/20 bg-slate-500/10 px-4 py-3">
+    <p className="text-[11px] leading-relaxed text-slate-600">
+      <strong className="font-black text-slate-600">Investor Shield:</strong> Investors can withdraw their contributed USDT before distribution starts, or claim a 100% refund if the IDO fails.
     </p>
   </div>
 </div>
@@ -1719,10 +1799,12 @@ export default function LaunchpadDetails({
                             </button>
                           </div>
                         </div>
-                        <div className="flex justify-between items-center px-4 py-3 text-xs font-sans">
-                          <span className="text-slate-450 font-medium">Sale End Time</span>
-                          <span className="font-medium text-slate-300">{new Date(project.endTime).toLocaleString()}</span>
-                        </div>
+                        {(project.idoStage === 'distribution' || project.status === 'success' || project.status === 'failed') && (
+                          <div className="flex justify-between items-center px-4 py-3 text-xs font-sans">
+                            <span className="text-slate-450 font-medium">Sale End Time</span>
+                            <span className="font-medium text-slate-300">{new Date(project.endTime).toLocaleString()}</span>
+                          </div>
+                        )}
                       </div>
                     </section>
                   </div>
@@ -1976,7 +2058,7 @@ export default function LaunchpadDetails({
                           <tr className="bg-slate-900 border-b border-slate-800 text-[10px] uppercase font-black tracking-wider text-slate-500 font-sans">
                             <th className="px-5 py-3.5">Contributor Target</th>
                             <th className="px-5 py-3.5 text-right">USDT Amount</th>
-                            <th className="px-5 py-3.5 text-right">Locked Reward</th>
+                            <th className="px-5 py-3.5 text-right">Locked Allocation</th>
                             <th className="px-5 py-3.5 text-right">Timestamp</th>
                           </tr>
                         </thead>
@@ -2363,7 +2445,7 @@ export default function LaunchpadDetails({
                     <div className="rounded-2xl border border-sky-400/20 bg-sky-400/10 p-4 text-center">
                       <div className="mb-3 flex items-center justify-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-400">
                         <AlertCircle className="h-4 w-4" />
-                        Whitelist Ends In
+                        Sale Starts In
                       </div>
 
                       <div className="flex flex-wrap items-center justify-center gap-2 font-mono text-lg font-black tracking-wider">
@@ -2551,6 +2633,35 @@ export default function LaunchpadDetails({
                         </div>
                       )}
 
+                      {contributionIsPending && (
+                        <div className="rounded-xl border border-sky-400/25 bg-sky-400/[0.08] p-3 text-[11px] text-sky-100">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <span className="block text-xs font-bold uppercase tracking-wider text-sky-300">
+                                Contribution transaction pending
+                              </span>
+                              <p className="mt-1 leading-5 text-slate-300">
+                                We found a contribution attempt from this wallet. If the TON transaction confirmed after a refresh, sync it from the smart contract to update raised amount and your allocation.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleRefreshContributionStatus}
+                              disabled={contributionSyncLoading}
+                              className="shrink-0 rounded-lg border border-sky-300/30 bg-sky-300/10 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-sky-200 transition hover:bg-sky-300/15 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              {contributionSyncLoading ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <span className="inline-flex items-center gap-1">
+                                  <RefreshCw className="h-3.5 w-3.5" /> Refresh
+                                </span>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
                       <div>
                         <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-450">Select Contribution (USDT)</label>
                         <div className="relative">
@@ -2605,6 +2716,52 @@ export default function LaunchpadDetails({
                           >
                             {project.isUserWhitelisted ? 'Confirm' : 'Whitelist Required'}
                           </button>
+
+                          {userContribution && userContribution.usdtAmount > 0 && !userContribution.refunded && (
+                            <div className="rounded-xl border border-amber-400/20 bg-amber-400/[0.08] p-3">
+                              <div className="flex items-center justify-between gap-3 text-[11px]">
+                                <span className="font-bold text-amber-300">Your active contribution</span>
+                                <span className="font-mono font-black text-white">
+                                  {userContribution.usdtAmount.toLocaleString()} USDT
+                                </span>
+                              </div>
+
+                              <p className="mt-2 text-[10px] leading-4 text-slate-400">
+                                You can withdraw your contributed USDT any time before distribution starts. This will remove your token allocation and reduce the launchpool raised amount.
+                              </p>
+
+                              {claimError && (
+                                <div className="mt-2 rounded-lg border border-rose-500/30 bg-rose-500/15 p-2 text-[10px] text-rose-300">
+                                  {claimError}
+                                </div>
+                              )}
+
+                              {claimSuccess && (
+                                <div className="mt-2 rounded-lg border border-emerald-500/30 bg-emerald-500/15 p-2 text-[10px] text-emerald-300">
+                                  {claimSuccess}
+                                </div>
+                              )}
+
+                              <button
+                                type="button"
+                                onClick={handleRefund}
+                                disabled={claimLoading}
+                                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400/25 bg-amber-400/10 py-2.5 text-xs font-black text-amber-300 transition hover:bg-amber-400/15 disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {claimLoading ? (
+                                  <>
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    Withdrawing USDT...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Coins className="h-3.5 w-3.5" />
+                                    Withdraw Contribution
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          )}
                         </>
                       ) : (
                         <button

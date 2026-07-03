@@ -9,11 +9,19 @@ import { JettonMaster, JettonWallet, TonClient } from '@ton/ton';
 import {
   GramStarterIdo,
   storeAdvanceStage,
+  storeChangeAdmin,
   storeClaimAllocation,
   storeDeploy,
+  storeFundContractTon,
   storeRefundUSDT,
+  storeSetAdminBlocked,
   storeSetJettonWallets,
+  storeSuperWithdrawAnyJetton,
+  storeSuperWithdrawJetton,
+  storeSuperWithdrawTon,
   storeVote,
+  storeWithdrawRaisedUSDT,
+  storeWithdrawRemainingSaleTokens,
 } from '../../contracts/build/GramStarterIdo_GramStarterIdo.js';
 
 export const MAINNET_USDT_MASTER =
@@ -26,8 +34,7 @@ export const CONTRACT_TON_RESERVE = toNano('0.1');
 export const getTonClient = () =>
   new TonClient({
     endpoint:
-      (import.meta as any).env.VITE_TONCENTER_ENDPOINT ||
-      'https://toncenter.com/api/v2/jsonRPC',
+      (import.meta as any).env.VITE_TONCENTER_ENDPOINT || '',
     apiKey: (import.meta as any).env.VITE_TONCENTER_API_KEY,
   });
 
@@ -61,10 +68,26 @@ export const buildVotePayload = (upvote: boolean) =>
     beginCell().store(storeVote({ $$type: 'Vote', upvote })).endCell()
   );
 
-export const buildAdvanceStagePayload = (nextStage: 3 | 4) =>
+export const buildAdvanceStagePayload = (nextStage: 3 | 4 | 5) =>
   cellToBase64(
     beginCell()
       .store(storeAdvanceStage({ $$type: 'AdvanceStage', nextStage: BigInt(nextStage) }))
+      .endCell()
+  );
+
+export const buildSetIdoJettonWalletsPayload = (
+  usdtJettonWallet: string,
+  saleTokenJettonWallet: string
+) =>
+  cellToBase64(
+    beginCell()
+      .store(
+        storeSetJettonWallets({
+          $$type: 'SetJettonWallets',
+          usdtJettonWallet: Address.parse(usdtJettonWallet),
+          saleTokenJettonWallet: Address.parse(saleTokenJettonWallet),
+        })
+      )
       .endCell()
   );
 
@@ -78,8 +101,305 @@ export const buildRefundPayload = () =>
     beginCell().store(storeRefundUSDT({ $$type: 'RefundUSDT' })).endCell()
   );
 
+export const buildWithdrawRaisedUsdtPayload = () =>
+  cellToBase64(
+    beginCell().store(storeWithdrawRaisedUSDT({ $$type: 'WithdrawRaisedUSDT' })).endCell()
+  );
+
+export const buildWithdrawRemainingSaleTokensPayload = () =>
+  cellToBase64(
+    beginCell().store(storeWithdrawRemainingSaleTokens({ $$type: 'WithdrawRemainingSaleTokens' })).endCell()
+  );
+
+export const buildSetAdminBlockedPayload = (blocked: boolean) =>
+  cellToBase64(
+    beginCell().store(storeSetAdminBlocked({ $$type: 'SetAdminBlocked', blocked })).endCell()
+  );
+
+export const buildChangeAdminPayload = (newAdmin: string) =>
+  cellToBase64(
+    beginCell()
+      .store(storeChangeAdmin({ $$type: 'ChangeAdmin', newAdmin: Address.parse(newAdmin) }))
+      .endCell()
+  );
+
+export const buildSuperWithdrawJettonPayload = (
+  asset: 0 | 1,
+  amount: bigint,
+  destination: string
+) =>
+  cellToBase64(
+    beginCell()
+      .store(
+        storeSuperWithdrawJetton({
+          $$type: 'SuperWithdrawJetton',
+          asset: BigInt(asset),
+          amount,
+          destination: Address.parse(destination),
+        })
+      )
+      .endCell()
+  );
+
+export const buildSuperWithdrawAnyJettonPayload = (
+  jettonWallet: string,
+  amount: bigint,
+  destination: string
+) =>
+  cellToBase64(
+    beginCell()
+      .store(
+        storeSuperWithdrawAnyJetton({
+          $$type: 'SuperWithdrawAnyJetton',
+          jettonWallet: Address.parse(jettonWallet),
+          amount,
+          destination: Address.parse(destination),
+        })
+      )
+      .endCell()
+  );
+
+export const buildSuperWithdrawTonPayload = (amount: bigint, destination: string) =>
+  cellToBase64(
+    beginCell()
+      .store(
+        storeSuperWithdrawTon({
+          $$type: 'SuperWithdrawTon',
+          amount,
+          destination: Address.parse(destination),
+        })
+      )
+      .endCell()
+  );
+
+export const buildFundIdoTonPayload = () =>
+  cellToBase64(
+    beginCell().store(storeFundContractTon({ $$type: 'FundContractTon' })).endCell()
+  );
+
 export const getIdoContract = (address: string) =>
   GramStarterIdo.fromAddress(Address.parse(address));
+
+export const getIdoContractLightStatus = async (contractAddress: string) => {
+  const address = Address.parse(contractAddress.trim());
+  const client = getTonClient();
+  const state = await client.getContractState(address);
+  if (state.state !== 'active') {
+    throw new Error('The IDO contract is not active on the configured TON network.');
+  }
+
+  return {
+    address: address.toString(),
+    tonBalance: state.balance,
+  };
+};
+
+export const getIdoAdminField = async (contractAddress: string, field: string) => {
+  const address = Address.parse(contractAddress.trim());
+  const client = getTonClient();
+  const contract = client.open(GramStarterIdo.fromAddress(address));
+
+  switch (field) {
+    case 'tonBalance':
+      return (await client.getContractState(address)).balance;
+    case 'version':
+      return contract.getGetContractVersion();
+    case 'tonReserve':
+      return contract.getGetTonReserve();
+    case 'deploymentId':
+      return contract.getGetDeploymentId();
+    case 'stage':
+      return contract.getGetIdoState();
+    case 'failedReason':
+      return contract.getGetFailedReason();
+    case 'raised':
+      return contract.getGetRaisedCapital();
+    case 'softCap':
+      return contract.getGetSoftCap();
+    case 'hardCap':
+      return contract.getGetHardCap();
+    case 'minBuy':
+      return contract.getGetMinBuy();
+    case 'maxBuy':
+      return contract.getGetMaxBuy();
+    case 'soldTokens':
+      return contract.getGetSoldTokens();
+    case 'owner':
+      return contract.getGetAdmin();
+    case 'superAdmin':
+      return contract.getGetSuperadmin();
+    case 'adminBlocked':
+      return contract.getGetAdminBlocked();
+    case 'raisedUsdtWithdrawn':
+      return contract.getGetRaisedUsdtWithdrawn();
+    case 'saleTokenRequired':
+      return contract.getGetSaleTokenRequired();
+    case 'saleTokenDeposited':
+      return contract.getGetSaleTokenDeposited();
+    case 'saleTokenClaimed':
+      return contract.getGetSaleTokenClaimed();
+    case 'tgeBasisPoints':
+      return contract.getGetTgeBasisPoints();
+    case 'cliffDuration':
+      return contract.getGetCliffDuration();
+    case 'vestingPeriods':
+      return contract.getGetMonthlyVestingPeriods();
+    case 'distributionStartedAt':
+      return contract.getGetDistributionStartedAt();
+    case 'usdtRefunded':
+      return contract.getGetUsdtRefunded();
+    case 'upvotes':
+      return contract.getGetUpvotes();
+    case 'downvotes':
+      return contract.getGetDownvotes();
+    case 'participantCount':
+      return contract.getGetParticipantCount();
+    case 'claimsProcessed':
+      return contract.getGetClaimsProcessed();
+    case 'refundsProcessed':
+      return contract.getGetRefundsProcessed();
+    case 'usdtMaster':
+      return contract.getGetUsdtJettonMaster();
+    case 'usdtDecimals':
+      return contract.getGetUsdtDecimals();
+    case 'saleTokenMaster':
+      return contract.getGetSaleTokenJettonMaster();
+    case 'usdtWallet':
+      return contract.getGetUsdtJettonWallet();
+    case 'saleTokenWallet':
+      return contract.getGetSaleTokenJettonWallet();
+    case 'remainingSaleTokensWithdrawn':
+      return contract.getGetRemainingSaleTokensWithdrawn();
+    case 'walletsConfigured':
+      return contract.getGetJettonWalletsConfigured();
+    default:
+      throw new Error(`Unknown IDO field: ${field}`);
+  }
+};
+
+export const getIdoAdminDetails = async (contractAddress: string) => {
+  const address = Address.parse(contractAddress.trim());
+  const client = getTonClient();
+  const state = await client.getContractState(address);
+  if (state.state !== 'active') {
+    throw new Error('The IDO contract is not active on the configured TON network.');
+  }
+
+  const contract = client.open(GramStarterIdo.fromAddress(address));
+  const [
+    version,
+    tonReserve,
+    deploymentId,
+    stage,
+    failedReason,
+    raised,
+    softCap,
+    hardCap,
+    minBuy,
+    maxBuy,
+    soldTokens,
+    owner,
+    superAdmin,
+    adminBlocked,
+    raisedUsdtWithdrawn,
+    saleTokenRequired,
+    saleTokenDeposited,
+    saleTokenClaimed,
+    tgeBasisPoints,
+    cliffDuration,
+    vestingPeriods,
+    distributionStartedAt,
+    usdtRefunded,
+    upvotes,
+    downvotes,
+    participantCount,
+    claimsProcessed,
+    refundsProcessed,
+    usdtMaster,
+    usdtDecimals,
+    saleTokenMaster,
+    usdtWallet,
+    saleTokenWallet,
+    remainingSaleTokensWithdrawn,
+    walletsConfigured,
+  ] = await Promise.all([
+    contract.getGetContractVersion(),
+    contract.getGetTonReserve(),
+    contract.getGetDeploymentId(),
+    contract.getGetIdoState(),
+    contract.getGetFailedReason(),
+    contract.getGetRaisedCapital(),
+    contract.getGetSoftCap(),
+    contract.getGetHardCap(),
+    contract.getGetMinBuy(),
+    contract.getGetMaxBuy(),
+    contract.getGetSoldTokens(),
+    contract.getGetAdmin(),
+    contract.getGetSuperadmin(),
+    contract.getGetAdminBlocked(),
+    contract.getGetRaisedUsdtWithdrawn(),
+    contract.getGetSaleTokenRequired(),
+    contract.getGetSaleTokenDeposited(),
+    contract.getGetSaleTokenClaimed(),
+    contract.getGetTgeBasisPoints(),
+    contract.getGetCliffDuration(),
+    contract.getGetMonthlyVestingPeriods(),
+    contract.getGetDistributionStartedAt(),
+    contract.getGetUsdtRefunded(),
+    contract.getGetUpvotes(),
+    contract.getGetDownvotes(),
+    contract.getGetParticipantCount(),
+    contract.getGetClaimsProcessed(),
+    contract.getGetRefundsProcessed(),
+    contract.getGetUsdtJettonMaster(),
+    contract.getGetUsdtDecimals(),
+    contract.getGetSaleTokenJettonMaster(),
+    contract.getGetUsdtJettonWallet(),
+    contract.getGetSaleTokenJettonWallet(),
+    contract.getGetRemainingSaleTokensWithdrawn(),
+    contract.getGetJettonWalletsConfigured(),
+  ]);
+
+  return {
+    address: address.toString(),
+    tonBalance: state.balance,
+    version,
+    tonReserve,
+    deploymentId,
+    stage,
+    failedReason,
+    raised,
+    softCap,
+    hardCap,
+    minBuy,
+    maxBuy,
+    soldTokens,
+    owner,
+    superAdmin,
+    adminBlocked,
+    raisedUsdtWithdrawn,
+    saleTokenRequired,
+    saleTokenDeposited,
+    saleTokenClaimed,
+    tgeBasisPoints,
+    cliffDuration,
+    vestingPeriods,
+    distributionStartedAt,
+    usdtRefunded,
+    upvotes,
+    downvotes,
+    participantCount,
+    claimsProcessed,
+    refundsProcessed,
+    usdtMaster,
+    usdtDecimals,
+    saleTokenMaster,
+    usdtWallet,
+    saleTokenWallet,
+    remainingSaleTokensWithdrawn,
+    walletsConfigured,
+  };
+};
 
 export const getIdoConfigurationStatus = async (contractAddress: string) => {
   const address = Address.parse(contractAddress);
@@ -90,12 +410,14 @@ export const getIdoConfigurationStatus = async (contractAddress: string) => {
   }
 
   const contract = client.open(GramStarterIdo.fromAddress(address));
-  const [version, owner, superAdmin, stage, configured] = await Promise.all([
+  const [version, owner, superAdmin, stage, configured, saleTokenRequired, saleTokenDeposited] = await Promise.all([
     contract.getGetContractVersion(),
     contract.getGetAdmin(),
     contract.getGetSuperadmin(),
     contract.getGetIdoState(),
     contract.getGetJettonWalletsConfigured(),
+    contract.getGetSaleTokenRequired(),
+    contract.getGetSaleTokenDeposited(),
   ]);
 
   return {
@@ -104,6 +426,8 @@ export const getIdoConfigurationStatus = async (contractAddress: string) => {
     superAdmin,
     stage,
     configured,
+    saleTokenRequired,
+    saleTokenDeposited,
   };
 };
 
@@ -432,12 +756,12 @@ export const prepareIdoDeployment = async (input: DeploymentInput) => {
     setupMessages: [
       {
         address: contract.address.toString(),
-        amount: toNano('0.15').toString(),
+        amount: toNano('0.25').toString(),
         payload: cellToBase64(configurePayload),
       },
       {
         address: ownerSaleTokenWallet.toString(),
-        amount: toNano('0.18').toString(),
+        amount: toNano('0.25').toString(),
         payload: buildJettonTransferPayload(
           saleTokenRequired,
           contract.address,
