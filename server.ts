@@ -571,7 +571,7 @@ const getOrCreateSwapSettings = async () => {
 
 async function startServer() {
   const app = express();
-  const PORT = 3004;
+  const PORT = Number(process.env.PORT || process.env.API_PORT || '3004');
 
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
