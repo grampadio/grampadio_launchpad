@@ -484,7 +484,7 @@ export default function App() {
           >
             <div className="flex h-12 w-12 items-center justify-center overflow-hidden">
               <img
-                src="/logo.png"
+                src="/logo.png?v=1"
                 alt="Grampad logo"
                 className="h-full w-full object-contain"
               />

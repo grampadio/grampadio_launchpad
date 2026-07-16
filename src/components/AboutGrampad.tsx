@@ -30,10 +30,10 @@ const DELETE_SPEED = 80;
 const HOLD_DELAY = 2200;
 
 const sponsoredProjects = [
-  { logo: '/logo.png', name: 'GramX', status: 'Live' },
-  { logo: '/logo.png', name: 'TONPad AI', status: 'Coming Soon' },
-  { logo: '/logo.png', name: 'MegaGram', status: 'Live' },
-  { logo: '/logo.png', name: 'DeFiGram', status: 'Coming Soon' },
+  { logo: '/logo.png?v=1', name: 'GramX', status: 'Live' },
+  { logo: '/logo.png?v=1', name: 'TONPad AI', status: 'Coming Soon' },
+  { logo: '/logo.png?v=1', name: 'MegaGram', status: 'Live' },
+  { logo: '/logo.png?v=1', name: 'DeFiGram', status: 'Coming Soon' },
 ];
 
 const topProjects = [
@@ -223,7 +223,7 @@ export default function AboutGrampad({
       <section className="relative z-10 flex min-h-screen items-center justify-center px-5 py-16 text-center">
         <div className="mx-auto max-w-5xl">
           <img
-            src="/logo.png"
+            src="/logo.png?v=1"
             alt="GramPad Logo"
             className="mx-auto mb-6 h-[100px] w-[100px] rounded-[32px] object-cover shadow-[0_24px_60px_rgba(44,156,244,0.35)]"
           />
