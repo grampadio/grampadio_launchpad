@@ -480,11 +480,11 @@ export default function App() {
       <div className="space-y-3">
            <button
             onClick={() => setActiveTab('home')}
-            className="flex items-center gap-1 text-left"
+            className="flex items-center gap-3 text-left"
           >
             <div className="flex h-12 w-12 items-center justify-center overflow-hidden">
               <img
-                src="/logo.webp?v=1"
+                src="/logo.webp?v=2"
                 alt="Grampad logo"
                 className="h-full w-full object-contain"
               />

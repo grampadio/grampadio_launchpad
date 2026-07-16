@@ -22,7 +22,7 @@ const stageOrder: DemoStage[] = ['voting', 'preparation', 'whitelist', 'sale', '
 const demoProject = {
   name: 'GramPad Genesis Demo',
   symbol: 'GDEMO',
-  logo: '/logo.webp?v=1',
+  logo: '/logo.webp?v=2',
   banner: 'https://images.unsplash.com/photo-1640826514546-63d12d6a59b6?auto=format&fit=crop&w=1200&h=420&q=80',
   description:
     'A simulated TON-first IDO project used to teach the full GramPad lifecycle without wallet signatures, gas, or real funds.',

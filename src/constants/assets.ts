@@ -1,4 +1,4 @@
-export const DEFAULT_PROJECT_LOGO = '/logo.webp?v=1';
+export const DEFAULT_PROJECT_LOGO = '/logo.webp?v=2';
 export const DEFAULT_PROJECT_BANNER = '/default-project-banner.svg';
 
 const LEGACY_PLACEHOLDER_ASSETS = [

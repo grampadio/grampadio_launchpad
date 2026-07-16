@@ -426,7 +426,7 @@ const countdown = showCountdown
       <section className="relative z-10 flex min-h-screen items-center justify-center px-5 py-16 text-center">
         <div className="mx-auto max-w-5xl">
           <img
-            src="/logo.webp?v=1"
+            src="/logo.webp?v=2"
             alt="GramPad Logo"
             className="mx-auto mb-6 h-[100px] w-[100px] rounded-[32px] object-cover shadow-[0_24px_60px_rgba(44,156,244,0.35)]"
           />
