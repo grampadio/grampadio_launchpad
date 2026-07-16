@@ -83,7 +83,7 @@ export default function Navbar({
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden sm:h-14 sm:w-14">
               <img
-                src="/logo.png"
+                src="/logo.webp?v=1.1"
                 alt="Grampad logo"
                 className="h-full w-full object-contain"
               />

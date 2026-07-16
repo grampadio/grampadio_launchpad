@@ -632,7 +632,7 @@ async function startServer() {
     res.json({
       url: origin,
       name: 'Grampad',
-      iconUrl: `${origin}/logo.png?v=1`
+      iconUrl: `${origin}/logo.png?v=1.1`
     });
   });
 
