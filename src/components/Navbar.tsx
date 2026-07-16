@@ -9,13 +9,11 @@ import {
   Moon,
   Sun,
   Building2,
-  FileCheck2,
   Coins,
   Lock,
   LockIcon,
   UserCircle,
   ChevronDown,
-  LucideSwitchCamera,
   ArrowUpDown,
 } from 'lucide-react';
 
@@ -61,7 +59,7 @@ export default function Navbar({
     { key: 'home' as const, label: 'Home', icon: Building2 },
     { key: 'explore' as const, label: 'Explore', icon: LayoutGrid },
     { key: 'staking' as const, label: 'Stake', icon: Coins },
-    { key: 'lplocker' as const, label: 'LP Lock', icon: LockIcon },
+    { key: 'lplocker' as const, label: 'Locker', icon: LockIcon },
     { key: 'guide' as const, label: 'Help', icon: HelpCircle },
   ];
 
@@ -78,24 +76,21 @@ export default function Navbar({
   return (
     <>
       <header className="sticky top-0 z-40 w-full border-b border-white/[0.07] bg-[#05070d]/85 backdrop-blur-xl">
-        <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-[64px] max-w-[1440px] min-w-0 items-center justify-between gap-2 px-3 sm:h-[72px] sm:px-6 lg:px-8">
           <button
             onClick={() => setActiveTab('home')}
-            className="flex items-center gap-3 text-left"
+            className="flex min-w-0 flex-1 items-center gap-1 text-left sm:flex-none"
           >
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden sm:h-14 sm:w-14">
               <img
                 src="/logo.png"
                 alt="Grampad logo"
                 className="h-full w-full object-contain"
               />
             </div>
-            <div className="leading-none">
-              <span className="gp-display-font block text-[25px] font-medium text-white">
-                Grampad
-              </span>
-              <span className="mt-1 block text-[9px] font-semibold uppercase text-slate-500">
-                grampad.io
+            <div className="min-w-0 leading-none">
+              <span className="gp-display-font block truncate text-[21px] font-semibold text-white sm:text-[30px]">
+                Grampad<span className='text-sky-600'>.io</span>
               </span>
             </div>
           </button>
@@ -105,7 +100,7 @@ export default function Navbar({
                { key: 'home' as const, label: 'Home', icon: Building2 },
               { key: 'explore' as const, label: 'Explore', icon: LayoutGrid },
               { key: 'staking' as const, label: 'Staking', icon: Coins },
-              { key: 'lplocker' as const, label: 'LP Locker', icon: Lock },
+              { key: 'lplocker' as const, label: 'Locker', icon: Lock },
               { key: 'guide' as const, label: 'How it works', icon: HelpCircle },
               { key: 'swap' as const, label: 'Swap', icon: ArrowUpDown },
              
@@ -129,12 +124,12 @@ export default function Navbar({
             })}
           </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
             <button
               onClick={onToggleTheme}
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-              className="gp-theme-toggle flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03] text-slate-400 transition hover:text-sky-400"
+              className="gp-theme-toggle flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03] text-slate-400 transition hover:text-sky-400 sm:h-10 sm:w-10"
             >
               {theme === 'dark' ? (
                 <Sun className="h-4 w-4" />
@@ -147,7 +142,7 @@ export default function Navbar({
               <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen(prev => !prev)}
-                  className="flex items-center gap-2 rounded-xl border border-sky-400/20 bg-sky-400/[0.07] px-3 py-2 text-xs transition hover:border-sky-400/40 hover:bg-sky-400/[0.12]"
+                  className="flex max-w-[132px] items-center gap-1.5 rounded-xl border border-sky-400/20 bg-sky-400/[0.07] px-2.5 py-2 text-xs transition hover:border-sky-400/40 hover:bg-sky-400/[0.12] sm:max-w-none sm:gap-2 sm:px-3"
                 >
                   <UserCircle className="h-5 w-5 text-sky-400" />
 
@@ -189,10 +184,11 @@ export default function Navbar({
             ) : (
               <button
                 onClick={() => onOpenConnectModal()}
-                className="flex items-center gap-2 rounded-xl bg-[#0098EA] px-4 py-2.5 text-xs font-extrabold btn-white-text shadow-[0_10px_35px_rgba(0,152,234,0.2)] transition hover:bg-sky-400 active:scale-[0.98]"
+                className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[#0098EA] px-3 py-2.5 text-[11px] font-extrabold btn-white-text shadow-[0_10px_35px_rgba(0,152,234,0.2)] transition hover:bg-sky-400 active:scale-[0.98] sm:gap-2 sm:px-4 sm:text-xs"
               >
                 <Smartphone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Connect Wallet
+                <span>Connect</span>
+                <span className="hidden sm:inline">Wallet</span>
               </button>
             )}
           </div>

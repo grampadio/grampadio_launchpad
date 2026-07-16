@@ -478,11 +478,11 @@ export default function App() {
       
       {/* Col 1 */}
       <div className="space-y-3">
-        <button
+           <button
             onClick={() => setActiveTab('home')}
-            className="flex items-center gap-3 text-left"
+            className="flex items-center gap-1 text-left"
           >
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden">
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden">
               <img
                 src="/logo.png"
                 alt="Grampad logo"
@@ -490,11 +490,8 @@ export default function App() {
               />
             </div>
             <div className="leading-none">
-              <span className="gp-display-font block text-[25px] font-medium text-white">
-                Grampad
-              </span>
-              <span className="mt-1 block text-[9px] font-semibold uppercase text-slate-500">
-                grampad.io
+              <span className="gp-display-font block text-[30px] font-semibold text-white">
+                Grampad<span className='text-sky-600'>.io</span>
               </span>
             </div>
           </button>
