@@ -133,6 +133,8 @@ export interface SwapSettings {
   usdtWalletAddress?: string;
   paused?: boolean;
   updatedAt?: number;
+  simulationActive?: boolean;
+  simulationSpeed?: number;
 }
 
 export interface ProjectApplication {
@@ -207,4 +209,30 @@ export interface TransactionRecord {
   tokenSymbol: string;
   timestamp: number;
   txHash: string;
+}
+
+export interface SwapTransaction {
+  id: string;
+  address: string;
+  fromAsset: 'USDT' | 'GRAM' | 'GRAMX';
+  toAsset: 'USDT' | 'GRAM' | 'GRAMX';
+  fromAmount: number;
+  toAmount: number;
+  price: number; // Price of GRAMX in terms of USDT
+  timestamp: number;
+  isFake: boolean;
+}
+
+export interface LockerLockRecord {
+  id: string;
+  owner: string;
+  jettonWallet: string;
+  jettonMaster: string;
+  symbol: string;
+  decimals: number;
+  amount: string;
+  rawAmount: string;
+  unlockTime: number;
+  withdrawn: boolean;
+  createdAt: number;
 }

@@ -140,7 +140,7 @@ export default function LaunchpadList({
         }
       )
     : activeFilter === 'upcoming'
-      ? projects.filter(project => project.idoStage === 'upcoming' || project.listingStatus === 'upcoming')
+      ? projects.filter(project => project.idoStage === 'upcoming')
       : projects;
 
   return (

@@ -227,7 +227,7 @@ contract GramPadSimpleSwap {
 
         message(MessageParameters {
             to: jettonWallet,
-            value: ton("0.20"),
+            value: ton("0.06"),
             bounce: true,
             body: JettonTransfer {
                 queryId: queryId,
@@ -319,23 +319,35 @@ contract GramPadSimpleSwap {
 
     receive(msg: OwnerWithdrawTon) {
         self.requireOwner();
-        require(context().value >= ton("0.01"), "Not enough TON");
         require(msg.amount > 0, "Invalid amount");
-        require(self.tonReserve >= msg.amount, "TON reserve too low");
-        require(myBalance() - context().value >= msg.amount, "TON balance too low");
 
-        self.tonReserve = self.tonReserve - msg.amount;
+        let availBalance: Int = myBalance() - context().value - ton("0.03");
+        if (availBalance < 0) {
+            availBalance = 0;
+        }
+
+        let amountToWithdraw: Int = msg.amount;
+        if (amountToWithdraw > availBalance) {
+            amountToWithdraw = availBalance;
+        }
+
+        require(amountToWithdraw > 0, "TON balance too low");
+
+        if (self.tonReserve >= amountToWithdraw) {
+            self.tonReserve = self.tonReserve - amountToWithdraw;
+        } else {
+            self.tonReserve = 0;
+        }
 
         message(MessageParameters {
             to: msg.destination,
-            value: msg.amount,
+            value: amountToWithdraw,
             bounce: false
         });
     }
 
     receive(msg: OwnerWithdrawGram) {
         self.requireOwner();
-        require(context().value >= ton("0.16"), "Not enough TON");
         require(msg.amount > 0, "Invalid amount");
         require(self.gramReserve >= msg.amount, "GRAM reserve too low");
 
@@ -345,7 +357,6 @@ contract GramPadSimpleSwap {
 
     receive(msg: OwnerWithdrawUsdt) {
         self.requireOwner();
-        require(context().value >= ton("0.16"), "Not enough TON");
         require(msg.amount > 0, "Invalid amount");
         require(self.usdtReserve >= msg.amount, "USDT reserve too low");
 
@@ -371,7 +382,7 @@ contract GramPadSimpleSwap {
             }
 
             require(!self.paused, "Swap paused");
-            require(myBalance() - context().value >= ton("0.22"), "TON reserve too low");
+            require(myBalance() - context().value >= ton("0.05"), "TON reserve too low");
             require(self.maxBuy == 0 || msg.amount <= self.maxBuy, "Max buy exceeded");
 
             let marker: Int = payload.loadUint(32);
@@ -400,7 +411,7 @@ contract GramPadSimpleSwap {
         }
 
         require(!self.paused, "Swap paused");
-        require(myBalance() - context().value >= ton("0.22"), "TON reserve too low");
+        require(myBalance() - context().value >= ton("0.05"), "TON reserve too low");
         let tonOutCheck: Int = self.quoteTonOut(msg.amount);
 
         let marker: Int = payload.loadUint(32);
@@ -454,7 +465,7 @@ contract GramPadSimpleSwap {
         require(gramOut > 0, "Swap output too low");
         require(gramOut >= msg.minOut, "Slippage exceeded");
         require(self.gramReserve >= gramOut, "GRAM reserve too low");
-        require(myBalance() >= ton("0.22"), "TON reserve too low");
+        require(myBalance() >= ton("0.05"), "TON reserve too low");
 
         self.tonReserve = self.tonReserve + tonAmount;
         self.gramReserve = self.gramReserve - gramOut;

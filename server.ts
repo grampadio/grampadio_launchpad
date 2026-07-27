@@ -9,7 +9,7 @@ import { GoogleGenAI, Type } from '@google/genai';
 import { Address, beginCell } from '@ton/core';
 import { JettonMaster, JettonWallet, TonClient } from '@ton/ton';
 import nodemailer from 'nodemailer';
-import { LaunchpadProject, TokenContribution, AIAudit, ProjectApplication, SwapSettings } from './src/types.js';
+import { LaunchpadProject, TokenContribution, AIAudit, ProjectApplication, SwapSettings, SwapTransaction, LockerLockRecord } from './src/types.js';
 import {
   getDatabase,
   getDatabaseHealth,
@@ -24,6 +24,12 @@ import {
   getSwapSettings,
   saveSwapSettings,
   updateApplicationStatus,
+  addSwapTransaction,
+  getSwapTransactions,
+  clearFakeSwapTransactions,
+  addLockerLock,
+  getLockerLocks,
+  updateLockerLockWithdrawn,
 } from './src/server/db.js';
 import {
   clearAdminSession,
@@ -36,6 +42,7 @@ import {
   verifyAdminCredentials,
 } from './src/server/auth.js';
 import { GramStarterIdo } from './contracts/build/GramStarterIdo_GramStarterIdo.js';
+import { GramPadUniversalLocker } from './contracts/build/GramPadUniversalLocker_GramPadUniversalLocker.js';
 import { parseContractGetterAddress } from './contracts/runtimeAddress.js';
 import { DEFAULT_PROJECT_BANNER, DEFAULT_PROJECT_LOGO, projectAssetOrDefault } from './src/constants/assets.js';
 
@@ -236,32 +243,18 @@ const sendApplicationStatusEmail = async (
   });
 };
 
+const canonicalAddressKey = (value: string) =>
+  Address.parse(value).toRawString().toLowerCase();
+
 const openIdoContract = (project: Pick<LaunchpadProject, 'idoContractAddress'>) => {
   if (!project.idoContractAddress) {
-    throw new Error('Project has no deployed IDO contract.');
+    throw new Error('Project has no deployed IDO escrow contract.');
   }
   return tonClient.open(GramStarterIdo.fromAddress(Address.parse(project.idoContractAddress)));
 };
 
 const toUsdtBaseUnits = (amount: number, decimals: number) =>
   BigInt(Math.round(amount * (10 ** decimals)));
-
-const canonicalAddressKey = (value: string) =>
-  Address.parse(value).toRawString().toLowerCase();
-
-const runUserBooleanGetter = async (
-  contractAddress: string,
-  method: 'get_user_has_voted' | 'get_user_vote',
-  userAddress: string
-) => {
-  const result = await tonClient.runMethod(Address.parse(contractAddress), method, [
-    {
-      type: 'slice',
-      cell: beginCell().storeAddress(Address.parse(userAddress)).endCell(),
-    },
-  ]);
-  return result.stack.readBoolean();
-};
 
 const runUserBigIntGetter = async (
   contractAddress: string,
@@ -290,6 +283,150 @@ const getUserGramxBalance = async (userAddress: string) => {
   } catch {
     return 0n;
   }
+};
+
+const DB_STAGE_ORDER: LaunchpadProject['idoStage'][] = [
+  'upcoming',
+  'vote',
+  'preparation',
+  'whitelist',
+  'sale',
+  'distribution',
+];
+
+const getDbStageIndex = (stage: LaunchpadProject['idoStage'] | string | undefined) => {
+  const index = DB_STAGE_ORDER.indexOf(String(stage || 'upcoming') as LaunchpadProject['idoStage']);
+  return index >= 0 ? index : 0;
+};
+
+const sameWalletAddress = (left: string, right: string) => {
+  try {
+    return canonicalAddressKey(left) === canonicalAddressKey(right);
+  } catch {
+    return left.trim().toLowerCase() === right.trim().toLowerCase();
+  }
+};
+
+const getAddressKey = (address: string) => {
+  try {
+    return canonicalAddressKey(address);
+  } catch {
+    return address.trim().toLowerCase();
+  }
+};
+
+const getActiveContributionsForAddress = (project: LaunchpadProject, address: string) =>
+  (project.contributions || []).filter(item => sameWalletAddress(item.contributor, address) && !item.refunded);
+
+const getContributionTotal = (project: LaunchpadProject, address: string, key: 'usdtAmount' | 'tokenAmount' | 'claimedAmount') =>
+  getActiveContributionsForAddress(project, address)
+    .reduce((sum, item) => sum + Number(item[key] || 0), 0);
+
+const calculateVestingSnapshot = (project: LaunchpadProject, contributor: string, now = Date.now()) => {
+  const allocation = getContributionTotal(project, contributor, 'tokenAmount');
+  const claimed = getContributionTotal(project, contributor, 'claimedAmount');
+  const distributionStart = Number(project.distributionStartTime || project.endTime || now);
+  const cliffEnd = distributionStart + Math.max(0, Number(project.cliffDurationDays || 0)) * 24 * 60 * 60 * 1000;
+  const vestingMonths = Math.max(1, Number(project.vestingMonths || 1));
+  const tgePercent = Math.max(0, Math.min(100, Number(project.vestingTgePercent || 0)));
+
+  let vested = 0;
+  if (project.status === 'success' && project.idoStage === 'distribution' && now >= cliffEnd) {
+    const tgeAmount = allocation * (tgePercent / 100);
+    const linearAmount = Math.max(0, allocation - tgeAmount);
+    const monthMs = 30 * 24 * 60 * 60 * 1000;
+    const completedMonths = Math.min(
+      vestingMonths,
+      Math.max(0, Math.floor((now - cliffEnd) / monthMs))
+    );
+    vested = Math.min(allocation, tgeAmount + (linearAmount * completedMonths / vestingMonths));
+  }
+
+  return {
+    allocation,
+    claimed,
+    vested,
+    claimable: Math.max(0, vested - claimed),
+    distributionStart,
+    cliffEnd,
+  };
+};
+
+const applyClaimToContributions = (project: LaunchpadProject, contributor: string, claimAmount: number) => {
+  let remaining = claimAmount;
+  for (const contribution of getActiveContributionsForAddress(project, contributor)) {
+    if (remaining <= 0) break;
+    const contributionClaimed = Number(contribution.claimedAmount || 0);
+    const contributionAvailable = Math.max(0, Number(contribution.tokenAmount || 0) - contributionClaimed);
+    const applied = Math.min(contributionAvailable, remaining);
+    contribution.claimedAmount = contributionClaimed + applied;
+    remaining -= applied;
+  }
+};
+
+const syncContributionFromChain = async (
+  project: LaunchpadProject,
+  contributorAddress: string,
+  txHash = 'on-chain-contribution-sync'
+) => {
+  const contributor = parseContractGetterAddress(contributorAddress);
+  const addressKey = contributor.toRawString().toLowerCase();
+  const contract = openIdoContract(project);
+  const [chainContribution, chainRaised, chainAllocation, chainUsdtDecimals] = await Promise.all([
+    runUserBigIntGetter(project.idoContractAddress!, 'get_user_contribution', contributorAddress),
+    contract.getGetRaisedCapital(),
+    runUserBigIntGetter(project.idoContractAddress!, 'get_user_allocation', contributorAddress),
+    contract.getGetUsdtDecimals(),
+  ]);
+  const usdtDecimals = Number(chainUsdtDecimals);
+  const unit = 10 ** usdtDecimals;
+  const existingContribution = (project.contributions || [])
+    .filter(c => sameWalletAddress(c.contributor, contributorAddress) && !c.refunded)
+    .reduce((sum, c) => sum + c.usdtAmount, 0);
+  const existingContributionBase = toUsdtBaseUnits(existingContribution, usdtDecimals);
+
+  if (!project.contributionProgressByAddress) {
+    project.contributionProgressByAddress = {};
+  }
+
+  project.usdtDecimals = usdtDecimals;
+  project.raised = Number(chainRaised) / unit;
+
+  if (chainContribution <= existingContributionBase) {
+    return {
+      confirmed: false,
+      addressKey,
+      deltaUsdt: 0,
+      tokenDelta: 0,
+    };
+  }
+
+  const deltaUsdt = Number(chainContribution - existingContributionBase) / unit;
+  const existingTokenAmount = (project.contributions || [])
+    .filter(c => sameWalletAddress(c.contributor, contributorAddress) && !c.refunded)
+    .reduce((sum, c) => sum + c.tokenAmount, 0);
+  const tokenDelta = Math.max(0, Number(chainAllocation) / (10 ** project.decimals) - existingTokenAmount);
+
+  project.contributions.unshift({
+    contributor: contributorAddress,
+    usdtAmount: deltaUsdt,
+    tokenAmount: tokenDelta,
+    timestamp: Date.now(),
+  });
+  project.contributionsCount = project.contributions.filter(c => !c.refunded && c.usdtAmount > 0).length;
+  project.contributionProgressByAddress[addressKey] = {
+    status: 'done',
+    usdtAmount: deltaUsdt,
+    txHash,
+    updatedAt: Date.now(),
+  };
+
+  return {
+    confirmed: true,
+    addressKey,
+    deltaUsdt,
+    tokenDelta,
+  };
 };
 
 function formatProjectForUser(project: LaunchpadProject, walletAddress?: string): LaunchpadProject {
@@ -360,144 +497,6 @@ function formatProjectForUser(project: LaunchpadProject, walletAddress?: string)
   };
 }
 
-const syncVoteFromChain = async (
-  project: LaunchpadProject,
-  voterAddress: string,
-  txHash = 'on-chain-vote-sync'
-) => {
-  const contract = openIdoContract(project);
-  const voter = parseContractGetterAddress(voterAddress);
-  const addressKey = voter.toRawString().toLowerCase();
-  const [hasVoted, chainUpvotes, chainDownvotes] = await Promise.all([
-    runUserBooleanGetter(project.idoContractAddress!, 'get_user_has_voted', voterAddress),
-    contract.getGetUpvotes(),
-    contract.getGetDownvotes(),
-  ]);
-
-  if (!project.voteProgressByAddress) {
-    project.voteProgressByAddress = {};
-  }
-
-  if (!hasVoted) {
-    delete project.voteProgressByAddress[addressKey];
-    project.votesUp = Number(chainUpvotes);
-    project.votesDown = Number(chainDownvotes);
-    return {
-      confirmed: false,
-      addressKey,
-      voteType: undefined as 'up' | 'down' | undefined,
-    };
-  }
-
-  const chainVote = await runUserBooleanGetter(project.idoContractAddress!, 'get_user_vote', voterAddress);
-  const voteType: 'up' | 'down' = chainVote ? 'up' : 'down';
-
-  if (!project.votedAddresses) {
-    project.votedAddresses = {};
-  }
-  project.votedAddresses[addressKey] = voteType;
-  project.voteProgressByAddress[addressKey] = {
-    status: 'done',
-    voteType,
-    txHash,
-    updatedAt: Date.now(),
-  };
-  project.votesUp = Number(chainUpvotes);
-  project.votesDown = Number(chainDownvotes);
-  delete project.userVoted;
-
-  return {
-    confirmed: true,
-    addressKey,
-    voteType,
-  };
-};
-
-const syncContributionFromChain = async (
-  project: LaunchpadProject,
-  contributorAddress: string,
-  txHash = 'on-chain-contribution-sync'
-) => {
-  const contributor = parseContractGetterAddress(contributorAddress);
-  const addressKey = contributor.toRawString().toLowerCase();
-  const contract = openIdoContract(project);
-  const [chainContribution, chainRaised, chainAllocation, chainUsdtDecimals] = await Promise.all([
-    runUserBigIntGetter(project.idoContractAddress!, 'get_user_contribution', contributorAddress),
-    contract.getGetRaisedCapital(),
-    runUserBigIntGetter(project.idoContractAddress!, 'get_user_allocation', contributorAddress),
-    contract.getGetUsdtDecimals(),
-  ]);
-  const usdtDecimals = Number(chainUsdtDecimals);
-  const unit = 10 ** usdtDecimals;
-  const activeContributions = Array.isArray(project.contributions) ? project.contributions : [];
-  project.contributions = activeContributions;
-
-  const existingContribution = project.contributions
-    .filter(c => {
-      try {
-        return canonicalAddressKey(c.contributor) === addressKey && !c.refunded;
-      } catch {
-        return c.contributor.trim().toLowerCase() === contributorAddress.trim().toLowerCase() && !c.refunded;
-      }
-    })
-    .reduce((sum, c) => sum + c.usdtAmount, 0);
-  const existingContributionBase = toUsdtBaseUnits(existingContribution, usdtDecimals);
-
-  if (!project.contributionProgressByAddress) {
-    project.contributionProgressByAddress = {};
-  }
-
-  project.usdtDecimals = usdtDecimals;
-  project.raised = Number(chainRaised) / unit;
-
-  if (chainContribution <= existingContributionBase) {
-    delete project.contributionProgressByAddress[addressKey];
-    return {
-      confirmed: false,
-      addressKey,
-      deltaUsdt: 0,
-      tokenDelta: 0,
-    };
-  }
-
-  const deltaBase = chainContribution - existingContributionBase;
-  const deltaUsdt = Number(deltaBase) / unit;
-  const existingTokenAmount = project.contributions
-    .filter(c => {
-      try {
-        return canonicalAddressKey(c.contributor) === addressKey && !c.refunded;
-      } catch {
-        return c.contributor.trim().toLowerCase() === contributorAddress.trim().toLowerCase() && !c.refunded;
-      }
-    })
-    .reduce((sum, c) => sum + c.tokenAmount, 0);
-  const tokenDelta = Math.max(
-    0,
-    Number(chainAllocation) / (10 ** project.decimals) - existingTokenAmount
-  );
-
-  project.contributions.unshift({
-    contributor: contributorAddress,
-    usdtAmount: deltaUsdt,
-    tokenAmount: tokenDelta,
-    timestamp: Date.now(),
-  });
-  project.contributionsCount = project.contributions.filter(c => !c.refunded && c.usdtAmount > 0).length;
-  project.contributionProgressByAddress[addressKey] = {
-    status: 'done',
-    usdtAmount: deltaUsdt,
-    txHash,
-    updatedAt: Date.now(),
-  };
-
-  return {
-    confirmed: true,
-    addressKey,
-    deltaUsdt,
-    tokenDelta,
-  };
-};
-
 const isProjectEnabled = (project: LaunchpadProject) =>
   project.enabled !== false && project.listingStatus !== 'hidden';
 
@@ -528,7 +527,7 @@ const getDefaultSwapSettings = (): SwapSettings => {
     contractAddress: String(process.env.VITE_SWAP_CONTRACT_ADDRESS || '').trim(),
     ownerAddress: '',
     gramMasterAddress,
-    gramSymbol: String(process.env.VITE_SWAP_GRAM_SYMBOL || 'GRAM').trim() || 'GRAM',
+    gramSymbol: String(process.env.VITE_SWAP_GRAM_SYMBOL || 'GRAMX').trim() || 'GRAMX',
     gramDecimals: Number(process.env.VITE_GRAMX_DECIMALS || 9),
     usdtMasterAddress,
     usdtSymbol: 'USDT',
@@ -545,16 +544,22 @@ const getDefaultSwapSettings = (): SwapSettings => {
     usdtWalletAddress: '',
     paused: false,
     updatedAt: 0,
+    simulationActive: false,
+    simulationSpeed: 15,
   };
 };
 
 const mergeSwapSettings = (stored: SwapSettings | null): SwapSettings => {
   const defaults = getDefaultSwapSettings();
-  return {
+  const merged = {
     ...defaults,
     ...(stored || {}),
     rateScale: DEFAULT_SWAP_RATE_SCALE,
   };
+  if (merged.gramSymbol === 'GRAM' || !merged.gramSymbol) {
+    merged.gramSymbol = 'GRAMX';
+  }
+  return merged;
 };
 
 const getOrCreateSwapSettings = async () => {
@@ -567,6 +572,52 @@ const getOrCreateSwapSettings = async () => {
 
   return merged;
 };
+
+
+async function triggerSimulatedSwap(): Promise<SwapTransaction> {
+  const settings = await getOrCreateSwapSettings();
+  const rateLabel = Number(settings.rateLabel || '2');
+  const basePrice = 1 / rateLabel;
+
+  // Get the last swap price to continue the random walk
+  const recent = await getSwapTransactions(1);
+  let currentPrice = recent.length > 0 ? recent[0].price : basePrice;
+
+  const isBuy = Math.random() > 0.48; // balanced random walk
+  const deviation = (Math.random() - 0.5) * 0.03; // -1.5% to +1.5%
+  currentPrice = currentPrice * (1 + deviation);
+
+  // Keep price within reasonable range of base price (50% to 200%)
+  if (currentPrice < basePrice * 0.5) currentPrice = basePrice * 0.5;
+  if (currentPrice > basePrice * 2.0) currentPrice = basePrice * 2.0;
+
+  const fromAsset = isBuy ? 'USDT' : 'GRAMX';
+  const toAsset = isBuy ? 'GRAMX' : 'USDT';
+
+  const usdtVal = 20 + Math.random() * 180; // 20 to 200 USDT
+  const gramxVal = usdtVal / currentPrice;
+
+  const fromAmount = isBuy ? usdtVal : gramxVal;
+  const toAmount = isBuy ? gramxVal : usdtVal;
+
+  const walletIndex = Math.floor(Math.random() * 1000);
+  const address = `UQSim${walletIndex}...${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
+  const tx: SwapTransaction = {
+    id: `mock-swap-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    address,
+    fromAsset,
+    toAsset,
+    fromAmount: Number(fromAmount.toFixed(4)),
+    toAmount: Number(toAmount.toFixed(4)),
+    price: Number(currentPrice.toFixed(6)),
+    timestamp: Date.now(),
+    isFake: true,
+  };
+
+  await addSwapTransaction(tx);
+  return tx;
+}
 
 
 async function startServer() {
@@ -660,6 +711,432 @@ async function startServer() {
       res.json(await getOrCreateSwapSettings());
     } catch (error: any) {
       res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/swap/transactions', async (_req, res) => {
+    try {
+      const txs = await getSwapTransactions(50);
+      res.json(txs);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/swap/history', async (req, res) => {
+    try {
+      const timeframe = String(req.query.timeframe || '5m');
+      let intervalMs = 300000; // default 5m
+      if (timeframe === '1m') intervalMs = 60000;
+      else if (timeframe === '1h') intervalMs = 3600000;
+
+      const txs = await getSwapTransactions(500);
+      // Sort chronologically
+      txs.sort((a, b) => a.timestamp - b.timestamp);
+
+      if (txs.length === 0) {
+        res.json([]);
+        return;
+      }
+
+      const candles: { time: number; open: number; high: number; low: number; close: number; volume: number }[] = [];
+
+      const firstTxTime = txs[0].timestamp;
+      const lastTxTime = Date.now();
+      const startTime = Math.floor(firstTxTime / intervalMs) * intervalMs;
+      const endTime = Math.floor(lastTxTime / intervalMs) * intervalMs;
+
+      let currentIntervalStart = startTime;
+      let txIndex = 0;
+      let lastClosePrice = txs[0].price;
+
+      while (currentIntervalStart <= endTime) {
+        const intervalEnd = currentIntervalStart + intervalMs;
+        const intervalTxs: typeof txs = [];
+
+        while (txIndex < txs.length && txs[txIndex].timestamp < intervalEnd) {
+          if (txs[txIndex].timestamp >= currentIntervalStart) {
+            intervalTxs.push(txs[txIndex]);
+          }
+          txIndex++;
+        }
+
+        if (intervalTxs.length > 0) {
+          const open = intervalTxs[0].price;
+          const close = intervalTxs[intervalTxs.length - 1].price;
+          const high = Math.max(...intervalTxs.map(t => t.price));
+          const low = Math.min(...intervalTxs.map(t => t.price));
+          const volume = intervalTxs.reduce((sum, t) => sum + (t.fromAsset === 'USDT' ? t.fromAmount : t.toAmount * t.price), 0);
+
+          candles.push({
+            time: currentIntervalStart,
+            open,
+            high,
+            low,
+            close,
+            volume,
+          });
+          lastClosePrice = close;
+        } else {
+          // Carry forward previous close price
+          candles.push({
+            time: currentIntervalStart,
+            open: lastClosePrice,
+            high: lastClosePrice,
+            low: lastClosePrice,
+            close: lastClosePrice,
+            volume: 0,
+          });
+        }
+
+        currentIntervalStart += intervalMs;
+      }
+
+      res.json(candles);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/swap/simulate/toggle', async (_req, res) => {
+    try {
+      const settings = await getOrCreateSwapSettings();
+      settings.simulationActive = !settings.simulationActive;
+      await saveSwapSettings(settings);
+      res.json({ success: true, simulationActive: settings.simulationActive });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/swap/simulate/trade', async (_req, res) => {
+    try {
+      const tx = await triggerSimulatedSwap();
+      res.status(201).json({ success: true, transaction: tx });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/swap/simulate/generate-history', async (_req, res) => {
+    try {
+      await clearFakeSwapTransactions();
+
+      const settings = await getOrCreateSwapSettings();
+      const rateLabel = Number(settings.rateLabel || '2');
+      const basePrice = 1 / rateLabel;
+
+      const txs: SwapTransaction[] = [];
+      const now = Date.now();
+      const oneDayMs = 24 * 60 * 60 * 1000;
+      const startTime = now - oneDayMs;
+      const count = 100;
+
+      let currentPrice = basePrice;
+
+      for (let i = 0; i < count; i++) {
+        const timestamp = startTime + (oneDayMs / count) * i;
+        const isBuy = Math.random() > 0.45; // slight upward drift
+
+        const deviation = (Math.random() - 0.48) * 0.04; // -1.9% to +2%
+        currentPrice = currentPrice * (1 + deviation);
+
+        if (currentPrice < basePrice * 0.5) currentPrice = basePrice * 0.5;
+        if (currentPrice > basePrice * 2.0) currentPrice = basePrice * 2.0;
+
+        const fromAsset = isBuy ? 'USDT' : 'GRAMX';
+        const toAsset = isBuy ? 'GRAMX' : 'USDT';
+
+        const usdtVal = 50 + Math.random() * 250;
+        const gramxVal = usdtVal / currentPrice;
+
+        const fromAmount = isBuy ? usdtVal : gramxVal;
+        const toAmount = isBuy ? gramxVal : usdtVal;
+
+        const walletIndex = Math.floor(Math.random() * 1000);
+        const address = `UQSim${walletIndex}...${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
+        const tx: SwapTransaction = {
+          id: `mock-swap-${timestamp}-${Math.random().toString(36).slice(2, 9)}`,
+          address,
+          fromAsset,
+          toAsset,
+          fromAmount: Number(fromAmount.toFixed(4)),
+          toAmount: Number(toAmount.toFixed(4)),
+          price: Number(currentPrice.toFixed(6)),
+          timestamp,
+          isFake: true,
+        };
+
+        await addSwapTransaction(tx);
+        txs.push(tx);
+      }
+
+      res.json({ success: true, count: txs.length });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Server-Side Background Metadata Sync Worker (Runs independently of browser windows)
+  const fetchJettonMetadataServer = async (address: string) => {
+    const cleanAddr = address.trim();
+    if (!cleanAddr) return null;
+
+    const TONCENTER_ENDPOINT = process.env.VITE_TONCENTER_ENDPOINT || '';
+    const isTestnet = TONCENTER_ENDPOINT.includes('testnet');
+    const tonApiBase = isTestnet ? 'https://testnet.tonapi.io' : 'https://tonapi.io';
+
+    try {
+      const url = `${tonApiBase}/v2/jettons/${encodeURIComponent(cleanAddr)}`;
+      const response = await fetch(url);
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          symbol: String(data?.metadata?.symbol || data?.symbol || 'TOKEN').toUpperCase(),
+          decimals: Number(data?.metadata?.decimals ?? data?.decimals ?? 9),
+          masterAddress: cleanAddr,
+        };
+      }
+
+      // On-chain fallback if address is a Jetton Wallet address (404 on TonAPI /v2/jettons)
+      const parsedAddr = Address.parse(cleanAddr);
+      const res = await tonClient.runMethod(parsedAddr, 'get_wallet_data');
+      if (res && res.stack) {
+        res.stack.readBigNumber(); // balance
+        res.stack.readAddress(); // owner
+        const masterAddr = res.stack.readAddress().toString();
+        if (masterAddr) {
+          const masterUrl = `${tonApiBase}/v2/jettons/${encodeURIComponent(masterAddr)}`;
+          const masterResponse = await fetch(masterUrl);
+          if (masterResponse.ok) {
+            const masterData = await masterResponse.json();
+            return {
+              symbol: String(masterData?.metadata?.symbol || masterData?.symbol || 'TOKEN').toUpperCase(),
+              decimals: Number(masterData?.metadata?.decimals ?? masterData?.decimals ?? 9),
+              masterAddress: masterAddr,
+            };
+          }
+        }
+      }
+    } catch (err: any) {
+      console.warn(`[Server Sync] Metadata fetch failed for ${cleanAddr}:`, err?.message || err);
+    }
+    return null;
+  };
+
+  let isServerLockerSyncRunning = false;
+  const syncLockerMetadataInBackground = async () => {
+    if (isServerLockerSyncRunning) return;
+    isServerLockerSyncRunning = true;
+
+    try {
+      const allLocks = await getLockerLocks();
+      const pendingLocks = allLocks.filter(
+        l => !l.symbol || l.symbol === 'TOKEN' || l.symbol === 'Token'
+      );
+
+      for (const lock of pendingLocks) {
+        const target = lock.jettonWallet || lock.jettonMaster;
+        if (!target) continue;
+
+        const meta = await fetchJettonMetadataServer(target);
+        if (meta && meta.symbol && meta.symbol !== 'TOKEN') {
+          const updatedRecord: LockerLockRecord = {
+            ...lock,
+            symbol: meta.symbol,
+            decimals: meta.decimals,
+            jettonMaster: meta.masterAddress || lock.jettonMaster || lock.jettonWallet,
+          };
+          await addLockerLock(updatedRecord);
+          console.log(`[Server Sync] Resolved lock ${lock.id} symbol => ${meta.symbol}`);
+        }
+
+        // Wait 1 second (1000ms) delay between each coin request
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    } catch (err) {
+      console.error('[Server Sync] Background sync error:', err);
+    } finally {
+      isServerLockerSyncRunning = false;
+    }
+  };
+
+  const UNIVERSAL_LOCKER_ADDRESS = String(process.env.VITE_UNIVERSAL_LOCKER_ADDRESS || '').trim();
+  let isOnChainSyncInProgress = false;
+
+  const syncAllOnChainLocksServer = async () => {
+    if (!UNIVERSAL_LOCKER_ADDRESS) {
+      console.warn('[Server Sync] Locker address is not configured.');
+      return false;
+    }
+
+    if (isOnChainSyncInProgress) {
+      console.log('[Server Sync] On-chain sync is already in progress. Skipping duplicate run.');
+      return false;
+    }
+
+    isOnChainSyncInProgress = true;
+
+    try {
+      const lockerContract = tonClient.open(
+        GramPadUniversalLocker.fromAddress(Address.parse(UNIVERSAL_LOCKER_ADDRESS))
+      );
+
+      const details = await lockerContract.getGetContractDetails();
+      const nextLockId = Number(details.nextLockId || 1n);
+
+      if (nextLockId <= 1) {
+        console.log('[Server Sync] No on-chain locks found on contract.');
+        return true;
+      }
+
+      console.log(`[Server Sync] Syncing on-chain locks 1 to ${nextLockId - 1}...`);
+
+      const existingLocks = await getLockerLocks();
+
+      for (let lockId = 1; lockId < nextLockId; lockId++) {
+        try {
+          const lock = await lockerContract.getGetLockDetails(BigInt(lockId));
+          const lockIdStr = lock.lockId.toString();
+          const rawAmt = lock.amount.toString();
+          const jettonWalletStr = lock.jettonWallet.toString();
+          const ownerStr = lock.owner.toString();
+
+          const existing = existingLocks.find(e => e.id === lockIdStr);
+          let symbol = existing?.symbol || 'TOKEN';
+          let decimals = existing?.decimals ?? 9;
+          let jettonMaster = existing?.jettonMaster || jettonWalletStr;
+
+          if (symbol === 'TOKEN') {
+            const meta = await fetchJettonMetadataServer(jettonWalletStr);
+            if (meta && meta.symbol && meta.symbol !== 'TOKEN') {
+              symbol = meta.symbol;
+              decimals = meta.decimals;
+              jettonMaster = meta.masterAddress || jettonWalletStr;
+            }
+          }
+
+          const unit = 10n ** BigInt(decimals);
+          const whole = lock.amount / unit;
+          const frac = (lock.amount % unit).toString().padStart(decimals, '0').replace(/0+$/, '');
+          const formattedAmt = frac ? `${whole}.${frac}` : whole.toString();
+
+          const record: LockerLockRecord = {
+            id: lockIdStr,
+            owner: ownerStr,
+            jettonWallet: jettonWalletStr,
+            jettonMaster: jettonMaster,
+            symbol: symbol,
+            decimals: decimals,
+            amount: formattedAmt,
+            rawAmount: rawAmt,
+            unlockTime: Number(lock.unlockTime),
+            withdrawn: lock.withdrawn,
+            createdAt: Number(lock.lockedAt) * 1000 || Date.now(),
+          };
+
+          await addLockerLock(record);
+          console.log(`[Server Sync] Synced lock #${lockIdStr} (${symbol}) for ${ownerStr}`);
+        } catch (err: any) {
+          console.warn(`[Server Sync] Failed to fetch on-chain lock #${lockId}:`, err?.message || err);
+        }
+
+        // Wait 1s between each lock during sync to prevent rate limits
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      syncLockerMetadataInBackground().catch(() => {});
+      return true;
+    } catch (err: any) {
+      console.error('[Server Sync] On-chain global sync failed:', err?.message || err);
+      return false;
+    } finally {
+      isOnChainSyncInProgress = false;
+    }
+  };
+
+  // Start background sync loop every 10 seconds on the server
+  setInterval(syncLockerMetadataInBackground, 10000);
+  setTimeout(syncAllOnChainLocksServer, 3000);
+
+  // LP Locker Database Endpoints
+  app.get('/api/locker/sync/status', (req, res) => {
+    res.json({
+      inProgress: isOnChainSyncInProgress || isServerLockerSyncRunning,
+    });
+  });
+
+  app.post('/api/locker/sync', async (req, res) => {
+    try {
+      if (isOnChainSyncInProgress) {
+        res.json({
+          success: true,
+          inProgress: true,
+          message: 'A lock sync is already running in the background. Please wait for it to complete.',
+        });
+        return;
+      }
+
+      // Perform sync asynchronously in server background
+      syncAllOnChainLocksServer().catch(err => {
+        console.error('[Server Sync] Sync route error:', err);
+      });
+
+      res.json({ success: true, message: 'On-chain lock sync started in server background.' });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || 'Failed to start sync.' });
+    }
+  });
+  app.get('/api/locker/locks', async (req, res) => {
+    try {
+      const owner = cleanText(req.query.owner, 128);
+      const locks = await getLockerLocks(owner || undefined);
+      res.json({ locks });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || 'Failed to fetch locks.' });
+    }
+  });
+
+  app.post('/api/locker/locks', async (req, res) => {
+    try {
+      const { id, owner, jettonWallet, jettonMaster, symbol, decimals, amount, rawAmount, unlockTime } = req.body || {};
+      if (!owner || !jettonWallet || !amount) {
+        res.status(400).json({ error: 'Missing required lock fields.' });
+        return;
+      }
+
+      const record: LockerLockRecord = {
+        id: String(id || `lock-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`),
+        owner: cleanText(owner, 128),
+        jettonWallet: cleanText(jettonWallet, 128),
+        jettonMaster: cleanText(jettonMaster || jettonWallet, 128),
+        symbol: (cleanText(symbol, 32) || 'TOKEN').toUpperCase(),
+        decimals: Number(decimals ?? 9),
+        amount: String(amount),
+        rawAmount: String(rawAmount || '0'),
+        unlockTime: Number(unlockTime || 0),
+        withdrawn: false,
+        createdAt: Date.now(),
+      };
+
+      await addLockerLock(record);
+      res.json({ success: true, lock: record });
+
+      // Trigger server-side background metadata resolution immediately
+      syncLockerMetadataInBackground().catch(() => {});
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || 'Failed to save lock.' });
+    }
+  });
+
+  app.post('/api/locker/locks/:id/withdraw', async (req, res) => {
+    try {
+      const { id } = req.params;
+      await updateLockerLockWithdrawn(id, true);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || 'Failed to update lock.' });
     }
   });
 
@@ -1359,7 +1836,7 @@ console.log('txHash:', txHash);
       }
 
       const db = await getDatabase();
-      if (db.some(p => p.idoContractAddress === idoContractAddress.trim())) {
+      if (idoContractAddress && db.some(p => p.idoContractAddress === String(idoContractAddress).trim())) {
         res.status(409).json({ error: 'This IDO contract is already registered.' });
         return;
       }
@@ -1399,17 +1876,8 @@ console.log('txHash:', txHash);
       );
 
       const finalJettonAddress = String(jettonAddress).trim();
-      const finalIdoContractAddress = String(idoContractAddress).trim();
+      const finalIdoContractAddress = String(idoContractAddress || '').trim();
       let normalizedCliffDurationDays = Math.max(0, Number(req.body.cliffDurationDays) || 0);
-      if (!('cliffDurationDays' in req.body) && finalIdoContractAddress) {
-        try {
-          const deployed = openIdoContract({ idoContractAddress: finalIdoContractAddress });
-          const chainCliffSeconds = await deployed.getGetCliffDuration();
-          normalizedCliffDurationDays = Math.floor(Number(chainCliffSeconds) / 86400);
-        } catch (error) {
-          normalizedCliffDurationDays = 0;
-        }
-      }
 
       let parsedAiAudit: AIAudit | undefined;
       if (aiAudit) {
@@ -1425,9 +1893,9 @@ console.log('txHash:', txHash);
         trustScore: Math.floor(Math.random() * 20) + 75, // 75-95
         riskLevel: 'LOW',
         utilityRating: 'GOOD',
-        liquidityAnalysis: `${Number(req.body.vestingMonths) || 3} monthly vesting periods are enforced by the IDO contract after a ${normalizedCliffDurationDays} day cliff.`,
-        whitelistRecommendation: 'Decentralized creator contract verification active. Community vote begins first.',
-        overallEvaluation: `Community fairlaunch of $${symbol} with standardized decentralized lockups. Highly transparent parameters.`,
+        liquidityAnalysis: `${Number(req.body.vestingMonths) || 3} monthly vesting periods are enforced by the IDO escrow contract after a ${normalizedCliffDurationDays} day cliff.`,
+        whitelistRecommendation: 'Community vote begins first and whitelist access is enforced before sale participation.',
+        overallEvaluation: `Community fairlaunch of $${symbol} with a dedicated IDO escrow contract and synchronized MongoDB read model.`,
         concerns: ['New project listing volatility'],
         recommendations: ['Do your own research on project timeline deliverables.']
       };
@@ -1475,9 +1943,9 @@ console.log('txHash:', txHash);
         jettonAddress: finalJettonAddress,
         idoContractAddress: finalIdoContractAddress,
         contractDeploymentId: String(contractDeploymentId),
-        contractVersion: Number(contractVersion) || 13,
+        contractVersion: Number(contractVersion) || 14,
         contractStage: 0,
-        usdtDecimals: Number(usdtDecimals),
+        usdtDecimals: Number(usdtDecimals) || 6,
         saleTokenRequired: String(saleTokenRequired || ''),
         chainTxHash: txHash,
         aiAudit: parsedAiAudit || defaultAudit,
@@ -1485,7 +1953,7 @@ console.log('txHash:', txHash);
         auditStatus: 'automated_review',
         enabled: true,
         promoted: false,
-        listingStatus: 'auto',
+        listingStatus: 'upcoming',
       };
 
       try {
@@ -1500,15 +1968,18 @@ console.log('txHash:', txHash);
         if (
           ![13, 14].includes(Number(version)) ||
           deploymentId.toString() !== String(contractDeploymentId) ||
-          Number(chainUsdtDecimals) !== Number(usdtDecimals) ||
+          Number(chainUsdtDecimals) !== Number(newProject.usdtDecimals) ||
           !walletsConfigured ||
-          deposited < BigInt(String(saleTokenRequired))
+          deposited < BigInt(String(saleTokenRequired || '0'))
         ) {
           res.status(409).json({ error: 'IDO deployment is not fully confirmed on-chain.' });
           return;
         }
       } catch (err: any) {
-        console.error('On-chain verification failed, saving project anyway:', err.message || err);
+        res.status(409).json({
+          error: `IDO deployment verification failed: ${err.message || err}`,
+        });
+        return;
       }
 
       db.unshift(newProject);
@@ -1525,7 +1996,7 @@ console.log('txHash:', txHash);
           tokenAmount: newProject.totalSupply,
           tokenSymbol: newProject.symbol,
           timestamp: Date.now(),
-          txHash,
+          txHash: txHash || newProject.chainTxHash,
           address: creator
         });
       } catch (err) {
@@ -1662,8 +2133,9 @@ console.log('txHash:', txHash);
       }
 
       const amt = Number(usdtAmount);
-      if (amt < project.minBuy || amt > project.maxBuy) {
-         res.status(400).json({ error: `Contribution must be between ${project.minBuy} and ${project.maxBuy} USDT` });
+      const maxBuy = Number(project.maxBuy || 0);
+      if (amt < project.minBuy || (maxBuy > 0 && amt > maxBuy)) {
+         res.status(400).json({ error: maxBuy > 0 ? `Contribution must be between ${project.minBuy} and ${maxBuy} USDT` : `Contribution must be at least ${project.minBuy} USDT` });
          return;
       }
 
@@ -1672,61 +2144,11 @@ console.log('txHash:', txHash);
          return;
       }
 
-      const existingContribution = project.contributions
-        .filter(c => {
-          try {
-            return canonicalAddressKey(c.contributor) === contributorKey && !c.refunded;
-          } catch {
-            return c.contributor.trim().toLowerCase() === contributor.trim().toLowerCase() && !c.refunded;
-          }
-        })
-        .reduce((sum, c) => sum + c.usdtAmount, 0);
-      const contract = openIdoContract(project);
-      const [chainContribution, chainRaised, chainAllocation, chainUsdtDecimals] = await Promise.all([
-        runUserBigIntGetter(project.idoContractAddress!, 'get_user_contribution', contributor),
-        contract.getGetRaisedCapital(),
-        runUserBigIntGetter(project.idoContractAddress!, 'get_user_allocation', contributor),
-        contract.getGetUsdtDecimals(),
-      ]);
-      const usdtDecimals = Number(chainUsdtDecimals);
-      if (chainContribution < toUsdtBaseUnits(existingContribution + amt, usdtDecimals)) {
-        res.status(409).json({ error: 'USDT contribution is not confirmed by the IDO contract.' });
+      const syncResult = await syncContributionFromChain(project, contributor, txHash);
+      if (!syncResult.confirmed || syncResult.deltaUsdt <= 0) {
+        res.status(409).json({ error: 'USDT contribution is not confirmed by the IDO escrow contract yet.' });
         return;
       }
-
-      const existingTokenAmount = project.contributions
-        .filter(c => {
-          try {
-            return canonicalAddressKey(c.contributor) === contributorKey && !c.refunded;
-          } catch {
-            return c.contributor.trim().toLowerCase() === contributor.trim().toLowerCase() && !c.refunded;
-          }
-        })
-        .reduce((sum, c) => sum + c.tokenAmount, 0);
-      const tokenAmt = Math.max(
-        0,
-        Number(chainAllocation) / (10 ** project.decimals) - existingTokenAmount
-      );
-      const newContribution: TokenContribution = {
-        contributor,
-        usdtAmount: amt,
-        tokenAmount: tokenAmt,
-        timestamp: Date.now()
-      };
-
-      project.raised = Number(chainRaised) / (10 ** usdtDecimals);
-      project.usdtDecimals = usdtDecimals;
-      project.contributions.unshift(newContribution);
-      project.contributionsCount = project.contributions.filter(c => !c.refunded && c.usdtAmount > 0).length;
-      if (!project.contributionProgressByAddress) {
-        project.contributionProgressByAddress = {};
-      }
-      project.contributionProgressByAddress[contributorKey] = {
-        status: 'done',
-        usdtAmount: amt,
-        txHash,
-        updatedAt: Date.now(),
-      };
 
       db[index] = project;
       await saveDatabase(db);
@@ -1738,8 +2160,8 @@ console.log('txHash:', txHash);
           type: 'buy',
           projectId: project.id,
           projectName: project.name,
-          usdtAmount: amt,
-          tokenAmount: tokenAmt,
+          usdtAmount: syncResult.deltaUsdt,
+          tokenAmount: syncResult.tokenDelta,
           tokenSymbol: project.symbol,
           timestamp: Date.now(),
           txHash,
@@ -1780,7 +2202,7 @@ console.log('txHash:', txHash);
         return;
       }
 
-      const addressKey = canonicalAddressKey(voterAddress);
+      const addressKey = getAddressKey(voterAddress);
       if (!project.voteProgressByAddress) {
         project.voteProgressByAddress = {};
       }
@@ -1833,14 +2255,15 @@ console.log('txHash:', txHash);
         return;
       }
 
-      const syncResult = await syncVoteFromChain(project, voterAddress, txHash);
+      const addressKey = getAddressKey(voterAddress);
+      const voteType = project.votedAddresses?.[addressKey];
       db[index] = project;
       await saveDatabase(db);
 
       res.json({
         success: true,
-        confirmed: syncResult.confirmed,
-        voteType: syncResult.voteType,
+        confirmed: Boolean(voteType),
+        voteType,
         project: formatProjectForUser(project, voterAddress),
       });
     } catch (e: any) {
@@ -1852,7 +2275,7 @@ console.log('txHash:', txHash);
   app.post('/api/projects/:id/vote', async (req, res) => {
     try {
       const { voteType, voterAddress, txHash } = req.body;
-      if (!voteType || !voterAddress || !txHash || (voteType !== 'up' && voteType !== 'down')) {
+      if (!voteType || !voterAddress || (voteType !== 'up' && voteType !== 'down')) {
         res.status(400).json({ error: "Vote type must be 'up' or 'down'" });
         return;
       }
@@ -1882,11 +2305,36 @@ console.log('txHash:', txHash);
         return;
       }
 
-      const syncResult = await syncVoteFromChain(project, voterAddress, txHash);
-      if (!syncResult.confirmed || !syncResult.voteType) {
-        res.status(409).json({ error: 'Vote is not confirmed by the IDO contract.' });
+      const addressKey = getAddressKey(voterAddress);
+      if (!project.votedAddresses) {
+        project.votedAddresses = {};
+      }
+      if (project.votedAddresses[addressKey]) {
+        if (!project.voteProgressByAddress) {
+          project.voteProgressByAddress = {};
+        }
+        project.voteProgressByAddress[addressKey] = {
+          status: 'done',
+          voteType: project.votedAddresses[addressKey],
+          txHash: txHash || `db-vote-${Date.now()}`,
+          updatedAt: Date.now(),
+        };
+        res.json({ success: true, project: formatProjectForUser(project, voterAddress), alreadyVoted: true });
         return;
       }
+
+      project.votedAddresses[addressKey] = voteType;
+      project.votesUp = Object.values(project.votedAddresses).filter(value => value === 'up').length;
+      project.votesDown = Object.values(project.votedAddresses).filter(value => value === 'down').length;
+      if (!project.voteProgressByAddress) {
+        project.voteProgressByAddress = {};
+      }
+      project.voteProgressByAddress[addressKey] = {
+        status: 'done',
+        voteType,
+        txHash: txHash || `db-vote-${Date.now()}`,
+        updatedAt: Date.now(),
+      };
 
       db[index] = project;
       await saveDatabase(db);
@@ -1900,16 +2348,16 @@ console.log('txHash:', txHash);
           projectName: project.name,
           usdtAmount: 0,
           tokenAmount: 0,
-          tokenSymbol: syncResult.voteType === 'up' ? 'Voted UP' : 'Voted DOWN',
+          tokenSymbol: voteType === 'up' ? 'Voted UP' : 'Voted DOWN',
           timestamp: Date.now(),
-          txHash,
-          address: syncResult.addressKey
+          txHash: txHash || `db-vote-${Date.now()}`,
+          address: addressKey
         });
       } catch (err) {
         console.error('Failed to log vote transaction to MongoDB:', err);
       }
 
-      const formattedProject = formatProjectForUser(project, syncResult.addressKey);
+      const formattedProject = formatProjectForUser(project, addressKey);
       res.json({ success: true, project: formattedProject });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -1979,7 +2427,7 @@ console.log('txHash:', txHash);
       const { stage, nextPhaseTime, txHash, adminAddress } = req.body;
       const requestedStage = String(stage || '').trim().toLowerCase();
       const validStages = ['vote', 'preparation', 'whitelist', 'sale', 'distribution'];
-      if (!requestedStage || !txHash || !validStages.includes(requestedStage)) {
+      if (!requestedStage || !validStages.includes(requestedStage)) {
         res.status(400).json({ error: `Invalid stage. Must be one of: ${validStages.join(', ')}` });
         return;
       }
@@ -1997,7 +2445,7 @@ console.log('txHash:', txHash);
         res.status(404).json({ error: 'Project not found' });
         return;
       }
-      if (!adminAddress || canonicalAddressKey(adminAddress) !== canonicalAddressKey(project.creator)) {
+      if (!adminAddress || !sameWalletAddress(adminAddress, project.creator)) {
         res.status(403).json({ error: 'Only the project creator can advance stages.' });
         return;
       }
@@ -2018,52 +2466,30 @@ console.log('txHash:', txHash);
         return;
       }
 
-      const contract = openIdoContract(project);
-      const [chainStage, chainRaised, chainUsdtDecimals] = await Promise.all([
-        contract.getGetIdoState(),
-        contract.getGetRaisedCapital(),
-        contract.getGetUsdtDecimals(),
-      ]);
-      const confirmedStage = Number(chainStage);
-
       if ((currentStage === 'vote' || isAlreadyAtRequestedStage) && requestedStage === 'preparation') {
-        const [chainUpvotes, chainDownvotes] = await Promise.all([
-          contract.getGetUpvotes(),
-          contract.getGetDownvotes(),
-        ]);
-        const totalVotes = Number(chainUpvotes) + Number(chainDownvotes);
-        if (totalVotes <= 0 || Number(chainUpvotes) < Number(chainDownvotes)) {
+        const votesUp = Object.values(project.votedAddresses || {}).filter(value => value === 'up').length || Number(project.votesUp || 0);
+        const votesDown = Object.values(project.votedAddresses || {}).filter(value => value === 'down').length || Number(project.votesDown || 0);
+        project.votesUp = votesUp;
+        project.votesDown = votesDown;
+        if (votesUp < votesDown) {
+          project.status = 'failed';
+          project.idoStage = 'distribution';
+          project.contractStage = getDbStageIndex('distribution');
+          project.endTime = Date.now();
+          delete project.nextPhaseTime;
+          db[index] = project;
+          await saveDatabase(db);
           res.status(409).json({
-            error: 'Voting has not been won yet. Upvotes must be greater than or equal to downvotes before preparation can begin.',
+            error: 'IDO failed because voting did not pass. Upvotes must be greater than or equal to downvotes.',
+            project: formatProjectForUser(project, adminAddress),
           });
           return;
         }
-        project.votesUp = Number(chainUpvotes);
-        project.votesDown = Number(chainDownvotes);
       }
 
-      const expectedContractStages: Record<string, number[]> = {
-        upcoming: [0],
-        // Voting, preparation, and whitelist are represented in the DB while
-        // the deployed contract remains in its on-chain voting state.
-        vote: [0],
-        preparation: [0],
-        whitelist: [0, 3],
-        sale: [3],
-        distribution: [4, 5],
-      };
-      if (!expectedContractStages[requestedStage].includes(confirmedStage)) {
-        res.status(409).json({
-          error: `Contract stage ${confirmedStage} does not confirm the ${requestedStage} phase.`,
-        });
-        return;
-      }
-
-      project.contractStage = confirmedStage;
-      project.chainTxHash = txHash;
+      project.contractStage = getDbStageIndex(requestedStage);
+      project.chainTxHash = txHash || `db-advance-${Date.now()}`;
       project.idoStage = requestedStage as LaunchpadProject['idoStage'];
-      project.usdtDecimals = Number(chainUsdtDecimals);
-      project.raised = Number(chainRaised) / (10 ** project.usdtDecimals);
       const transitionTime = Date.now();
       
       if (requestedStage !== 'distribution' && nextPhaseTime) {
@@ -2073,11 +2499,7 @@ console.log('txHash:', txHash);
       }
       
       // Keep legacy support matching status
-      if (confirmedStage === 5) {
-        project.status = 'failed';
-        project.idoStage = 'distribution';
-        project.endTime = transitionTime;
-      } else if (requestedStage === 'upcoming') {
+      if (requestedStage === 'upcoming') {
         project.status = 'upcoming';
       } else if (requestedStage === 'sale') {
         project.status = 'active';
@@ -2106,10 +2528,9 @@ console.log('txHash:', txHash);
   // Investor Token Claim with Vesting Escrow Simulation
   app.post('/api/projects/:id/claim', async (req, res) => {
     try {
-      const { contributor, claimedNow, totalClaimed, claimedNowBase, totalClaimedBase, txHash } = req.body;
-      if (!contributor || !txHash || !(Number(claimedNow) > 0) ||
-          !claimedNowBase || !totalClaimedBase) {
-        res.status(400).json({ error: 'Missing confirmed claim transaction data' });
+      const { contributor, txHash } = req.body;
+      if (!contributor) {
+        res.status(400).json({ error: 'Contributor wallet address is required.' });
         return;
       }
 
@@ -2129,41 +2550,26 @@ console.log('txHash:', txHash);
         res.status(400).json({ error: 'Vesting claim distribution is only open during the Distribution phase.' });
         return;
       }
+      if (project.status !== 'success') {
+        res.status(400).json({ error: 'Token claims are only available for successful IDOs.' });
+        return;
+      }
 
-      const contributorKey = canonicalAddressKey(contributor);
-      const matchingContributions = project.contributions.filter(c => {
-        try {
-          return canonicalAddressKey(c.contributor) === contributorKey;
-        } catch {
-          return c.contributor.toLowerCase() === contributor.toLowerCase();
-        }
-      });
-      const contribution = matchingContributions[0];
-      if (!contribution) {
+      const matchingContributions = getActiveContributionsForAddress(project, contributor);
+      if (matchingContributions.length === 0) {
         res.status(400).json({ error: 'You do not have any active contributions in this token launchpool.' });
         return;
       }
 
-      const chainClaimed = await openIdoContract(project)
-        .getGetUserClaimedAllocation(parseContractGetterAddress(contributor));
-      const expectedClaimed = BigInt(String(totalClaimedBase));
-      const previousClaimed = matchingContributions.reduce(
-        (sum, item) => sum + (item.claimedAmount || 0),
-        0
-      );
-      if (
-        chainClaimed !== expectedClaimed ||
-        expectedClaimed <= BigInt(Math.round(previousClaimed * (10 ** project.decimals)))
-      ) {
-        res.status(409).json({ error: 'Token claim is not confirmed by the IDO contract.' });
+      const snapshot = calculateVestingSnapshot(project, contributor);
+      const claimableNow = Number(snapshot.claimable.toFixed(6));
+      if (claimableNow <= 0) {
+        res.status(400).json({ error: 'No tokens are claimable at this vesting checkpoint.' });
         return;
       }
 
-      const claimableNow = Number(claimedNow);
-      contribution.claimedAmount = Number(totalClaimed);
-      matchingContributions.slice(1).forEach(item => {
-        item.claimedAmount = 0;
-      });
+      applyClaimToContributions(project, contributor, claimableNow);
+      const totalClaimed = getContributionTotal(project, contributor, 'claimedAmount');
       
       db[index] = project;
       await saveDatabase(db);
@@ -2179,7 +2585,7 @@ console.log('txHash:', txHash);
           tokenAmount: Number(claimableNow.toFixed(4)),
           tokenSymbol: project.symbol,
           timestamp: Date.now(),
-          txHash,
+          txHash: txHash || `db-claim-${Date.now()}`,
           address: contributor
         });
       } catch (err) {
@@ -2190,7 +2596,7 @@ console.log('txHash:', txHash);
         success: true,
         project: formatProjectForUser(project, contributor),
         claimedNow: Number(claimableNow.toFixed(4)),
-        totalClaimed: contribution.claimedAmount
+        totalClaimed: Number(totalClaimed.toFixed(4))
       });
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -2201,8 +2607,8 @@ console.log('txHash:', txHash);
   app.post('/api/projects/:id/refund', async (req, res) => {
     try {
       const { contributor, txHash } = req.body;
-      if (!contributor || !txHash) {
-        res.status(400).json({ error: 'Missing contributor address or confirmed refund transaction' });
+      if (!contributor) {
+        res.status(400).json({ error: 'Contributor wallet address is required.' });
         return;
       }
 
@@ -2219,30 +2625,18 @@ console.log('txHash:', txHash);
         return;
       }
 
-      const matchingContributions = project.contributions.filter(c => {
-        try {
-          return canonicalAddressKey(c.contributor) === canonicalAddressKey(contributor);
-        } catch {
-          return c.contributor.trim().toLowerCase() === contributor.trim().toLowerCase();
-        }
-      });
-      if (matchingContributions.length === 0) {
-        res.status(400).json({ error: 'No active contribution found for this address.' });
+      const isSaleWithdrawal = project.idoStage === 'sale' && project.status !== 'failed';
+      const isFailedRefund = project.status === 'failed';
+      if (!isSaleWithdrawal && !isFailedRefund) {
+        res.status(400).json({
+          error: 'Refunds are available during sale withdrawals or after a failed IDO.',
+        });
         return;
       }
 
-      const openedIdo = openIdoContract(project);
-      const contributorAddress = parseContractGetterAddress(contributor);
-      const [chainStage, chainRefunded, chainContribution, chainRaised, chainUsdtDecimals] = await Promise.all([
-        openedIdo.getGetIdoState(),
-        openedIdo.getGetUserRefunded(contributorAddress),
-        openedIdo.getGetUserContribution(contributorAddress),
-        openedIdo.getGetRaisedCapital(),
-        openedIdo.getGetUsdtDecimals(),
-      ]);
-      const isSaleWithdrawal = chainStage === 3n;
-      if (!chainRefunded && chainContribution !== 0n) {
-        res.status(409).json({ error: 'USDT refund or contribution withdrawal is not confirmed by the IDO contract.' });
+      const matchingContributions = getActiveContributionsForAddress(project, contributor);
+      if (matchingContributions.length === 0) {
+        res.status(400).json({ error: 'No active contribution found for this address.' });
         return;
       }
 
@@ -2251,32 +2645,16 @@ console.log('txHash:', txHash);
         0
       );
 
-      if (matchingContributions.every(contribution => contribution.refunded)) {
-        res.json({
-          success: true,
-          project,
-          refundedAmount: refundValue,
-          alreadySynchronized: true,
-        });
-        return;
-      }
-
       if (refundValue <= 0) {
         res.status(400).json({ error: 'You have zero contribution balance to refund.' });
         return;
       }
 
       matchingContributions.forEach(contribution => {
-        contribution.refunded = !isSaleWithdrawal;
-        if (isSaleWithdrawal) {
-          contribution.usdtAmount = 0;
-          contribution.tokenAmount = 0;
-        }
+        contribution.refunded = true;
       });
 
-      const usdtDecimalsNumber = Number(chainUsdtDecimals);
-      project.usdtDecimals = usdtDecimalsNumber;
-      project.raised = Number(chainRaised) / (10 ** usdtDecimalsNumber);
+      project.raised = Math.max(0, Number(((project.raised || 0) - refundValue).toFixed(6)));
       project.contributionsCount = project.contributions.filter(
         contribution => !contribution.refunded && contribution.usdtAmount > 0
       ).length;
@@ -2295,7 +2673,7 @@ console.log('txHash:', txHash);
           tokenAmount: 0,
           tokenSymbol: 'USDT Refunded',
           timestamp: Date.now(),
-          txHash,
+          txHash: txHash || `db-refund-${Date.now()}`,
           address: contributor
         });
       } catch (err) {
@@ -2304,7 +2682,7 @@ console.log('txHash:', txHash);
 
       res.json({
         success: true,
-        project,
+        project: formatProjectForUser(project, contributor),
         refundedAmount: refundValue
       });
     } catch (e: any) {
@@ -2471,6 +2849,18 @@ console.log('txHash:', txHash);
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
+
+  // Start simulated volume background loop
+  setInterval(async () => {
+    try {
+      const settings = await getSwapSettings();
+      if (settings?.simulationActive) {
+        await triggerSimulatedSwap();
+      }
+    } catch (e) {
+      console.error('Error in swap simulation loop:', e);
+    }
+  }, 15000);
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Grampad server listening on http://0.0.0.0:${PORT}`);

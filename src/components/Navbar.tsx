@@ -101,8 +101,8 @@ export default function Navbar({
               { key: 'explore' as const, label: 'Explore', icon: LayoutGrid },
               { key: 'staking' as const, label: 'Staking', icon: Coins },
               { key: 'lplocker' as const, label: 'Locker', icon: Lock },
-              { key: 'guide' as const, label: 'How it works', icon: HelpCircle },
               { key: 'swap' as const, label: 'Swap', icon: ArrowUpDown },
+               { key: 'guide' as const, label: 'How it works', icon: HelpCircle },
              
             ].map(item => {
               const Icon = item.icon;

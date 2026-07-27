@@ -432,7 +432,7 @@ builder $GramPadSimpleSwap$_store(builder build_0, (slice, int, slice, slice, in
     var (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)) = $self;
     int $queryId = $self'nextTransferQueryId;
     $self'nextTransferQueryId = ($self'nextTransferQueryId + 1);
-    $global_message($MessageParameters$_constructor_to_value_bounce_body($jettonWallet, 200000000, true, $JettonTransfer$_store_cell($JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload($queryId, $amount, $destination, $global_myAddress(), null(), 10000000, $Builder$_fun_asSlice($Builder$_fun_storeBit(false, $global_beginCell()))), begin_cell())));
+    $global_message($MessageParameters$_constructor_to_value_bounce_body($jettonWallet, 60000000, true, $JettonTransfer$_store_cell($JettonTransfer$_constructor_queryId_amount_destination_responseDestination_customPayload_forwardTonAmount_forwardPayload($queryId, $amount, $destination, $global_myAddress(), null(), 10000000, $Builder$_fun_asSlice($Builder$_fun_storeBit(false, $global_beginCell()))), begin_cell())));
     return (($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume), ());
 }
 
@@ -638,12 +638,22 @@ _ %get_quote_ton_out(int $gramAmount) method_id(78467) {
         var $msg'amount = in_msg~load_varuint16();
         var $msg'destination = in_msg~load_msg_addr();
         ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
-        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 10000000));
         throw_unless(17062, ($msg'amount > 0));
-        throw_unless(25435, ($self'tonReserve >= $msg'amount));
-        throw_unless(4558, (($global_myBalance() - $Context$_get_value(__tact_context_get())) >= $msg'amount));
-        $self'tonReserve = ($self'tonReserve - $msg'amount);
-        $global_message($MessageParameters$_constructor_to_value_bounce($msg'destination, $msg'amount, false));
+        int $availBalance = (($global_myBalance() - $Context$_get_value(__tact_context_get())) - 30000000);
+        if (($availBalance < 0)) {
+            $availBalance = 0;
+        }
+        int $amountToWithdraw = $msg'amount;
+        if (($amountToWithdraw > $availBalance)) {
+            $amountToWithdraw = $availBalance;
+        }
+        throw_unless(4558, ($amountToWithdraw > 0));
+        if (($self'tonReserve >= $amountToWithdraw)) {
+            $self'tonReserve = ($self'tonReserve - $amountToWithdraw);
+        } else {
+            $self'tonReserve = 0;
+        }
+        $global_message($MessageParameters$_constructor_to_value_bounce($msg'destination, $amountToWithdraw, false));
         $GramPadSimpleSwap$_contract_store(($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume));
         return ();
     }
@@ -653,7 +663,6 @@ _ %get_quote_ton_out(int $gramAmount) method_id(78467) {
         var $msg'amount = in_msg~load_varuint16();
         var $msg'destination = in_msg~load_msg_addr();
         ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
-        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 160000000));
         throw_unless(17062, ($msg'amount > 0));
         throw_unless(16264, ($self'gramReserve >= $msg'amount));
         $self'gramReserve = ($self'gramReserve - $msg'amount);
@@ -667,7 +676,6 @@ _ %get_quote_ton_out(int $gramAmount) method_id(78467) {
         var $msg'amount = in_msg~load_varuint16();
         var $msg'destination = in_msg~load_msg_addr();
         ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_requireOwner();
-        throw_unless(15304, ($Context$_get_value(__tact_context_get()) >= 160000000));
         throw_unless(17062, ($msg'amount > 0));
         throw_unless(25347, ($self'usdtReserve >= $msg'amount));
         $self'usdtReserve = ($self'usdtReserve - $msg'amount);
@@ -696,7 +704,7 @@ _ %get_quote_ton_out(int $gramAmount) method_id(78467) {
                 return ();
             }
             throw_unless(44787, (~ $self'paused));
-            throw_unless(25435, (($global_myBalance() - $Context$_get_value(__tact_context_get())) >= 220000000));
+            throw_unless(25435, (($global_myBalance() - $Context$_get_value(__tact_context_get())) >= 50000000));
             throw_unless(22614, ( (($self'maxBuy == 0)) ? (true) : (($msg'amount <= $self'maxBuy)) ));
             int $marker = $payload~load_uint(32);
             throw_unless(34023, ($marker == 1398227280));
@@ -720,7 +728,7 @@ _ %get_quote_ton_out(int $gramAmount) method_id(78467) {
             return ();
         }
         throw_unless(44787, (~ $self'paused));
-        throw_unless(25435, (($global_myBalance() - $Context$_get_value(__tact_context_get())) >= 220000000));
+        throw_unless(25435, (($global_myBalance() - $Context$_get_value(__tact_context_get())) >= 50000000));
         int $tonOutCheck = ($self'owner, $self'deploymentId, $self'gramJettonMaster, $self'gramJettonWallet, $self'gramDecimals, $self'usdtJettonMaster, $self'usdtJettonWallet, $self'usdtDecimals, $self'jettonWalletsConfigured, $self'paused, $self'rateScaled, $self'tonRateScaled, $self'maxBuy, $self'nextTransferQueryId, $self'gramReserve, $self'usdtReserve, $self'tonReserve, $self'totalSwapCount, $self'totalGramToUsdtVolume, $self'totalUsdtToGramVolume, $self'totalTonToGramVolume, $self'totalGramToTonVolume)~$GramPadSimpleSwap$_fun_quoteTonOut($msg'amount);
         int $marker = $payload~load_uint(32);
         throw_unless(34023, ($marker == 1398227280));
@@ -765,7 +773,7 @@ _ %get_quote_ton_out(int $gramAmount) method_id(78467) {
         throw_unless(60322, ($gramOut > 0));
         throw_unless(41529, ($gramOut >= $msg'minOut));
         throw_unless(16264, ($self'gramReserve >= $gramOut));
-        throw_unless(25435, ($global_myBalance() >= 220000000));
+        throw_unless(25435, ($global_myBalance() >= 50000000));
         $self'tonReserve = ($self'tonReserve + $tonAmount);
         $self'gramReserve = ($self'gramReserve - $gramOut);
         $self'totalSwapCount = ($self'totalSwapCount + 1);

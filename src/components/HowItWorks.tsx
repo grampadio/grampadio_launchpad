@@ -249,7 +249,8 @@ export default function HowItWorks({ onExplore, onapply, walletConnected, onConn
                     onClick={() => setSelectedStep((prev) => (prev + 1) % steps.length)}
                     className="gp-how-secondary rounded-lg border border-slate-800 bg-slate-900/60 hover:bg-slate-900 hover:text-[#0098EA] transition duration-250 py-1.5 px-4 text-xs font-semibold text-slate-300 flex items-center gap-1 cursor-pointer"
                   >
-                    <span>Next Step View</span>
+                    {steps.length - 1 === selectedStep ? 'Restart Tour' : 'Next Step'}
+                   
                     <ArrowRight className="h-3.5 w-3.5 text-[#0098EA]" />
                   </button>
                 </div>

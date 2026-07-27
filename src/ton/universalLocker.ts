@@ -140,17 +140,22 @@ export const getLockerDetails = async (
 ) => {
   if (!address) throw new Error('Universal locker address is not configured.');
 
-  const contract = getTonClient().open(getUniversalLockerContract(address));
-  const details = await contract.getGetContractDetails();
+  try {
+    const contract = getTonClient().open(getUniversalLockerContract(address));
+    const details = await contract.getGetContractDetails();
 
-  return {
-    owner: details.owner.toString(),
-    paused: details.paused,
-    totalLockedPositions: details.totalLockedPositions,
-    activeLockPositions: details.activeLockPositions,
-    totalWithdrawnPositions: details.totalWithdrawnPositions,
-    nextLockId: details.nextLockId,
-  };
+    return {
+      owner: details.owner.toString(),
+      paused: details.paused,
+      totalLockedPositions: details.totalLockedPositions,
+      activeLockPositions: details.activeLockPositions,
+      totalWithdrawnPositions: details.totalWithdrawnPositions,
+      nextLockId: details.nextLockId,
+    };
+  } catch (err) {
+    console.warn('getLockerDetails contract getter call failed:', err);
+    return null;
+  }
 };
 
 export const getUserLockerDetails = async (
@@ -160,41 +165,68 @@ export const getUserLockerDetails = async (
   if (!address) throw new Error('Universal locker address is not configured.');
 
   const user = Address.parse(userAddress);
-  const contract = getTonClient().open(getUniversalLockerContract(address));
 
-  const summary = await contract.getGetUserSummary(user);
-  const totalLocks = Number(summary.totalLocks || 0n);
+  try {
+    const contract = getTonClient().open(getUniversalLockerContract(address));
+    const summary = await contract.getGetUserSummary(user);
+    const totalLocks = Number(summary.totalLocks || 0n);
 
-  const lockIds = await Promise.all(
-    Array.from({ length: totalLocks }, (_, index) =>
-      contract.getGetUserLockIdByIndex(user, BigInt(index))
-    )
-  );
+    if (totalLocks === 0) {
+      return {
+        user: user.toString(),
+        totalLocks: 0n,
+        activeLocks: 0n,
+        lockIds: [],
+        locks: [],
+        activeLockItems: [],
+        closedLockItems: [],
+      };
+    }
 
-  const locks = await Promise.all(
-    lockIds.map(lockId => contract.getGetLockDetails(lockId))
-  );
+    const rawLockIds = await Promise.all(
+      Array.from({ length: totalLocks }, (_, index) =>
+        contract.getGetUserLockIdByIndex(user, BigInt(index)).catch(() => null)
+      )
+    );
+    const lockIds = rawLockIds.filter((id): id is bigint => id !== null);
 
-  const formattedLocks = locks.map(lock => ({
-    lockId: lock.lockId,
-    owner: lock.owner.toString(),
-    jettonWallet: lock.jettonWallet.toString(),
-    amount: lock.amount,
-    lockedAt: lock.lockedAt,
-    unlockTime: lock.unlockTime,
-    withdrawn: lock.withdrawn,
-    active: !lock.withdrawn,
-  }));
+    const rawLocks = await Promise.all(
+      lockIds.map(lockId => contract.getGetLockDetails(lockId).catch(() => null))
+    );
+    const locks = rawLocks.filter((l): l is NonNullable<typeof l> => l !== null);
 
-  return {
-    user: summary.user.toString(),
-    totalLocks: summary.totalLocks,
-    activeLocks: summary.activeLocks,
-    lockIds,
-    locks: formattedLocks,
-    activeLockItems: formattedLocks.filter(lock => !lock.withdrawn),
-    closedLockItems: formattedLocks.filter(lock => lock.withdrawn),
-  };
+    const formattedLocks = locks.map(lock => ({
+      lockId: lock.lockId,
+      owner: lock.owner.toString(),
+      jettonWallet: lock.jettonWallet.toString(),
+      amount: lock.amount,
+      lockedAt: lock.lockedAt,
+      unlockTime: lock.unlockTime,
+      withdrawn: lock.withdrawn,
+      active: !lock.withdrawn,
+    }));
+
+    return {
+      user: summary.user.toString(),
+      totalLocks: summary.totalLocks,
+      activeLocks: summary.activeLocks,
+      lockIds,
+      locks: formattedLocks,
+      activeLockItems: formattedLocks.filter(lock => !lock.withdrawn),
+      closedLockItems: formattedLocks.filter(lock => lock.withdrawn),
+    };
+  } catch (err) {
+    console.warn('getUserLockerDetails contract getter call failed:', err);
+    return {
+      user: user.toString(),
+      totalLocks: 0n,
+      activeLocks: 0n,
+      lockIds: [],
+      locks: [],
+      activeLockItems: [],
+      closedLockItems: [],
+    };
+  }
 };
 
 export const prepareUniversalLockerDeployment = async (ownerAddress: string) => {
@@ -251,6 +283,42 @@ export async function getJettonMetadata(jettonMaster: string) {
   console.log('Metadata response ok:', response.ok);
 
   if (!response.ok) {
+    // If the input address was a Jetton Wallet address (which returns 404 on /v2/jettons/<addr>),
+    // execute on-chain get_wallet_data getter to extract the true Jetton Master address!
+    try {
+      const client = await getTonClient();
+      const parsedAddr = Address.parse(address);
+      const res = await client.runMethod(parsedAddr, 'get_wallet_data');
+      if (res && res.stack) {
+        res.stack.readBigNumber(); // balance
+        res.stack.readAddress(); // owner
+        const masterAddr = res.stack.readAddress().toString();
+
+        if (masterAddr) {
+          const masterUrl = `${tonApiBase}/v2/jettons/${encodeURIComponent(masterAddr)}`;
+          const masterResponse = await fetch(masterUrl);
+          if (masterResponse.ok) {
+            const masterData = await masterResponse.json();
+            const decimals = Number(
+              masterData?.metadata?.decimals ??
+                masterData?.decimals ??
+                DEFAULT_JETTON_DECIMALS
+            );
+            return {
+              symbol: String(masterData?.metadata?.symbol || masterData?.symbol || 'TOKEN'),
+              name: String(masterData?.metadata?.name || masterData?.name || ''),
+              decimals,
+              totalSupply: 0,
+              image: String(masterData?.metadata?.image || masterData?.image || ''),
+              masterAddress: masterAddr,
+            };
+          }
+        }
+      }
+    } catch (fallbackErr) {
+      console.warn('Jetton wallet fallback lookup failed:', fallbackErr);
+    }
+
     const errorText = await response.text();
     console.log('Metadata error:', errorText);
     throw new Error('Failed to fetch Jetton metadata.');

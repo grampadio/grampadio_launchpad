@@ -171,7 +171,7 @@ export default function TokenLauncher({ wallet, onOpenConnect, onDeploySuccess, 
 
   // Deploying transaction state
   const [deployStep, setDeployStep] = useState<'idle' | 'signing' | 'broadcasting' | 'complete'>('idle');
-  const [broadcastStage, setBroadcastStage] = useState<'deployment' | 'setup' | 'deposit'>('deployment');
+  const [broadcastStage, setBroadcastStage] = useState<'deployment' | 'setup' | 'deposit' | 'db-sync'>('deployment');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [pendingDeployment, setPendingDeployment] = useState<Awaited<ReturnType<typeof prepareIdoDeployment>> | null>(null);
   const [deploymentTxBoc, setDeploymentTxBoc] = useState('');
@@ -706,7 +706,7 @@ const handleAIGenerate = async () => {
         <div className="gp-chip inline-flex rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em]">Project launcher</div>
         <h1 className="mt-4 text-3xl font-black tracking-[-0.035em] text-white sm:text-4xl">Launch on Grampad</h1>
         <p className="mt-3 text-sm leading-6 text-slate-400">
-          Configure your sale, deploy a dedicated IDO contract, and move through preparation, community voting, whitelist, sale, and distribution.
+          Configure your sale, deploy a dedicated IDO escrow contract, then sync MongoDB as the fast read model for the portal.
         </p>
       </div>
       
@@ -714,6 +714,7 @@ const handleAIGenerate = async () => {
         
         {/* Left Column: Form & Assist Box (8cols in Desktop) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
+          {false && (
           <section className="gp-panel rounded-[24px] p-6 sm:p-8">
             <h2 className="text-lg font-extrabold text-white">Recover deployed project</h2>
             <p className="mt-2 text-xs leading-6 text-slate-500">
@@ -741,9 +742,9 @@ const handleAIGenerate = async () => {
               <div className="mt-4 rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.06] p-4">
                 <p className="text-xs font-bold text-emerald-300">Deployment verified on-chain</p>
                 <div className="mt-3 grid gap-2 text-[11px] text-slate-400 sm:grid-cols-2">
-                  <span>Hard cap: {recoveryDetails.hardCap} USDT</span>
-                  <span>Max buy: {recoveryDetails.maxBuy} USDT</span>
-                  <span>Vesting: {recoveryDetails.vestingMonths} months</span>
+                  <span>Hard cap: {recoveryDetails?.hardCap} USDT</span>
+                  <span>Max buy: {recoveryDetails?.maxBuy} USDT</span>
+                  <span>Vesting: {recoveryDetails?.vestingMonths} months</span>
                   <span>Sale tokens funded: yes</span>
                 </div>
                 <p className="mt-3 text-[11px] leading-5 text-slate-400">
@@ -831,6 +832,7 @@ const handleAIGenerate = async () => {
               </div>
             )}
           </section>
+          )}
           
           {/* A. AI Assistant Panel */}
           {/* <div className="rounded-3xl border border-[#0098EA]/30 bg-gradient-to-br from-[#0B1E38]/90 to-[#070E1B]/95 p-6 shadow-xl shadow-[#0098EA]/5">
@@ -1738,7 +1740,7 @@ const handleAIGenerate = async () => {
                   </div>
                   <h4 className="font-bold text-lg mb-1">Jetton IDO Seeded!</h4>
                   <p className="text-xs text-slate-400 leading-relaxed">
-                    Congratulations! Your IDO project is now officially deployed and has entered stage 1: Voting. Community members can vote before preparation begins.
+                    Congratulations! Your IDO escrow contract is deployed and the project is saved as upcoming. Advance it to voting when you are ready.
                   </p>
                 </div>
               )}

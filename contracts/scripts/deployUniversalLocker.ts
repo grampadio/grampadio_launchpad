@@ -10,7 +10,7 @@ export async function run(provider: NetworkProvider) {
   }
 
   const locker = provider.open(
-    await GramPadUniversalLocker.fromInit(owner)
+    await GramPadUniversalLocker.fromInit(owner, 0n)
   );
 
   await locker.send(

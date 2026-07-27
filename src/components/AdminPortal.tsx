@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Coins,
   Copy,
   Edit3,
   Eye,
@@ -20,11 +21,15 @@ import {
   Loader2,
   LockKeyhole,
   LogOut,
+  Play,
   Plus,
+  RefreshCcw,
   Rocket,
   Save,
   ShieldCheck,
   Shuffle,
+  Sparkles,
+  Square,
   UploadIcon,
   Wallet,
   X,
@@ -42,7 +47,6 @@ import {
   buildSuperWithdrawTonPayload,
   buildWithdrawRaisedUsdtPayload,
   buildWithdrawRemainingSaleTokensPayload,
-  cellToBase64,
   getIdoAdminField,
   getIdoContractLightStatus,
 } from '../ton/gramStarter.js';
@@ -68,8 +72,12 @@ import {
   rateScaledFromLabel,
   SWAP_DEPLOY_TON,
   SWAP_FUND_TON,
+  SWAP_JETTON_TRANSFER_TON,
   waitForSwapDeployment,
 } from '../ton/simpleSwap.js';
+
+const cellToBase64 = (cell: { toBoc: () => Uint8Array }) =>
+  btoa(String.fromCharCode(...cell.toBoc()));
 
 interface AdminPortalProps {
   session: AdminSession;
@@ -169,6 +177,8 @@ export default function AdminPortal({
     updatedAt: 0,
   });
   const [swapSaving, setSwapSaving] = useState(false);
+  const [simulating, setSimulating] = useState(false);
+  const [simBusy, setSimBusy] = useState(false);
   const [swapWithdrawDrafts, setSwapWithdrawDrafts] = useState({
     topupGramAmount: '',
     tonAmount: '',
@@ -230,6 +240,9 @@ export default function AdminPortal({
       setApplications(Array.isArray(applicationData) ? applicationData : []);
       if (swapData && typeof swapData === 'object') {
         setSwapSettings(swapData);
+        if (typeof swapData.simulationActive === 'boolean') {
+          setSimulating(swapData.simulationActive);
+        }
       }
     } catch (error: any) {
       setActionError(error.message);
@@ -754,15 +767,25 @@ export default function AdminPortal({
 
     try {
       const ownerAddress = requireWallet();
-      const rateScaled = rateScaledFromLabel(swapSettings.rateLabel);
-      const maxBuyRaw = maxBuyRawFromLabel(swapSettings.maxBuyLabel || '0', Number(swapSettings.usdtDecimals));
+      if (!swapSettings.gramMasterAddress) {
+        throw new Error('Enter GRAMX Jetton Master Address before deploying swap contract.');
+      }
+      if (!swapSettings.usdtMasterAddress) {
+        throw new Error('Enter USDT Jetton Master Address before deploying swap contract.');
+      }
+
+      const rateScaled = rateScaledFromLabel(swapSettings.rateLabel || '1');
+      const tonRateScaled = rateScaledFromLabel(swapSettings.tonRateLabel || '1');
+      const maxBuyRaw = maxBuyRawFromLabel(swapSettings.maxBuyLabel || '0', Number(swapSettings.usdtDecimals || 6));
+
       const deployment = await buildSwapDeployment({
         ownerAddress,
         gramMasterAddress: swapSettings.gramMasterAddress,
-        gramDecimals: Number(swapSettings.gramDecimals),
+        gramDecimals: Number(swapSettings.gramDecimals || 9),
         usdtMasterAddress: swapSettings.usdtMasterAddress,
-        usdtDecimals: Number(swapSettings.usdtDecimals),
+        usdtDecimals: Number(swapSettings.usdtDecimals || 6),
         rateScaled,
+        tonRateScaled,
         maxBuyRaw,
       });
 
@@ -911,7 +934,7 @@ export default function AdminPortal({
         messages: [
           {
             address: ownerGramWallet.toString(),
-            amount: toNano('0.15').toString(),
+            amount: toNano(SWAP_JETTON_TRANSFER_TON).toString(),
             payload: buildSwapReserveTopUpPayload(
               amount,
               swapSettings.contractAddress,
@@ -965,6 +988,56 @@ export default function AdminPortal({
       }
     } finally {
       setAction(null);
+    }
+  };
+
+  const toggleSimulation = async () => {
+    setSimBusy(true);
+    try {
+      const res = await fetch('/api/swap/simulate/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !simulating }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSimulating(data.simulationActive);
+        setMessage({ type: 'success', text: `Volume simulation ${data.simulationActive ? 'started' : 'stopped'}.` });
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Failed to toggle volume simulation.' });
+    } finally {
+      setSimBusy(false);
+    }
+  };
+
+  const generateMockHistory = async () => {
+    setSimBusy(true);
+    try {
+      const res = await fetch('/api/swap/simulate/generate-history', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: `Generated ${data.count || 100} mock trade points over 24h.` });
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Failed to generate mock history.' });
+    } finally {
+      setSimBusy(false);
+    }
+  };
+
+  const triggerMockTrade = async () => {
+    setSimBusy(true);
+    try {
+      const res = await fetch('/api/swap/simulate/trade', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setMessage({ type: 'success', text: `Mock trade executed: ${data.trade.fromAmount} ${data.trade.fromAsset} -> ${data.trade.toAmount} ${data.trade.toAsset}` });
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Failed to trigger mock trade.' });
+    } finally {
+      setSimBusy(false);
     }
   };
 
@@ -1097,12 +1170,14 @@ export default function AdminPortal({
         label = 'USDT';
       }
 
+      const attachedTon = asset === 'ton' ? toNano('0.08').toString() : toNano('0.08').toString();
+
       await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 600,
         messages: [
           {
             address: swapSettings.contractAddress,
-            amount: toNano('0.15').toString(),
+            amount: attachedTon,
             payload,
           },
         ],
@@ -1189,9 +1264,9 @@ export default function AdminPortal({
     { id: 'projects' as const, label: 'Projects', icon: FileText },
     { id: 'applications' as const, label: 'Applications', icon: CheckCircle2 },
     { id: 'create' as const, label: 'Create project', icon: Plus },
-    { id: 'idoContract' as const, label: 'IDO Contract', icon: ShieldCheck },
     { id: 'swap' as const, label: 'Swap', icon: Shuffle },
     { id: 'lplocker' as const, label: 'LP Locker', icon: UploadIcon },
+    { id: 'idoContract' as const, label: 'IDO Contract', icon: ShieldCheck },
   ];
   const owner = wallet.connected && wallet.address ? wallet.address : '';
 
@@ -2063,6 +2138,67 @@ export default function AdminPortal({
                   <span>{swapSettings.paused ? 'Resume swap' : 'Pause swap'}</span>
                   {action === 'toggle-swap' ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4 text-sky-400" />}
                 </button>
+              </div>
+            </div>
+
+            {/* Exchange Volume Simulator Panel in Admin Portal */}
+            <div className="gp-panel rounded-2xl p-5 border border-[#0098EA]/30 bg-gradient-to-b from-[#0A101D] to-[#070c17]">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-amber-400" />
+                  <h3 className="text-sm font-black uppercase tracking-[0.16em] text-white">
+                    Exchange Volume Simulator
+                  </h3>
+                </div>
+
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase font-mono tracking-wider ${
+                    simulating
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                      : 'bg-slate-800 text-slate-400'
+                  }`}
+                >
+                  {simulating ? 'Auto Active' : 'Paused'}
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                Control exchange volume simulation. Generates realistic synthetic transactions to display real-time volume & price movement on the public trading chart.
+              </p>
+
+              <div className="space-y-3">
+                <button
+                  onClick={toggleSimulation}
+                  disabled={simBusy}
+                  className={`w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-xs font-bold transition border ${
+                    simulating
+                      ? 'bg-amber-500/10 text-amber-300 border-amber-500/30 hover:bg-amber-500/20'
+                      : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20'
+                  }`}
+                >
+                  {simulating ? <Square className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
+                  {simulating ? 'Stop Auto Volume Generator' : 'Start Auto Volume Generator (Every 15s)'}
+                </button>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={generateMockHistory}
+                    disabled={simBusy}
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 hover:border-slate-700 px-3 py-2.5 text-xs font-bold text-slate-300 transition"
+                  >
+                    <RefreshCcw className={`h-3.5 w-3.5 text-sky-400 ${simBusy ? 'animate-spin' : ''}`} />
+                    Populate 24h Data
+                  </button>
+
+                  <button
+                    onClick={triggerMockTrade}
+                    disabled={simBusy}
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 hover:border-slate-700 px-3 py-2.5 text-xs font-bold text-slate-300 transition"
+                  >
+                    <Coins className="h-3.5 w-3.5 text-emerald-400" />
+                    +1 Mock Trade
+                  </button>
+                </div>
               </div>
             </div>
 

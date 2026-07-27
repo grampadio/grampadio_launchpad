@@ -1,6 +1,7 @@
 import { MongoClient } from 'mongodb';
-import { HomePageData, LaunchpadProject, ProjectApplication, SwapSettings, TransactionRecord } from '../types.js';
-
+import { HomePageData, LaunchpadProject, ProjectApplication, SwapSettings, TransactionRecord, SwapTransaction, LockerLockRecord } from '../types.js';
+import dotenv from 'dotenv';
+dotenv.config();
 export interface ProjectPageQuery {
   page: number;
   limit: number;
@@ -25,7 +26,7 @@ interface PlatformSettingDocument<T> {
 
 
 let cachedClient: MongoClient | null = null;
-const DATABASE_NAME = process.env.MONGODB_DB || 'ton_launchpad';
+const DATABASE_NAME = process.env.MONGODB_DB;
 
 async function getMongoDBCollection(collectionName: string = 'projects') {
   const mongoUri = process.env.MONGODB_URI;
@@ -153,7 +154,6 @@ export async function getHomePageData(): Promise<HomePageData> {
   };
   const liveFilter = {
     ...visibleFilter,
-    idoContractAddress: { $exists: true, $ne: '' },
     idoStage: { $in: ['vote', 'preparation', 'whitelist', 'sale'] },
     listingStatus: { $ne: 'under_review' },
   };
@@ -164,7 +164,6 @@ export async function getHomePageData(): Promise<HomePageData> {
   const underReviewFilter = { ...visibleFilter, listingStatus: 'under_review' };
   const pastFilter = {
     ...visibleFilter,
-    idoContractAddress: { $exists: true, $ne: '' },
     idoStage: 'distribution',
     listingStatus: { $ne: 'hidden' },
   };
@@ -178,7 +177,7 @@ export async function getHomePageData(): Promise<HomePageData> {
     collection.find(upcomingFilter).sort({ startTime: 1 }).limit(3).toArray(),
     collection.find(underReviewFilter).sort({ startTime: -1 }).limit(6).toArray(),
     collection.find(pastFilter).sort({ endTime: -1 }).limit(3).toArray(),
-    collection.find({ ...visibleFilter, promoted: true }).sort({ raised: -1, startTime: -1 }).toArray(),
+    collection.find({ ...visibleFilter, promoted: true, status: { $ne: 'failed' } }).sort({ raised: -1, startTime: -1 }).toArray(),
     collection.aggregate([
       { $match: visibleFilter },
       {
@@ -417,4 +416,67 @@ export async function saveSwapSettings(settings: SwapSettings): Promise<void> {
     },
     { upsert: true }
   );
+}
+
+export async function addSwapTransaction(tx: SwapTransaction): Promise<void> {
+  const collection = await getMongoDBCollection('swap_transactions');
+  await collection.insertOne(tx as any);
+}
+
+export async function getSwapTransactions(limit: number = 50): Promise<SwapTransaction[]> {
+  const collection = await getMongoDBCollection('swap_transactions');
+  const items = await collection.find({}).sort({ timestamp: -1 }).limit(limit).toArray();
+  return items.map(item => {
+    const { _id, ...tx } = item as any;
+    return tx as SwapTransaction;
+  });
+}
+
+import { Address } from '@ton/core';
+
+export async function clearFakeSwapTransactions(): Promise<void> {
+  const collection = await getMongoDBCollection('swap_transactions');
+  await collection.deleteMany({ isFake: true });
+}
+
+export async function addLockerLock(lock: LockerLockRecord): Promise<void> {
+  const collection = await getMongoDBCollection('locker_locks');
+  await collection.updateOne(
+    { id: lock.id },
+    { $set: lock },
+    { upsert: true }
+  );
+}
+
+export async function getLockerLocks(ownerAddress?: string): Promise<LockerLockRecord[]> {
+  const collection = await getMongoDBCollection('locker_locks');
+  const query: any = {};
+  if (ownerAddress && ownerAddress.trim()) {
+    const input = ownerAddress.trim();
+    const variants = new Set<string>();
+    variants.add(input);
+
+    try {
+      const parsed = Address.parse(input);
+      variants.add(parsed.toString());
+      variants.add(parsed.toRawString());
+      variants.add(parsed.toString({ bounceable: false }));
+      variants.add(parsed.toString({ testOnly: true }));
+      variants.add(parsed.toString({ testOnly: true, bounceable: false }));
+    } catch {}
+
+    const regexes = Array.from(variants).map(v => new RegExp(`^${v}$`, 'i'));
+    query.$or = regexes.map(r => ({ owner: r }));
+  }
+
+  const items = await collection.find(query).sort({ createdAt: -1 }).toArray();
+  return items.map(item => {
+    const { _id, ...record } = item as any;
+    return record as LockerLockRecord;
+  });
+}
+
+export async function updateLockerLockWithdrawn(id: string, withdrawn: boolean = true): Promise<void> {
+  const collection = await getMongoDBCollection('locker_locks');
+  await collection.updateOne({ id }, { $set: { withdrawn } });
 }
