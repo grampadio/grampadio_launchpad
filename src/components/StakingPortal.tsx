@@ -898,7 +898,7 @@ const planRoiLabel = planRoiValues.length
               <div>
                 <h2 className="text-xl font-bold text-white">Your staking dashboard</h2>
                 <p className="mt-2 text-xs leading-6 text-slate-500">
-                  Contract: <span className="font-mono text-slate-400">{shortAddress(contractAddress)}</span>
+                  Contract: <span className="font-mono text-slate-400">{contractAddress}</span>
                 </p>
               </div>
 
@@ -909,21 +909,56 @@ const planRoiLabel = planRoiValues.length
               )}
             </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              {[
-                ['Wallet GRAMX', `${formatTokenAmount(gramxBalance)} GRAMX`],
-                ['Total active staked', `${formatTokenAmount(userStake?.stake || 0n)} GRAMX`],
-                ['Total pending rewards', `${formatTokenAmount(userStake?.pendingReward || 0n)} GRAMX`],
-                ['Total positions', String(userStake?.totalStakePositions || 0n)],
-                ['Active positions', String(userStake?.activeStakePositions || 0n)],
-                ['Status', hasActiveStake ? 'Active staking' : 'No active stake'],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</span>
-                  <strong className="mt-2 block text-lg font-black text-white">{value}</strong>
-                </div>
-              ))}
-            </div>
+           <div className="mt-6 grid gap-4 sm:grid-cols-3">
+  {[
+    {
+      label: 'Wallet',
+      amount: formatTokenAmount(gramxBalance),
+      token: 'GRAMX',
+    },
+    {
+      label: 'Total active staked',
+      amount: formatTokenAmount(userStake?.stake || 0n),
+      token: 'GRAMX',
+    },
+    {
+      label: 'Total pending rewards',
+      amount: formatTokenAmount(userStake?.pendingReward || 0n),
+      token: 'GRAMX',
+    },
+    {
+      label: 'Total positions',
+      amount: String(userStake?.totalStakePositions || 0n),
+    },
+    {
+      label: 'Active positions',
+      amount: String(userStake?.activeStakePositions || 0n),
+    },
+    {
+      label: 'Status',
+      amount: hasActiveStake ? 'Active staking' : 'No active stake',
+    },
+  ].map((item) => (
+    <div
+      key={item.label}
+      className="rounded-2xl border border-white/[0.06] bg-white/[0.025] p-4"
+    >
+      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+        {item.label}
+      </span>
+
+      <strong className="mt-2 block text-2xl font-black text-white">
+        {item.amount}
+      </strong>
+
+      {item.token && (
+        <span className="mt-1 block text-sm font-bold uppercase tracking-wider text-emerald-400">
+          {item.token}
+        </span>
+      )}
+    </div>
+  ))}
+</div>
 
             <div className="mt-6 rounded-2xl border border-sky-400/15 bg-sky-400/[0.05] p-4">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
