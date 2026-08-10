@@ -1242,7 +1242,7 @@ export default function LpLockerPortal({
                 <div className="flex justify-between gap-4 border-b border-white/[0.06] pb-3">
                   <span>Locker contract</span>
                   <span className="break-all text-right font-mono text-slate-300">
-                    {shortAddress(lockerAddress)}
+                    {lockerAddress}
                   </span>
                 </div>
 
