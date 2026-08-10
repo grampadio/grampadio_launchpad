@@ -175,7 +175,7 @@ export default function LpLockerPortal({
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
   const [allLocksList, setAllLocksList] = useState<LockerLockRecord[]>([]);
-  const [allLockView, setAllLockView] = useState<'active' | 'closed' | 'all'>('all');
+  const [allLockView, setAllLockView] = useState<'active' | 'closed' | 'all'>('active');
   const [allLocksSearch, setAllLocksSearch] = useState('');
   const [allLocksPage, setAllLocksPage] = useState(1);
 
@@ -927,9 +927,11 @@ export default function LpLockerPortal({
             <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex rounded-xl border border-white/[0.08] bg-white/[0.025] p-1">
                 {[
-                  ['all', `All (${allLocksList.length})`],
                   ['active', `Active (${allLocksList.filter(l => !l.withdrawn).length})`],
-                  ['closed', `Closed (${allLocksList.filter(l => l.withdrawn).length})`],
+                   ['closed', `Closed (${allLocksList.filter(l => l.withdrawn).length})`],
+                  ['all', `All (${allLocksList.length})`],
+                  
+                 
                 ].map(([id, label]) => (
                   <button
                     key={id}
