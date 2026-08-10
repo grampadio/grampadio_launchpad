@@ -1,11 +1,14 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { CHAIN } from '@tonconnect/protocol';
 import { Address, toNano } from '@ton/core';
 import {
   ArrowRight,
+  Check,
   CheckCircle2,
   Coins,
+  Copy,
+  ExternalLink,
   Loader2,
   Lock,
   RefreshCw,
@@ -14,7 +17,7 @@ import {
   Unlock,
   Wallet,
 } from 'lucide-react';
-import { WalletState } from '../types.js';
+import { WalletState, LockerLockRecord } from '../types.js';
 import {
   buildConfigureLockPayload,
   buildEmergencyWithdrawLockerTonPayload,
@@ -71,6 +74,72 @@ const loadLockerTokenRegistry = (): LockerTokenRegistry => {
   }
 };
 
+const normalizeAddress = (addr: string): string => {
+  if (!addr) return '';
+  try {
+    return Address.parse(addr.trim()).toString();
+  } catch {
+    return addr.trim();
+  }
+};
+
+const getTokenInfoFromRegistry = (registry: LockerTokenRegistry, addressStr: string) => {
+  if (!addressStr) return undefined;
+  const raw = addressStr.trim();
+  const norm = normalizeAddress(raw);
+
+  const keys = [raw, norm].filter(Boolean);
+  for (const k of keys) {
+    if (registry[k] && registry[k].symbol && registry[k].symbol !== 'TOKEN' && registry[k].symbol !== 'Token') {
+      return registry[k];
+    }
+  }
+
+  const foundKey = Object.keys(registry).find(k => {
+    const matches = k.toLowerCase() === raw.toLowerCase() || k.toLowerCase() === norm.toLowerCase();
+    return matches && registry[k]?.symbol && registry[k].symbol !== 'TOKEN' && registry[k].symbol !== 'Token';
+  });
+  if (foundKey) return registry[foundKey];
+
+  return registry[raw] || registry[norm] || undefined;
+};
+
+const resolveLockSymbol = (lock: any, registry: LockerTokenRegistry, fallbackSymbol: string = 'TOKEN'): string => {
+  if (lock.symbol && lock.symbol !== 'TOKEN' && lock.symbol !== 'Token') {
+    return lock.symbol.toUpperCase();
+  }
+
+  const regWallet = getTokenInfoFromRegistry(registry, lock.jettonWallet);
+  if (regWallet?.symbol && regWallet.symbol !== 'TOKEN' && regWallet.symbol !== 'Token') {
+    return regWallet.symbol.toUpperCase();
+  }
+
+  if (lock.jettonMaster) {
+    const regMaster = getTokenInfoFromRegistry(registry, lock.jettonMaster);
+    if (regMaster?.symbol && regMaster.symbol !== 'TOKEN' && regMaster.symbol !== 'Token') {
+      return regMaster.symbol.toUpperCase();
+    }
+  }
+
+  const gramxMaster = String((import.meta as any).env.VITE_GRAMX_MASTER || '').trim();
+  if (gramxMaster) {
+    try {
+      if (
+        (lock.jettonMaster && Address.parse(lock.jettonMaster).equals(Address.parse(gramxMaster))) ||
+        (lock.jettonWallet && Address.parse(lock.jettonWallet).equals(Address.parse(gramxMaster)))
+      ) {
+        return 'GRAMX';
+      }
+    } catch {}
+  }
+
+  if (fallbackSymbol && fallbackSymbol !== 'TOKEN' && fallbackSymbol !== 'Token') {
+    return fallbackSymbol.toUpperCase();
+  }
+
+  return 'TOKEN';
+};
+
 const dateFromSeconds = (value: bigint | number | string) => {
   const seconds = Number(value);
   if (!seconds) return '-';
@@ -94,6 +163,7 @@ export default function LpLockerPortal({
   const [jettonBalance, setJettonBalance] = useState<bigint>(0n);
 
   const [loading, setLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [metadataLoading, setMetadataLoading] = useState(false);
   const [action, setAction] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -102,6 +172,19 @@ export default function LpLockerPortal({
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [tokenRegistry, setTokenRegistry] = useState<LockerTokenRegistry>(loadLockerTokenRegistry);
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+
+  const [allLocksList, setAllLocksList] = useState<LockerLockRecord[]>([]);
+  const [allLockView, setAllLockView] = useState<'active' | 'closed' | 'all'>('all');
+  const [allLocksSearch, setAllLocksSearch] = useState('');
+  const [allLocksPage, setAllLocksPage] = useState(1);
+
+  const handleCopyAddress = (addr: string) => {
+    if (!addr) return;
+    navigator.clipboard.writeText(addr);
+    setCopiedAddress(addr);
+    setTimeout(() => setCopiedAddress(null), 2000);
+  };
 
   const [jettonMaster, setJettonMaster] = useState('');
   const [tokenSymbol, setTokenSymbol] = useState('TOKEN');
@@ -137,18 +220,20 @@ export default function LpLockerPortal({
     symbol: string,
     decimals: number
   ) => {
-    const key = jettonWalletAddress.trim();
-    if (!key) return;
+    const wKey = jettonWalletAddress.trim();
+    const wNorm = normalizeAddress(jettonWalletAddress);
+    const mKey = masterAddress.trim();
+    const mNorm = normalizeAddress(masterAddress);
+    const sym = (symbol || 'TOKEN').toUpperCase();
 
     setTokenRegistry(current => {
-      const next = {
-        ...current,
-        [key]: {
-          masterAddress: masterAddress.trim(),
-          symbol: (symbol || 'TOKEN').toUpperCase(),
-          decimals,
-        },
-      };
+      const next = { ...current };
+      const entry = { masterAddress: mKey || mNorm, symbol: sym, decimals };
+
+      if (wKey) next[wKey] = entry;
+      if (wNorm) next[wNorm] = entry;
+      if (mKey) next[mKey] = entry;
+      if (mNorm) next[mNorm] = entry;
 
       window.localStorage.setItem(lockerTokenRegistryKey, JSON.stringify(next));
       return next;
@@ -162,34 +247,279 @@ export default function LpLockerPortal({
     setMessage(null);
 
     try {
-      const details = await getLockerDetails(lockerAddress);
-      setLocker(details);
+      try {
+        const details = await getLockerDetails(lockerAddress);
+        setLocker(details);
+      } catch {
+        // Safe fallback if contract overview call is slow
+      }
 
-      if (wallet.connected && wallet.address) {
-        const data = await getUserLockerDetails(wallet.address, lockerAddress);
-        setUserLocks(data);
+      // Fetch ALL platform locks once
+      const res = await fetch('/api/locker/locks');
+      if (res.ok) {
+        const json = await res.json();
+        const globalLocks: LockerLockRecord[] = json.locks || [];
+        setAllLocksList(globalLocks);
 
-        if (jettonMaster) {
-          const balance = await getUserJettonBalance(wallet.address, jettonMaster);
-          setJettonBalance(balance);
+        // Update token registry from all locks
+        globalLocks.forEach(g => {
+          if (g.symbol && g.jettonWallet) {
+            rememberTokenForWallet(
+              g.jettonWallet,
+              g.jettonMaster || g.jettonWallet,
+              g.symbol,
+              g.decimals ?? DEFAULT_JETTON_DECIMALS
+            );
+          }
+        });
+
+        // Filter user-specific locks in memory
+        if (wallet.connected && wallet.address) {
+          const userAddrStr = wallet.address;
+          const userLocksList = globalLocks.filter(d => {
+            if (!d.owner || !userAddrStr) return false;
+            try {
+              return Address.parse(d.owner).equals(Address.parse(userAddrStr));
+            } catch {
+              return d.owner.toLowerCase() === userAddrStr.toLowerCase();
+            }
+          });
+
+          const formattedLocks = userLocksList.map(d => ({
+            lockId: d.id,
+            owner: d.owner,
+            jettonWallet: d.jettonWallet,
+            jettonMaster: d.jettonMaster,
+            amount: parseLockerTokenAmount(d.amount, d.decimals ?? DEFAULT_JETTON_DECIMALS),
+            formattedAmount: d.amount,
+            lockedAt: BigInt(Math.floor((d.createdAt || Date.now()) / 1000)),
+            unlockTime: BigInt(d.unlockTime),
+            withdrawn: d.withdrawn,
+            active: !d.withdrawn,
+            symbol: d.symbol || 'TOKEN',
+            decimals: d.decimals ?? DEFAULT_JETTON_DECIMALS,
+          }));
+
+          setUserLocks({
+            user: userAddrStr,
+            activeLocks: BigInt(formattedLocks.filter(l => !l.withdrawn).length),
+            totalLocks: BigInt(formattedLocks.length),
+            lockIds: formattedLocks.map((_, idx) => BigInt(idx + 1)),
+            locks: formattedLocks as any,
+            activeLockItems: formattedLocks.filter(l => !l.withdrawn) as any,
+            closedLockItems: formattedLocks.filter(l => l.withdrawn) as any,
+          });
+
+          if (jettonMaster) {
+            try {
+              const balance = await getUserJettonBalance(userAddrStr, jettonMaster);
+              setJettonBalance(balance);
+            } catch {}
+          }
+        } else {
+          setUserLocks(null);
+          setJettonBalance(0n);
         }
-      } else {
-        setUserLocks(null);
-        setJettonBalance(0n);
       }
     } catch (error: any) {
       setMessage({
         type: 'error',
-        text: error.message || 'Failed to load locker data.',
+        text: error.message || 'Failed to load locker data from database.',
       });
     } finally {
       setLoading(false);
     }
   };
 
+  const syncNetworkWithDb = async (userAddress: string) => {
+    try {
+      const data = await getUserLockerDetails(userAddress, lockerAddress);
+      if (data.locks && data.locks.length > 0) {
+        for (const lock of data.locks) {
+          let symbol = 'TOKEN';
+          let decimals = DEFAULT_JETTON_DECIMALS;
+          let masterAddress = lock.jettonWallet;
+
+          const registryInfo = getTokenInfoFromRegistry(tokenRegistry, lock.jettonWallet);
+          if (registryInfo?.symbol) {
+            symbol = registryInfo.symbol;
+            decimals = registryInfo.decimals;
+            masterAddress = registryInfo.masterAddress || lock.jettonWallet;
+          } else {
+            try {
+              const meta = await getJettonMetadata(lock.jettonWallet);
+              if (meta?.symbol) {
+                symbol = meta.symbol;
+                decimals = meta.decimals ?? DEFAULT_JETTON_DECIMALS;
+                masterAddress = (meta as any).masterAddress || lock.jettonWallet;
+                rememberTokenForWallet(lock.jettonWallet, masterAddress, symbol, decimals);
+              }
+            } catch {}
+          }
+
+          const formattedAmt = formatLockerTokenAmount(lock.amount, decimals);
+
+          await fetch('/api/locker/locks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: lock.lockId.toString(),
+              owner: lock.owner,
+              jettonWallet: lock.jettonWallet,
+              jettonMaster: masterAddress,
+              symbol,
+              decimals,
+              amount: formattedAmt,
+              rawAmount: lock.amount.toString(),
+              unlockTime: Number(lock.unlockTime),
+              withdrawn: lock.withdrawn,
+            }),
+          }).catch(() => {});
+
+          // 1 second delay between each coin during network sync to prevent rate limits
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+    } catch (err) {
+      console.error('Network sync with DB error:', err);
+    }
+  };
+
+  const handleRefreshLocks = async () => {
+    if (loading || isSyncing) return;
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const res = await fetch('/api/locker/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userAddress: wallet.address || '' }),
+      });
+
+      const json = await res.json();
+      if (json.inProgress) {
+        setMessage({
+          type: 'success',
+          text: json.message || 'Lock sync is already running in the background.',
+        });
+        setLoading(false);
+        return;
+      }
+
+      setIsSyncing(true);
+      setMessage({
+        type: 'success',
+        text: 'Syncing on-chain locks in server background...',
+      });
+
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch('/api/locker/sync/status');
+          if (statusRes.ok) {
+            const statusJson = await statusRes.json();
+            if (!statusJson.inProgress) {
+              clearInterval(pollInterval);
+              setIsSyncing(false);
+              setLoading(false);
+              await loadLocker();
+              setMessage({
+                type: 'success',
+                text: 'Locks successfully synced from blockchain.',
+              });
+            }
+          }
+        } catch {
+          clearInterval(pollInterval);
+          setIsSyncing(false);
+          setLoading(false);
+        }
+      }, 2000);
+    } catch (error: any) {
+      setIsSyncing(false);
+      setLoading(false);
+      setMessage({
+        type: 'error',
+        text: error.message || 'Refresh failed.',
+      });
+    }
+  };
+
+  const metadataProcessingSet = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     loadLocker();
   }, [wallet.connected, wallet.address, lockerAddress]);
+
+  useEffect(() => {
+    const list = [...(userLocks?.locks || []), ...allLocksList];
+    if (list.length === 0) return;
+
+    let isSubscribed = true;
+
+    const processQueue = async () => {
+      for (const lock of list) {
+        if (!isSubscribed) break;
+
+        const target = lock.jettonWallet || (lock as any).jettonMaster;
+        if (!target) continue;
+
+        const currentSym = resolveLockSymbol(lock, tokenRegistry, '');
+        if (currentSym !== 'TOKEN') continue;
+
+        if (metadataProcessingSet.current.has(target)) continue;
+        metadataProcessingSet.current.add(target);
+
+        try {
+          const meta = await getJettonMetadata(target);
+          if (!isSubscribed) break;
+
+          if (meta?.symbol && meta.symbol !== 'TOKEN') {
+            const sym = meta.symbol.toUpperCase();
+            const master = (meta as any).masterAddress || (lock as any).jettonMaster || lock.jettonWallet;
+
+            rememberTokenForWallet(
+              lock.jettonWallet,
+              master,
+              sym,
+              meta.decimals ?? DEFAULT_JETTON_DECIMALS
+            );
+
+            const lockIdStr = String((lock as any).id || (lock as any).lockId || '');
+            if (lockIdStr) {
+              await fetch('/api/locker/locks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  id: lockIdStr,
+                  owner: lock.owner,
+                  jettonWallet: lock.jettonWallet,
+                  jettonMaster: master,
+                  symbol: sym,
+                  decimals: meta.decimals ?? DEFAULT_JETTON_DECIMALS,
+                  amount: (lock as any).formattedAmount || (lock as any).amount || '0',
+                  unlockTime: Number(lock.unlockTime),
+                  withdrawn: lock.withdrawn,
+                }),
+              }).catch(() => {});
+            }
+          }
+        } catch (err) {
+          console.warn(`Background metadata fetch for ${target} failed:`, err);
+        }
+
+        // Wait 1 second (1000ms) delay between each coin request to prevent rate limiting / 429 errors!
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    };
+
+    processQueue();
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [userLocks, allLocksList]);
 
   useEffect(() => {
     setPage(1);
@@ -311,6 +641,28 @@ export default function LpLockerPortal({
       });
 
       setAmount('');
+
+      // Persist lock record to Database
+      try {
+        await fetch('/api/locker/locks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: String(userLocks?.totalLocks ? userLocks.totalLocks + 1n : Date.now()),
+            owner: user,
+            jettonWallet: userJettonWallet.toString(),
+            jettonMaster,
+            symbol: tokenSymbol || 'TOKEN',
+            decimals,
+            amount: amount.trim(),
+            rawAmount: parsedAmount.toString(),
+            unlockTime: Number(unlockTime),
+          }),
+        });
+      } catch (err) {
+        console.error('Failed to save lock record to DB:', err);
+      }
+
       await afterTransaction(`${tokenSymbol || 'Token'} lock transaction sent.`);
     } catch (error: any) {
       if (error.message !== 'Connect wallet first.') {
@@ -349,6 +701,12 @@ export default function LpLockerPortal({
           },
         ],
       });
+
+      try {
+        await fetch(`/api/locker/locks/${lockId}/withdraw`, { method: 'POST' });
+      } catch (err) {
+        console.error('Failed to update DB lock withdrawn status:', err);
+      }
 
       await afterTransaction(`Withdraw sent for lock #${lockId}.`);
     } catch (error: any) {
@@ -413,7 +771,7 @@ export default function LpLockerPortal({
     if (!q) return baseLocks;
 
     return baseLocks.filter(lock => {
-      const tokenInfo = tokenRegistry[lock.jettonWallet];
+      const tokenInfo = getTokenInfoFromRegistry(tokenRegistry, lock.jettonWallet);
       const values = [
         lock.lockId.toString(),
         lock.owner,
@@ -434,21 +792,54 @@ export default function LpLockerPortal({
     page * pageSize
   );
 
+  useEffect(() => {
+    setAllLocksPage(1);
+  }, [allLockView, allLocksSearch]);
+
+  const baseAllLocks = useMemo(() => {
+    let list = [...allLocksList];
+    if (allLockView === 'active') list = list.filter(l => !l.withdrawn);
+    else if (allLockView === 'closed') list = list.filter(l => l.withdrawn);
+    list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    return list;
+  }, [allLocksList, allLockView]);
+
+  const filteredAllLocks = useMemo(() => {
+    const q = allLocksSearch.trim().toLowerCase();
+    if (!q) return baseAllLocks;
+
+    return baseAllLocks.filter(l => {
+      const values = [
+        l.id,
+        l.owner,
+        l.jettonWallet,
+        l.jettonMaster,
+        l.symbol,
+        l.amount,
+      ];
+      return values.some(v => String(v || '').toLowerCase().includes(q));
+    });
+  }, [baseAllLocks, allLocksSearch]);
+
+  const totalAllLocksPages = Math.max(1, Math.ceil(filteredAllLocks.length / pageSize));
+  const pagedAllLocks = filteredAllLocks.slice(
+    (allLocksPage - 1) * pageSize,
+    allLocksPage * pageSize
+  );
+
+  const overallTotalLocks = allLocksList.length || Number(locker?.totalLockedPositions || 0n);
+  const overallActiveLocks = allLocksList.filter(l => !l.withdrawn).length || Number(locker?.activeLockPositions || 0n);
+  const overallClosedLocks = allLocksList.filter(l => l.withdrawn).length || Number(locker?.totalWithdrawnPositions || 0n);
+
   const activeLocks = userLocks?.activeLockItems || [];
   const closedLocks = userLocks?.closedLockItems || [];
 
   const decimalsForDisplay = Number(tokenDecimals || DEFAULT_JETTON_DECIMALS);
 
   const stats = [
-    ['Active locks', String(userLocks?.activeLocks || 0n), 'Your active lock positions', Lock],
-    ['Total locks', String(userLocks?.totalLocks || 0n), 'All your lock positions', Coins],
-    ['Closed locks', String(closedLocks.length), 'Withdrawn lock positions', Unlock],
-    [
-      'Token balance',
-      `${formatLockerTokenAmount(jettonBalance, decimalsForDisplay)} ${tokenSymbol || 'TOKEN'}`,
-      'Selected Jetton wallet balance',
-      Wallet,
-    ],
+    ['Active locks', String(overallActiveLocks), 'Platform active lock positions', Lock],
+    ['Total locks', String(overallTotalLocks), 'All platform lock positions', Coins],
+    ['Closed locks', String(overallClosedLocks), 'Platform withdrawn positions', Unlock],
   ] as const;
 
   return (
@@ -470,18 +861,22 @@ export default function LpLockerPortal({
           </div>
 
           <button
-            onClick={loadLocker}
-            disabled={loading || !isConfigured}
+            onClick={handleRefreshLocks}
+            disabled={loading || isSyncing || !isConfigured}
             className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-xs font-bold text-slate-300 transition hover:text-white disabled:opacity-50"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            Refresh locks
+            {isSyncing || loading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-sky-400" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            {isSyncing ? 'Syncing locks...' : loading ? 'Loading...' : 'Refresh locks'}
           </button>
         </div>
       </section>
 
       {message && (
-        <div className={`mt-6 flex items-start gap-2 rounded-2xl border p-4 text-xs ${message.type === 'success' ? 'border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-300' : 'border-rose-400/20 bg-rose-400/[0.07] text-rose-300'}`}>
+        <div className={`mt-6 flex items-start gap-2 rounded-2xl border p-4 text-xs ${message.type === 'success' ? 'border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-600' : 'border-rose-400/20 bg-rose-400/[0.07] text-rose-300'}`}>
           {message.type === 'success' ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <ShieldCheck className="h-4 w-4 shrink-0" />}
           <span className="break-words">{message.text}</span>
         </div>
@@ -498,7 +893,7 @@ export default function LpLockerPortal({
 
       {isConfigured && (
         <>
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid gap-5 sm:grid-cols-3">
             {stats.map(([label, value, detail, Icon]) => (
               <div key={label} className="gp-panel rounded-2xl p-5">
                 <div className="flex items-center justify-between gap-4">
@@ -516,6 +911,245 @@ export default function LpLockerPortal({
               </div>
             ))}
           </div>
+            <section className={`${cardClass} mt-8`}>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Coins className="h-5 w-5 text-sky-400" />
+                  <h2 className="text-xl font-bold text-white">All Locked Tokens</h2>
+                </div>
+                <p className="mt-1 text-xs text-slate-400">
+                  Global list of all Jetton & LP token locks across the platform.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex rounded-xl border border-white/[0.08] bg-white/[0.025] p-1">
+                {[
+                  ['all', `All (${allLocksList.length})`],
+                  ['active', `Active (${allLocksList.filter(l => !l.withdrawn).length})`],
+                  ['closed', `Closed (${allLocksList.filter(l => l.withdrawn).length})`],
+                ].map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setAllLockView(id as 'active' | 'closed' | 'all')}
+                    className={`rounded-lg px-4 py-2 text-xs font-bold transition ${
+                      allLockView === id
+                        ? 'btn-white-text bg-[#0098EA] text-white'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <label className="relative min-w-full lg:min-w-[280px]">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                <input
+                  className={`${inputClass} pl-10`}
+                  value={allLocksSearch}
+                  onChange={event => setAllLocksSearch(event.target.value)}
+                  placeholder="Search ID, owner, wallet, master, symbol..."
+                />
+              </label>
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-2xl border border-white/[0.06]">
+              <div className="hidden grid-cols-[1.2fr_1.8fr_1fr_1.3fr_0.8fr_1.4fr] gap-3 border-b border-white/[0.06] bg-white/[0.025] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 lg:grid">
+                <span>Amount</span>
+                <span>Jetton wallet</span>
+                <span>Locked At</span>
+                <span>Unlock time</span>
+                <span>Status</span>
+                <span className="text-right">Owner</span>
+              </div>
+
+              {pagedAllLocks.length === 0 ? (
+                <div className="p-8 text-center text-xs text-slate-500">
+                  No platform locks found matching your search.
+                </div>
+              ) : (
+                <div className="divide-y divide-white/[0.06]">
+                  {pagedAllLocks.map(lock => {
+                    const matured = Number(lock.unlockTime) <= Math.floor(Date.now() / 1000);
+                    const tokenInfo = getTokenInfoFromRegistry(tokenRegistry, lock.jettonWallet);
+                    const rowDecimals = lock.decimals ?? tokenInfo?.decimals ?? decimalsForDisplay;
+                    const rowSymbol = resolveLockSymbol(lock, tokenRegistry, tokenSymbol);
+                    const displayAmount = lock.amount || formatLockerTokenAmount(lock.rawAmount || '0', rowDecimals);
+
+                    const walletExplorerUrl = `https://${lockerNetwork === CHAIN.TESTNET ? 'testnet.' : ''}tonviewer.com/${lock.jettonWallet}`;
+                    const ownerExplorerUrl = `https://${lockerNetwork === CHAIN.TESTNET ? 'testnet.' : ''}tonviewer.com/${lock.owner}`;
+                    const masterAddr = lock.jettonMaster || tokenInfo?.masterAddress;
+                    const masterExplorerUrl = masterAddr
+                      ? `https://${lockerNetwork === CHAIN.TESTNET ? 'testnet.' : ''}tonviewer.com/${masterAddr}`
+                      : '';
+
+                    return (
+                      <div
+                        key={lock.id}
+                        className="grid gap-3 px-4 py-4 text-xs lg:grid-cols-[1.2fr_1.8fr_1fr_1.3fr_0.8fr_1.4fr] lg:items-center"
+                      >
+                        <div>
+                          <span className="lg:hidden text-[10px] font-bold uppercase text-slate-500">
+                            Amount
+                          </span>
+                          <p className="font-extrabold text-white text-sm">
+                            {displayAmount}{' '}
+                            <span className="text-sky-400 font-mono font-black">{rowSymbol}</span>
+                          </p>
+                        </div>
+
+                        <div>
+                          <span className="lg:hidden text-[10px] font-bold uppercase text-slate-500">
+                            Jetton wallet
+                          </span>
+                          <div className="flex items-center gap-1.5 whitespace-nowrap">
+                            <span className="font-mono text-slate-200 font-bold text-xs tracking-tight">
+                              {shortAddress(lock.jettonWallet)}
+                            </span>
+                            <a
+                              href={walletExplorerUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="View Jetton Wallet on Tonviewer"
+                              className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-sky-400 transition hover:border-sky-400 hover:bg-sky-400/20"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyAddress(lock.jettonWallet)}
+                              title="Copy Address"
+                              className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-slate-400 transition hover:border-sky-400 hover:text-white"
+                            >
+                              {copiedAddress === lock.jettonWallet ? (
+                                <Check className="h-3 w-3 text-emerald-600" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </button>
+                          </div>
+                          {masterAddr && (
+                            <div className="mt-1 flex items-center gap-1 whitespace-nowrap text-[10px] text-slate-400">
+                              <span className="font-mono">
+                                Master: {shortAddress(masterAddr)}
+                              </span>
+                              {masterExplorerUrl && (
+                                <a
+                                  href={masterExplorerUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-sky-400 hover:text-sky-300 transition"
+                                  title="View Jetton Master on Tonviewer"
+                                >
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <span className="lg:hidden text-[10px] font-bold uppercase text-slate-500">
+                            Created at
+                          </span>
+                          <p className="text-slate-300">
+                            {lock.createdAt ? new Date(lock.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'}
+                          </p>
+                        </div>
+
+                        <div>
+                          <span className="lg:hidden text-[10px] font-bold uppercase text-slate-500">
+                            Unlock time
+                          </span>
+                          <p className={matured ? 'text-emerald-600' : 'text-amber-600'}>
+                            {dateFromSeconds(lock.unlockTime)}
+                          </p>
+                        </div>
+
+                        <div>
+                          <span
+                            className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                              lock.withdrawn
+                                ? 'border-slate-400/20 bg-slate-400/[0.06] text-slate-400'
+                                : matured
+                                  ? 'border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-600'
+                                  : 'border-amber-400/20 bg-amber-400/[0.08] text-amber-600'
+                            }`}
+                          >
+                            {lock.withdrawn ? 'Closed' : matured ? 'Unlocked' : 'Locked'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-start lg:justify-end gap-1.5 whitespace-nowrap">
+                          <span className="lg:hidden text-[10px] font-bold uppercase text-slate-500">
+                            Owner:
+                          </span>
+                          <span className="font-mono text-slate-300 font-semibold">
+                            {shortAddress(lock.owner)}
+                          </span>
+                          <a
+                            href={ownerExplorerUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="View Owner on Tonviewer"
+                            className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-sky-400 transition hover:border-sky-400 hover:bg-sky-400/20"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyAddress(lock.owner)}
+                            title="Copy Owner Address"
+                            className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-slate-400 transition hover:border-sky-400 hover:text-white"
+                          >
+                            {copiedAddress === lock.owner ? (
+                              <Check className="h-3 w-3 text-emerald-600" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-slate-500">
+                Showing {pagedAllLocks.length} of {filteredAllLocks.length} locks
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={allLocksPage <= 1}
+                  onClick={() => setAllLocksPage(current => Math.max(1, current - 1))}
+                  className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-bold text-slate-300 disabled:opacity-40"
+                >
+                  Prev
+                </button>
+
+                <span className="text-xs font-bold text-slate-400">
+                  Page {allLocksPage} / {totalAllLocksPages}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={allLocksPage >= totalAllLocksPages}
+                  onClick={() => setAllLocksPage(current => Math.min(totalAllLocksPages, current + 1))}
+                  className="rounded-xl border border-white/[0.08] px-4 py-2 text-xs font-bold text-slate-300 disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </section>
 
           <div className="mt-6 grid gap-6 xl:grid-cols-[0.9fr_1.3fr]">
             <section className={cardClass}>
@@ -582,21 +1216,11 @@ export default function LpLockerPortal({
                   </label>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={refreshJettonBalance}
-                    disabled={!wallet.connected || !jettonMaster || metadataLoading}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] px-5 py-3 text-sm font-bold text-slate-300 transition hover:text-white disabled:opacity-50"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                    Check balance
-                  </button>
-
+                <div>
                   {wallet.connected ? (
                     <button
                       disabled={action === 'lock' || locker?.paused || metadataLoading}
-                      className="btn-white-text flex items-center justify-center gap-2 rounded-xl bg-[#0098EA] px-5 py-3 text-sm font-bold text-white transition hover:bg-sky-400 disabled:opacity-50"
+                      className="btn-white-text flex w-full items-center justify-center gap-2 rounded-xl bg-[#0098EA] px-5 py-3 text-sm font-bold text-white transition hover:bg-sky-400 disabled:opacity-50"
                     >
                       {action === 'lock' ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
                       Lock token
@@ -605,7 +1229,7 @@ export default function LpLockerPortal({
                     <button
                       type="button"
                       onClick={onOpenConnect}
-                      className="btn-white-text flex items-center justify-center gap-2 rounded-xl bg-[#0098EA] px-5 py-3 text-sm font-bold text-white"
+                      className="btn-white-text flex w-full items-center justify-center gap-2 rounded-xl bg-[#0098EA] px-5 py-3 text-sm font-bold text-white"
                     >
                       <Wallet className="h-4 w-4" />
                       Connect wallet
@@ -622,16 +1246,9 @@ export default function LpLockerPortal({
                   </span>
                 </div>
 
-                <div className="flex justify-between gap-4 border-b border-white/[0.06] py-3">
-                  <span>Selected token balance</span>
-                  <span className="text-right font-bold text-slate-300">
-                    {formatLockerTokenAmount(jettonBalance, decimalsForDisplay)} {tokenSymbol}
-                  </span>
-                </div>
-
                 <div className="flex justify-between gap-4 pt-3">
                   <span>Status</span>
-                  <span className={locker?.paused ? 'text-rose-300' : 'text-emerald-300'}>
+                  <span className={locker?.paused ? 'text-rose-300' : 'text-emerald-600'}>
                     {locker?.paused ? 'Paused' : 'Active'}
                   </span>
                 </div>
@@ -681,6 +1298,7 @@ export default function LpLockerPortal({
                 </form>
               )}
             </section>
+            
 
             <section className={cardClass}>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -735,8 +1353,7 @@ export default function LpLockerPortal({
               </div>
 
               <div className="mt-5 overflow-hidden rounded-2xl border border-white/[0.06]">
-                <div className="hidden grid-cols-[0.7fr_1fr_1.2fr_1.2fr_1fr_1fr] gap-3 border-b border-white/[0.06] bg-white/[0.025] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 lg:grid">
-                  <span>ID</span>
+                <div className="hidden grid-cols-[1.2fr_2fr_1.3fr_1fr_1fr] gap-3 border-b border-white/[0.06] bg-white/[0.025] px-4 py-3 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 lg:grid">
                   <span>Amount</span>
                   <span>Jetton wallet</span>
                   <span>Unlock time</span>
@@ -755,30 +1372,29 @@ export default function LpLockerPortal({
                     {pagedLocks.map(lock => {
                       const matured = Number(lock.unlockTime) <= Math.floor(Date.now() / 1000);
                       const canWithdraw = !lock.withdrawn && matured;
-                      const tokenInfo = tokenRegistry[lock.jettonWallet];
-                      const rowDecimals = tokenInfo?.decimals ?? decimalsForDisplay;
-                      const rowSymbol = tokenInfo?.symbol || tokenSymbol || 'TOKEN';
+                      const tokenInfo = getTokenInfoFromRegistry(tokenRegistry, lock.jettonWallet);
+                      const rowDecimals = (lock as any).decimals ?? tokenInfo?.decimals ?? decimalsForDisplay;
+                      const rowSymbol = resolveLockSymbol(lock, tokenRegistry, tokenSymbol);
+                      const displayAmount = (lock as any).formattedAmount || formatLockerTokenAmount(lock.amount, rowDecimals);
+
+                      const walletExplorerUrl = `https://${lockerNetwork === CHAIN.TESTNET ? 'testnet.' : ''}tonviewer.com/${lock.jettonWallet}`;
+                      const masterAddr = (lock as any).jettonMaster || tokenInfo?.masterAddress;
+                      const masterExplorerUrl = masterAddr
+                        ? `https://${lockerNetwork === CHAIN.TESTNET ? 'testnet.' : ''}tonviewer.com/${masterAddr}`
+                        : '';
 
                       return (
                         <div
                           key={lock.lockId.toString()}
-                          className="grid gap-3 px-4 py-4 text-xs lg:grid-cols-[0.7fr_1fr_1.2fr_1.2fr_1fr_1fr] lg:items-center"
+                          className="grid gap-3 px-4 py-4 text-xs lg:grid-cols-[1.2fr_2fr_1.3fr_1fr_1fr] lg:items-center"
                         >
-                          <div>
-                            <span className="lg:hidden text-[10px] font-bold uppercase text-slate-500">
-                              ID
-                            </span>
-                            <p className="font-mono font-bold text-white">
-                              #{lock.lockId.toString()}
-                            </p>
-                          </div>
-
                           <div>
                             <span className="lg:hidden text-[10px] font-bold uppercase text-slate-500">
                               Amount
                             </span>
-                            <p className="font-bold text-white">
-                              {formatLockerTokenAmount(lock.amount, rowDecimals)} {rowSymbol}
+                            <p className="font-extrabold text-white text-sm">
+                              {displayAmount}{' '}
+                              <span className="text-sky-400 font-mono font-black">{rowSymbol}</span>
                             </p>
                           </div>
 
@@ -786,13 +1402,49 @@ export default function LpLockerPortal({
                             <span className="lg:hidden text-[10px] font-bold uppercase text-slate-500">
                               Jetton wallet
                             </span>
-                            <p className="break-all font-mono text-slate-300">
-                              {shortAddress(lock.jettonWallet)}
-                            </p>
-                            {tokenInfo?.masterAddress && (
-                              <p className="mt-1 break-all font-mono text-[10px] text-sky-300">
-                                {tokenInfo.symbol} master: {shortAddress(tokenInfo.masterAddress)}
-                              </p>
+                            <div className="flex items-center gap-1.5 whitespace-nowrap">
+                              <span className="font-mono text-slate-200 font-bold text-xs tracking-tight">
+                                {shortAddress(lock.jettonWallet)}
+                              </span>
+                              <a
+                                href={walletExplorerUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                title="View Jetton Wallet on Tonviewer"
+                                className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-sky-400 transition hover:border-sky-400 hover:bg-sky-400/20"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyAddress(lock.jettonWallet)}
+                                title="Copy Address"
+                                className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.05] text-slate-400 transition hover:border-sky-400 hover:text-white"
+                              >
+                                {copiedAddress === lock.jettonWallet ? (
+                                  <Check className="h-3 w-3 text-emerald-400" />
+                                ) : (
+                                  <Copy className="h-3 w-3" />
+                                )}
+                              </button>
+                            </div>
+                            {masterAddr && (
+                              <div className="mt-1 flex items-center gap-1 whitespace-nowrap text-[10px] text-slate-400">
+                                <span className="font-mono">
+                                  Master: {shortAddress(masterAddr)}
+                                </span>
+                                {masterExplorerUrl && (
+                                  <a
+                                    href={masterExplorerUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sky-400 hover:text-sky-300 transition"
+                                    title="View Jetton Master on Tonviewer"
+                                  >
+                                    <ExternalLink className="h-2.5 w-2.5" />
+                                  </a>
+                                )}
+                              </div>
                             )}
                           </div>
 
@@ -800,7 +1452,7 @@ export default function LpLockerPortal({
                             <span className="lg:hidden text-[10px] font-bold uppercase text-slate-500">
                               Unlock time
                             </span>
-                            <p className={matured ? 'text-emerald-300' : 'text-amber-300'}>
+                            <p className={matured ? 'text-emerald-600' : 'text-amber-600'}>
                               {dateFromSeconds(lock.unlockTime)}
                             </p>
                           </div>
@@ -811,8 +1463,8 @@ export default function LpLockerPortal({
                                 lock.withdrawn
                                   ? 'border-slate-400/20 bg-slate-400/[0.06] text-slate-400'
                                   : matured
-                                    ? 'border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-300'
-                                    : 'border-amber-400/20 bg-amber-400/[0.08] text-amber-300'
+                                    ? 'border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-600'
+                                    : 'border-amber-400/20 bg-amber-400/[0.08] text-amber-600'
                               }`}
                             >
                               {lock.withdrawn ? 'Closed' : matured ? 'Unlocked' : 'Locked'}
@@ -871,6 +1523,8 @@ export default function LpLockerPortal({
               </div>
             </section>
           </div>
+
+        
         </>
       )}
     </div>

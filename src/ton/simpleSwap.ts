@@ -26,8 +26,8 @@ import { buildJettonTransferPayload, cellToBase64, getTonClient, parseTokenAmoun
 export const SWAP_RATE_SCALE = 1_000_000_000n;
 export const SWAP_DEPLOY_TON = '0.08';
 export const SWAP_FUND_TON = '0.3';
-export const SWAP_JETTON_FORWARD_TON = '0.1';
-export const SWAP_JETTON_TRANSFER_TON = '0.1';
+export const SWAP_JETTON_FORWARD_TON = '0.03';
+export const SWAP_JETTON_TRANSFER_TON = '0.08';
 const SWAP_PAYLOAD_MARKER = 0x53574150;
 const TON_DECIMALS = 9;
 
@@ -199,18 +199,18 @@ export async function buildSwapDeployment(
   settings: Pick<
     SwapSettings,
     'ownerAddress' | 'gramMasterAddress' | 'gramDecimals' | 'usdtMasterAddress' | 'usdtDecimals'
-  > & { rateScaled: bigint; tonRateScaled: bigint; maxBuyRaw: bigint }
+  > & { rateScaled: bigint; tonRateScaled?: bigint; maxBuyRaw?: bigint }
 ) {
   const deploymentId = BigInt(Date.now());
   const contract = await GramPadSimpleSwap.fromInit(
     Address.parse(settings.ownerAddress),
     Address.parse(settings.gramMasterAddress),
-    BigInt(settings.gramDecimals),
+    BigInt(settings.gramDecimals ?? 9),
     Address.parse(settings.usdtMasterAddress),
-    BigInt(settings.usdtDecimals),
-    settings.rateScaled,
-    settings.tonRateScaled,
-    settings.maxBuyRaw,
+    BigInt(settings.usdtDecimals ?? 6),
+    settings.rateScaled ?? 1000000000n,
+    settings.tonRateScaled ?? 1000000000n,
+    settings.maxBuyRaw ?? 0n,
     deploymentId
   );
 

@@ -588,7 +588,7 @@ PROGRAM{
   $GramPadSimpleSwap$_fun_sendJetton PROCREF:<{
     s11 PUSH
     INC
-    200000000 PUSHINT
+    60000000 PUSHINT
     TRUE
         MYADDR
     PUSHNULL
@@ -1198,32 +1198,45 @@ PROGRAM{
       s1 22 s() XCHG
       s0 23 s() XCHG
       $GramPadSimpleSwap$_fun_requireOwner INLINECALLDICT
-      15304 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      10000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       17062 PUSHINT
       23 s() PUSH
       0 GTINT
       THROWANYIFNOT
-      25435 PUSHINT
-      s6 PUSH
-      24 s() PUSH
-      GEQ
-      THROWANYIFNOT
-      4558 PUSHINT
           BALANCE FIRST
       __tact_context_get INLINECALLDICT
       $Context$_get_value INLINECALLDICT
       SUB
-      24 s() PUSH
-      GEQ
-      THROWANYIFNOT
-      s0 s5 XCHG
-      22 s() PUSH
+      30000000 PUSHINT
       SUB
+      DUP
+      0 LESSINT
+      IF:<{
+        DROP
+        0 PUSHINT
+      }>
+      23 s() PUSH
+      OVER
+      GREATER
+      IF:<{
+        23 s() POP
+      }>ELSE<{
+        DROP
+      }>
+      4558 PUSHINT
+      23 s() PUSH
+      0 GTINT
+      THROWANYIFNOT
+      s5 PUSH
+      23 s() PUSH
+      GEQ
+      IF:<{
+        s0 s5 XCHG
+        22 s() PUSH
+        SUB
+      }>ELSE<{
+        s5 POP
+        0 PUSHINT
+      }>
       s1 23 s() XCHG
       s0 22 s() XCHG
       FALSE
@@ -1276,12 +1289,6 @@ PROGRAM{
       s1 22 s() XCHG
       s0 23 s() XCHG
       $GramPadSimpleSwap$_fun_requireOwner INLINECALLDICT
-      15304 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      160000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       17062 PUSHINT
       23 s() PUSH
       0 GTINT
@@ -1331,12 +1338,6 @@ PROGRAM{
       s1 22 s() XCHG
       s0 23 s() XCHG
       $GramPadSimpleSwap$_fun_requireOwner INLINECALLDICT
-      15304 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      160000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       17062 PUSHINT
       23 s() PUSH
       0 GTINT
@@ -1451,7 +1452,7 @@ PROGRAM{
         __tact_context_get INLINECALLDICT
         $Context$_get_value INLINECALLDICT
         SUB
-        220000000 PUSHINT
+        50000000 PUSHINT
         GEQ
         THROWANYIFNOT
         22614 PUSHINT
@@ -1590,7 +1591,7 @@ PROGRAM{
       __tact_context_get INLINECALLDICT
       $Context$_get_value INLINECALLDICT
       SUB
-      220000000 PUSHINT
+      50000000 PUSHINT
       GEQ
       THROWANYIFNOT
       21 s() 22 s() XCHG
@@ -1857,7 +1858,7 @@ PROGRAM{
       THROWANYIFNOT
       25435 PUSHINT
           BALANCE FIRST
-      220000000 PUSHINT
+      50000000 PUSHINT
       GEQ
       THROWANYIFNOT
       s0 s5 XCHG

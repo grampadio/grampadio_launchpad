@@ -15,26 +15,21 @@ import { CHAIN } from '@tonconnect/protocol';
 import { LaunchpadProject, WalletState, AIAudit } from '../types.js';
 import { Address, beginCell, toNano } from "@ton/core";
 import { JettonMaster, JettonWallet } from "@ton/ton";
-import { parseContractGetterAddress } from '../../contracts/runtimeAddress.js';
 import { DEFAULT_PROJECT_BANNER, DEFAULT_PROJECT_LOGO, projectAssetOrDefault } from '../constants/assets.js';
 import {
   buildAdvanceStagePayload,
   buildClaimPayload,
   buildRefundPayload,
-  buildVotePayload,
   getIdoContract,
   getTonClient,
   getUserContribution,
-  getUserHasVoted,
-  getUserVote,
   MAINNET_USDT_MASTER,
   parseUSDTAmount,
   waitForContract,
 } from '../ton/gramStarter.js';
+import { parseContractGetterAddress } from '../../contracts/runtimeAddress.js';
 import { getUserGramxBalance, GRAMX_DECIMALS } from '../ton/staking.js';
 
-// Must exceed the forwarded TON below, otherwise the sender's Jetton wallet
-// rejects the transfer before the IDO contract receives it.
 const USDT_TRANSFER_GAS = "0.15";
 const USDT_FORWARD_TON = "0.01";
 
@@ -163,7 +158,7 @@ export default function LaunchpadDetails({
   };
 
   const refreshClaimSnapshot = async () => {
-    if (!wallet.connected || !wallet.address || !project.idoContractAddress || project.idoStage !== 'distribution') {
+    if (!wallet.connected || !wallet.address || project.idoStage !== 'distribution') {
       setClaimSnapshot(current => ({
         ...current,
         distributionStartedAt: 0,
@@ -177,20 +172,35 @@ export default function LaunchpadDetails({
 
     setClaimSnapshot(current => ({ ...current, loading: true }));
     try {
-      const contributor = parseContractGetterAddress(wallet.address);
-      const opened = getTonClient().open(getIdoContract(project.idoContractAddress));
-      const [distributionStartedAt, vestedBase, claimableBase, claimedBase] = await Promise.all([
-        opened.getGetDistributionStartedAt(),
-        opened.getGetUserVestedAllocation(contributor),
-        opened.getGetUserClaimableAllocation(contributor),
-        opened.getGetUserClaimedAllocation(contributor),
-      ]);
-      const unit = 10 ** project.decimals;
+      const normalize = (value: string) => {
+        try {
+          return Address.parse(value).toRawString().toLowerCase();
+        } catch {
+          return value.trim().toLowerCase();
+        }
+      };
+      const walletKey = normalize(wallet.address);
+      const activeContributions = (project.contributions || []).filter(item =>
+        normalize(item.contributor) === walletKey && !item.refunded
+      );
+      const allocation = activeContributions.reduce((sum, item) => sum + Number(item.tokenAmount || 0), 0);
+      const claimed = activeContributions.reduce((sum, item) => sum + Number(item.claimedAmount || 0), 0);
+      const distributionStartMs = Number(project.distributionStartTime || project.endTime || 0);
+      const cliffEndMs = distributionStartMs + Math.max(0, Number(project.cliffDurationDays || 0)) * 24 * 60 * 60 * 1000;
+      const vestingMonths = Math.max(1, Number(project.vestingMonths || 1));
+      const tgeAmount = allocation * (Math.max(0, Math.min(100, Number(project.vestingTgePercent || 0))) / 100);
+      const linearAmount = Math.max(0, allocation - tgeAmount);
+      const completedMonths = distributionStartMs > 0 && Date.now() >= cliffEndMs
+        ? Math.min(vestingMonths, Math.max(0, Math.floor((Date.now() - cliffEndMs) / (30 * 24 * 60 * 60 * 1000))))
+        : 0;
+      const vestedAmount = project.status === 'success' && Date.now() >= cliffEndMs
+        ? Math.min(allocation, tgeAmount + (linearAmount * completedMonths / vestingMonths))
+        : 0;
       setClaimSnapshot({
-        distributionStartedAt: Number(distributionStartedAt),
-        vestedAmount: Number(vestedBase) / unit,
-        claimableAmount: Number(claimableBase) / unit,
-        claimedAmount: Number(claimedBase) / unit,
+        distributionStartedAt: distributionStartMs ? Math.floor(distributionStartMs / 1000) : 0,
+        vestedAmount,
+        claimableAmount: Math.max(0, vestedAmount - claimed),
+        claimedAmount: claimed,
         loading: false,
       });
     } catch (error) {
@@ -200,7 +210,7 @@ export default function LaunchpadDetails({
 
   useEffect(() => {
     refreshClaimSnapshot();
-  }, [wallet.address, wallet.connected, project.id, project.idoStage, project.idoContractAddress]);
+  }, [wallet.address, wallet.connected, project.id, project.idoStage, project.contributions, project.distributionStartTime]);
 
   const getNextStageInfo = (currentStage: string) => {
     switch (currentStage) {
@@ -448,60 +458,12 @@ export default function LaunchpadDetails({
         throw new Error('At least 1 GRAMX is required to vote on GramPad1.');
       }
 
-      if (!project.idoContractAddress) {
-        throw new Error('This project does not have a deployed IDO contract.');
-      }
-
-      const idoContract = getIdoContract(project.idoContractAddress);
-      const alreadyVoted = await getUserHasVoted(
-        project.idoContractAddress,
-        wallet.address
-      );
-      let confirmedVoteType = type;
-      let txHash = 'on-chain-vote-sync';
-
-      if (alreadyVoted) {
-        confirmedVoteType = (await getUserVote(
-          project.idoContractAddress,
-          wallet.address
-        )) ? 'up' : 'down';
-      } else {
-        const result = await tonConnectUI.sendTransaction({
-          validUntil: Math.floor(Date.now() / 1000) + 360,
-          messages: [
-            {
-              address: project.idoContractAddress,
-              amount: toNano('0.1').toString(),
-              payload: buildVotePayload(type === 'up'),
-            }
-          ]
-        });
-        txHash = result.boc;
-        const pendingRes = await fetch(`/api/projects/${project.id}/vote-progress`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            voteType: type,
-            txHash,
-            voterAddress: wallet.address,
-          }),
-        });
-        const pendingData = await pendingRes.json();
-        if (pendingRes.ok && pendingData.project) {
-          setProject(pendingData.project);
-        }
-        await waitForContract(
-          idoContract,
-          () => getUserHasVoted(project.idoContractAddress!, wallet.address!)
-        );
-      }
-
       const res = await fetch(`/api/projects/${project.id}/vote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          voteType: confirmedVoteType,
-          txHash,
+          voteType: type,
+          txHash: `db-vote-${Date.now()}`,
           voterAddress: wallet.address,
         })
       });
@@ -689,26 +651,16 @@ export default function LaunchpadDetails({
     setShowAdvanceModal(false);
 
     try {
-      if (!project.idoContractAddress) {
-        throw new Error('This project does not have a deployed IDO contract.');
-      }
-
-      const idoContract = getIdoContract(project.idoContractAddress);
       const nextPhaseTimestamp = Date.parse(selectedNextPhaseDate);
-      const openedIdo = getTonClient().open(idoContract);
-      let confirmedStage = Number(await openedIdo.getGetIdoState());
-      let txHash = 'db-stage-transition';
-      const targetContractStage =
-        project.idoStage === 'whitelist' ? 3 :
-          project.idoStage === 'sale' ? 4 :
-            null;
+      let txHash = `db-stage-transition-${Date.now()}`;
+      let contractStage: number | undefined;
 
-      if (targetContractStage !== null && !(
-        confirmedStage === targetContractStage ||
-        (targetContractStage === 4 && confirmedStage === 5)
-      )) {
+      if (project.idoContractAddress && (project.idoStage === 'whitelist' || project.idoStage === 'sale')) {
+        const idoContract = getIdoContract(project.idoContractAddress);
+        const targetContractStage = project.idoStage === 'whitelist' ? 3 : 4;
         const result = await tonConnectUI.sendTransaction({
           validUntil: Math.floor(Date.now() / 1000) + 360,
+          network: tonNetwork,
           messages: [{
             address: project.idoContractAddress,
             amount: toNano('0.15').toString(),
@@ -716,24 +668,19 @@ export default function LaunchpadDetails({
           }],
         });
         txHash = result.boc;
-
         await waitForContract(idoContract, async opened => {
-          confirmedStage = Number(await opened.getGetIdoState());
-          return confirmedStage === targetContractStage ||
-            (targetContractStage === 4 && confirmedStage === 5);
+          contractStage = Number(await opened.getGetIdoState());
+          return contractStage === targetContractStage || (targetContractStage === 4 && contractStage === 5);
         });
       }
-
-      const confirmedUiStage =
-        confirmedStage === 5 ? 'distribution' : nextStage;
 
       const res = await fetch(`/api/projects/${project.id}/advance-stage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          stage: confirmedUiStage,
+          stage: nextStage,
           nextPhaseTime: nextPhaseTimestamp,
-          contractStage: confirmedStage,
+          contractStage,
           txHash,
           adminAddress: wallet.address,
         })
@@ -766,44 +713,35 @@ export default function LaunchpadDetails({
 
     try {
       if (!project.idoContractAddress) {
-        throw new Error('This project does not have a deployed IDO contract.');
+        throw new Error('This project does not have a deployed IDO escrow contract.');
       }
 
       const contributor = parseContractGetterAddress(wallet.address);
       const idoContract = getIdoContract(project.idoContractAddress);
       const opened = getTonClient().open(idoContract);
       const claimedBefore = await opened.getGetUserClaimedAllocation(contributor);
-      const transaction = {
+      const result = await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 360,
+        network: tonNetwork,
         messages: [
           {
             address: project.idoContractAddress,
             amount: toNano('0.18').toString(),
             payload: buildClaimPayload(),
-          }
-        ]
-      };
-
-      const result = await tonConnectUI.sendTransaction(transaction);
-      const txHash = result.boc;
-      let totalClaimedBase = claimedBefore;
-      await waitForContract(idoContract, async contract => {
-        totalClaimedBase = await contract.getGetUserClaimedAllocation(contributor);
-        return totalClaimedBase > claimedBefore;
+          },
+        ],
       });
-      const unit = 10 ** project.decimals;
-      const claimedNow = Number(totalClaimedBase - claimedBefore) / unit;
-      const totalClaimed = Number(totalClaimedBase) / unit;
+      const txHash = result.boc;
+      await waitForContract(idoContract, async contract => {
+        const claimedAfter = await contract.getGetUserClaimedAllocation(contributor);
+        return claimedAfter > claimedBefore;
+      });
 
       const res = await fetch(`/api/projects/${project.id}/claim`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contributor: wallet.address,
-          claimedNow,
-          totalClaimed,
-          claimedNowBase: (totalClaimedBase - claimedBefore).toString(),
-          totalClaimedBase: totalClaimedBase.toString(),
           txHash,
         })
       });
@@ -828,16 +766,16 @@ export default function LaunchpadDetails({
               }
 
               updatedFirstMatchingContribution = true;
-              return { ...contribution, claimedAmount: Number(data.totalClaimed || totalClaimed) };
+              return { ...contribution, claimedAmount: Number(data.totalClaimed || 0) };
             }),
           };
         });
       }
-      setClaimSuccess(`Successfully claimed ${data.claimedNow.toLocaleString()} ${project.symbol}! (Cumulative claimed: ${data.totalClaimed.toLocaleString()}). Transaction reference: ${txHash.slice(0, 10)}...`);
+      setClaimSuccess(`Successfully claimed ${data.claimedNow.toLocaleString()} ${project.symbol}! (Cumulative claimed: ${data.totalClaimed.toLocaleString()}).`);
       setClaimSnapshot(current => ({
         ...current,
         claimableAmount: 0,
-        claimedAmount: Number(data.totalClaimed || totalClaimed),
+        claimedAmount: Number(data.totalClaimed || current.claimedAmount),
       }));
       refreshClaimSnapshot();
       reloadProject();
@@ -861,127 +799,28 @@ export default function LaunchpadDetails({
 
     try {
       if (!project.idoContractAddress) {
-        throw new Error('This project does not have a deployed IDO contract.');
+        throw new Error('This project does not have a deployed IDO escrow contract.');
       }
 
+      const isSaleWithdrawal = project.idoStage === 'sale' && project.status !== 'failed';
       const contributor = parseContractGetterAddress(wallet.address);
       const idoContract = getIdoContract(project.idoContractAddress);
-      const client = getTonClient();
-      const openedIdo = client.open(idoContract);
-      const [
-        stage,
-        contributionBefore,
-        alreadyRefunded,
-        chainRaised,
-        chainSoftCap,
-        walletsConfigured,
-        idoUsdtWalletAddress,
-      ] = await Promise.all([
-        openedIdo.getGetIdoState(),
-        openedIdo.getGetUserContribution(contributor),
-        openedIdo.getGetUserRefunded(contributor),
-        openedIdo.getGetRaisedCapital(),
-        openedIdo.getGetSoftCap(),
-        openedIdo.getGetJettonWalletsConfigured(),
-        openedIdo.getGetUsdtJettonWallet(),
-      ]);
-
-      if (!walletsConfigured) {
-        throw new Error('The IDO USDT Jetton wallet is not configured.');
-      }
-      if (alreadyRefunded) {
-        if (contributionBefore !== 0n) {
-          throw new Error('The refund state is inconsistent on-chain. Please contact support.');
-        }
-
-        const recoveryResponse = await fetch(`/api/projects/${project.id}/refund`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contributor: wallet.address,
-            txHash: `onchain-refund-recovery:${project.idoContractAddress}`,
-          }),
-        });
-        const recoveryData = await recoveryResponse.json();
-        if (!recoveryResponse.ok) {
-          throw new Error(recoveryData.error || 'Could not synchronize the confirmed refund.');
-        }
-
-        const recoveredAmount = recoveryData.refundedAmount || 0;
-        setClaimSuccess(
-          `Your ${recoveredAmount.toLocaleString()} USDT refund was already completed on-chain. The project record is now synchronized.`
-        );
-        await reloadProject();
-        onContributeSuccess();
-        return;
-      }
-      if (contributionBefore <= 0n) {
-        throw new Error('The IDO contract has no refundable USDT contribution for this wallet.');
-      }
-      const isSaleWithdrawal = stage === 3n;
-      if (!isSaleWithdrawal && stage !== 5n && !(stage === 4n && chainRaised < chainSoftCap)) {
-        throw new Error(`Refund is not available in contract stage ${stage.toString()}.`);
-      }
-
-      const idoUsdtWalletState = await client.getContractState(idoUsdtWalletAddress);
-      if (idoUsdtWalletState.state !== 'active') {
-        throw new Error(
-          `The configured IDO USDT Jetton wallet ${idoUsdtWalletAddress.toString()} is not active.`
-        );
-      }
-      const idoUsdtBalance = await client
-        .open(JettonWallet.create(idoUsdtWalletAddress))
-        .getBalance();
-      if (idoUsdtBalance < contributionBefore) {
-        const decimals = Number(await openedIdo.getGetUsdtDecimals());
-        const unit = 10 ** decimals;
-        throw new Error(
-          `The IDO USDT wallet does not contain enough USDT for this refund. ` +
-          `Required ${Number(contributionBefore) / unit} USDT, available ${Number(idoUsdtBalance) / unit} USDT.`
-        );
-      }
-
-      const idoTonState = await client.getContractState(Address.parse(project.idoContractAddress));
-      if (idoTonState.balance < toNano('0.1')) {
-        throw new Error('The IDO contract TON reserve is below 0.1 TON and must be funded before refunding.');
-      }
-
-      const transaction = {
+      const result = await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 360,
         network: tonNetwork,
         messages: [
           {
             address: project.idoContractAddress,
-            // The IDO forwards 0.12 TON to its Jetton wallet. Keep enough
-            // headroom for compute, storage, action and response-message fees.
             amount: toNano('0.35').toString(),
             payload: buildRefundPayload(),
-          }
-        ]
-      };
-
-      const result = await tonConnectUI.sendTransaction(transaction);
+          },
+        ],
+      });
       const txHash = result.boc;
       await waitForContract(idoContract, async opened => {
-        const [refunded, remainingContribution] = await Promise.all([
-          opened.getGetUserRefunded(contributor),
-          opened.getGetUserContribution(contributor),
-        ]);
-        return remainingContribution === 0n && (isSaleWithdrawal || refunded);
-      }, 90_000, 'The refund transaction was not confirmed. It may have failed or the USDT Jetton transfer may have bounced.');
-
-      // A bounced outgoing Jetton transfer restores the contribution. Give the
-      // response path time to settle before recording the refund in the DB.
-      await new Promise(resolve => setTimeout(resolve, 6_000));
-      const [refundStillConfirmed, contributionAfter] = await Promise.all([
-        openedIdo.getGetUserRefunded(contributor),
-        openedIdo.getGetUserContribution(contributor),
-      ]);
-      if (contributionAfter !== 0n || (!isSaleWithdrawal && !refundStillConfirmed)) {
-        throw new Error(
-          'The IDO accepted the refund request, but its outgoing USDT transfer bounced. Check the configured IDO USDT Jetton wallet and its USDT balance.'
-        );
-      }
+        const contributionAfter = await opened.getGetUserContribution(contributor);
+        return contributionAfter === 0n;
+      }, 90_000, 'The refund transaction was not confirmed by the IDO escrow contract.');
 
       const res = await fetch(`/api/projects/${project.id}/refund`, {
         method: 'POST',
@@ -1039,8 +878,12 @@ export default function LaunchpadDetails({
       return;
     }
 
-    if (amt < project.minBuy || amt > project.maxBuy) {
-      setAuditError(`Contribution must be between ${project.minBuy} and ${project.maxBuy} USDT.`);
+    const maxBuy = Number(project.maxBuy || 0);
+    if (amt < project.minBuy || (maxBuy > 0 && amt > maxBuy)) {
+      setAuditError(maxBuy > 0
+        ? `Contribution must be between ${project.minBuy} and ${maxBuy} USDT.`
+        : `Contribution must be at least ${project.minBuy} USDT.`
+      );
       return;
     }
 
@@ -1053,11 +896,10 @@ export default function LaunchpadDetails({
       return;
     }
 
-    // Begin real TonConnect live signing on TON Mainnet
     setTxStep('wallet_sign');
     try {
       if (!project.idoContractAddress) {
-        throw new Error('This project does not have a deployed IDO contract.');
+        throw new Error('This project does not have a deployed IDO escrow contract.');
       }
 
       const client = getTonClient();
@@ -1066,40 +908,22 @@ export default function LaunchpadDetails({
       const idoContract = getIdoContract(project.idoContractAddress);
       const openedIdo = client.open(idoContract);
       const contractUsdtDecimals = Number(await openedIdo.getGetUsdtDecimals());
-      const configuredUsdtDecimals = Number(
-        (import.meta as any).env.VITE_TON_USDT_DECIMALS || 6
-      );
+      const configuredUsdtDecimals = Number((import.meta as any).env.VITE_TON_USDT_DECIMALS || 6);
       if (contractUsdtDecimals !== configuredUsdtDecimals) {
         throw new Error(
-          `This project was deployed for ${contractUsdtDecimals}-decimal USDT, but the configured testnet USDT uses ${configuredUsdtDecimals} decimals. Redeploy this project before accepting contributions.`
+          `This project was deployed for ${contractUsdtDecimals}-decimal USDT, but the configured USDT uses ${configuredUsdtDecimals} decimals. Redeploy or update VITE_TON_USDT_DECIMALS.`
         );
       }
-      const contributionBefore = await getUserContribution(
-        project.idoContractAddress,
-        wallet.address
-      );
-      const TON_USDT_MASTER =
-        (import.meta as any).env.VITE_TON_USDT_MASTER || MAINNET_USDT_MASTER;
-
+      const contributionBefore = await getUserContribution(project.idoContractAddress, wallet.address);
+      const TON_USDT_MASTER = (import.meta as any).env.VITE_TON_USDT_MASTER || MAINNET_USDT_MASTER;
       const usdtMaster = client.open(JettonMaster.create(Address.parse(TON_USDT_MASTER)));
-      let userUsdtWallet: Address;
-
-      try {
-        userUsdtWallet = await usdtMaster.getWalletAddress(userAddress);
-      } catch (error) {
-        console.error('Invalid or unavailable USDT jetton master:', error);
-        throw new Error(
-          'The configured TON USDT contract is invalid or unavailable. Please restart the app after updating VITE_TON_USDT_MASTER.'
-        );
-      }
+      const userUsdtWallet = await usdtMaster.getWalletAddress(userAddress);
       const amountInUSDT = parseUSDTAmount(contAmount, contractUsdtDecimals);
       const openedUserUsdtWallet = client.open(JettonWallet.create(userUsdtWallet));
       const userBalance = await openedUserUsdtWallet.getBalance();
 
       if (userBalance < amountInUSDT) {
-        throw new Error(
-          `Insufficient USDT balance. This contribution requires ${contAmount} USDT.`
-        );
+        throw new Error(`Insufficient USDT balance. This contribution requires ${contAmount} USDT.`);
       }
 
       const pendingRes = await fetch(`/api/projects/${project.id}/contribution-progress`, {
@@ -1130,27 +954,22 @@ export default function LaunchpadDetails({
         .storeBit(0)
         .endCell();
 
-      const transaction = {
+      const result = await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 600,
+        network: tonNetwork,
         messages: [
           {
-            // This is TON attached for gas. The USDT amount is encoded in the payload above.
             address: userUsdtWallet.toString(),
             amount: toNano(USDT_TRANSFER_GAS).toString(),
             payload: jettonTransferPayload.toBoc().toString("base64"),
           },
         ],
-      };
-
-      const result = await tonConnectUI.sendTransaction(transaction);
-      const txHash = result.boc; // Live signed transaction payload
+      });
+      const txHash = result.boc;
 
       setTxStep('confirming');
       await waitForContract(idoContract, async () => {
-        const contribution = await getUserContribution(
-          project.idoContractAddress!,
-          wallet.address!
-        );
+        const contribution = await getUserContribution(project.idoContractAddress!, wallet.address!);
         return contribution >= contributionBefore + amountInUSDT;
       });
 
@@ -1390,10 +1209,10 @@ export default function LaunchpadDetails({
       </div>
 
       {/* Grid container */}
-      <div className="gp-details-layout grid gap-8 lg:grid-cols-12 items-start">
+      <div className="gp-details-layout lg:grid gap-8 lg:grid-cols-12 items-start">
 
         {/* Left deep-dive specs column (8 shares) */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        <div className="lg:col-span-8 flex flex-col gap-6 order-1 lg:order-1">
 
           {/* Hero space */}
           <div className="gp-details-hero relative overflow-hidden rounded-[28px] border border-slate-800 shadow-xl">
@@ -1445,7 +1264,7 @@ export default function LaunchpadDetails({
                     </div>
                   )}
                 </div>
-                <p className="mt-2 text-slate-400 text-xs leading-relaxed max-w-xl truncate">
+                <p className="mt-2 text-slate-400 text-xs leading-relaxed max-w-xl line-clamp-3">
                   {project.description}
                 </p>
 
@@ -1568,8 +1387,8 @@ export default function LaunchpadDetails({
               </div>
               <div className="gp-details-market-stat">
                 <span>IDO rate</span>
-                <strong>{project.rate.toLocaleString()} ${project.symbol}</strong>
-                <small>per 1 USDT</small>
+                <strong>{1/project.rate} USDT</strong>
+                <small>per 1 {project.symbol}</small>
               </div>
               <div className="gp-details-market-stat">
                 <span>Participants</span>
@@ -1638,30 +1457,30 @@ export default function LaunchpadDetails({
                       </div>
                     </div>
 
-                    <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
-                      <div className="gp-tokenomics-kpi">
+                    <div className="mt-5 grid grid-cols-2 sm:grid-cols-5 gap-2">
+                      <div className="gp-tokenomics-kpi !p-2.5 sm:!p-3.5 text-center">
                         <span>Soft cap</span>
-                        <strong>${project.softCap.toLocaleString()}</strong>
+                        <strong className="!text-xs sm:!text-[0.95rem]">${project.softCap.toLocaleString()}</strong>
                         <small>USDT</small>
                       </div>
-                      <div className="gp-tokenomics-kpi">
+                      <div className="gp-tokenomics-kpi !p-2.5 sm:!p-3.5 text-center">
                         <span>Hard cap</span>
-                        <strong>${project.hardCap.toLocaleString()}</strong>
+                        <strong className="!text-xs sm:!text-[0.95rem]">${project.hardCap.toLocaleString()}</strong>
                         <small>USDT</small>
                       </div>
-                      <div className="gp-tokenomics-kpi">
+                      <div className="gp-tokenomics-kpi !p-2.5 sm:!p-3.5 text-center">
                         <span>TGE unlock</span>
-                        <strong>{project.vestingTgePercent !== undefined ? project.vestingTgePercent : 20}%</strong>
+                        <strong className="!text-xs sm:!text-[0.95rem]">{project.vestingTgePercent !== undefined ? project.vestingTgePercent : 20}%</strong>
                         <small>at distribution</small>
                       </div>
-                      <div className="gp-tokenomics-kpi">
+                      <div className="gp-tokenomics-kpi !p-2.5 sm:!p-3.5 text-center">
                         <span>Linear vesting</span>
-                        <strong>{project.vestingMonths ?? Math.max(1, Math.ceil((project.vestingDays || 90) / 30))}</strong>
+                        <strong className="!text-xs sm:!text-[0.95rem]">{project.vestingMonths ?? Math.max(1, Math.ceil((project.vestingDays || 90) / 30))}</strong>
                         <small>months</small>
                       </div>
-                      <div className="gp-tokenomics-kpi">
+                      <div className="gp-tokenomics-kpi !p-2.5 sm:!p-3.5 text-center">
                         <span>Cliff duration</span>
-                        <strong>{project.cliffDurationDays || 0}</strong>
+                        <strong className="!text-xs sm:!text-[0.95rem]">{project.cliffDurationDays || 0}</strong>
                         <small>days</small>
                       </div>
                     </div>
@@ -1712,28 +1531,35 @@ export default function LaunchpadDetails({
                         Jetton Contract Specifications
                       </h3>
                       <div className="gp-details-rows rounded-xl border border-slate-800 bg-slate-900/10 overflow-hidden divide-y divide-slate-800/60 font-sans">
-                        <div className="flex justify-between items-center px-4 py-3 text-xs bg-slate-900/10">
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs bg-slate-900/10 gap-2 w-full">
                           <span className="text-slate-400 font-medium">Token standard</span>
                           <span className="text-white font-semibold">TON Jetton Asset Standard</span>
                         </div>
-                        <div className="flex justify-between items-center px-4 py-3 text-xs bg-slate-900/10">
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs bg-slate-900/10 gap-2 w-full">
                           <span className="text-slate-400 font-medium">Ticker Symbol</span>
                           <span className="font-bold text-[#00D2FF]">${project.symbol}</span>
                         </div>
-                        <div className="flex justify-between items-center px-4 py-3 text-xs bg-slate-900/10">
-                          <span className="text-slate-400 font-medium">Decimals Scale</span>
-                          <span className="text-slate-200">{project.decimals || 9} decimals</span>
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs bg-slate-900/10 gap-2 w-full">
+                          <span className="text-slate-400 font-medium">Decimals</span>
+                          <span className="text-slate-200">{project.decimals} decimals</span>
                         </div>
-                        <div className="flex justify-between items-center px-4 py-3 text-xs bg-slate-900/10">
-                          <span className="text-slate-405 font-medium">Deployed Total Supply</span>
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs bg-slate-900/10 gap-2 w-full">
+                          <span className="text-slate-400 font-medium">Deployed Total Supply</span>
                           <span className="font-mono font-bold text-white">{project.totalSupply.toLocaleString()} Tokens</span>
                         </div>
-                        <div className="flex flex-col gap-2 p-4 bg-slate-900/10">
-                          <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">Contract Master Hash</span>
-                          <div className="flex items-center justify-between gap-2 bg-slate-950 px-3 py-2 rounded-lg border border-slate-800">
-                            <code className="font-mono text-[10px] text-[#0098EA] select-all truncate">
-                              {project.jettonAddress || 'Not configured'}
-                            </code>
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs bg-slate-900/10 gap-2 w-full">
+                          <span className="text-slate-400 font-medium">IDO Total Supply</span>
+                          <span className="font-mono font-bold text-white">{project.hardCap * project.rate} Tokens</span>
+                        </div>
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs bg-slate-900/10 gap-2 w-full">
+                          <span className="text-slate-400 font-medium">IDO Price</span>
+                          <span className="font-mono font-bold text-white">{1 / project.rate} USDT</span>
+                        </div>
+          
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs gap-2 w-full">
+                          <span className="text-slate-400 font-medium">Project Master Hash</span>
+                          <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                            <span className="font-mono text-[10px] text-[#0098EA] select-all truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">{project.creator}</span>
                             <button
                               type="button"
                               onClick={event => project.jettonAddress && handleCopy(project.jettonAddress, 'jetton', event)}
@@ -1741,10 +1567,13 @@ export default function LaunchpadDetails({
                               className="text-slate-500 hover:text-[#0098EA] p-1.5 rounded hover:bg-slate-900 transition shrink-0 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-500"
                               title="Copy Contract Address"
                             >
+                              
                               {copiedText === 'jetton' ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
                             </button>
                           </div>
                         </div>
+
+            
                       </div>
                     </section>
 
@@ -1755,52 +1584,53 @@ export default function LaunchpadDetails({
                         Launchpool Targets & Terms
                       </h3>
                       <div className="gp-details-rows rounded-xl border border-slate-800 bg-slate-900/10 overflow-hidden divide-y divide-slate-800/60 font-sans">
-                        <div className="flex justify-between items-center gap-3 px-4 py-3 text-xs bg-slate-950/25">
-                          <span className="text-slate-450 font-medium shrink-0">IDO Smart Contract Address</span>
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="font-mono text-[#0098EA] font-bold text-[10px] truncate max-w-[160px] sm:max-w-[320px]" title={project.idoContractAddress}>
-                              {project.idoContractAddress || 'Not deployed'}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={event => project.idoContractAddress && handleCopy(project.idoContractAddress, 'ido-contract', event)}
-                              disabled={!project.idoContractAddress}
-                              className="text-slate-500 hover:text-white p-0.5"
-                            >
-                              {copiedText === 'ido-contract' ? <Check className="h-2.5 w-2.5 text-emerald-400" /> : <Copy className="h-2.5 w-2.5" />}
-                            </button>
-                          </div>
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs bg-slate-900/10 gap-2 w-full">
+                          <span className="text-slate-450 font-medium shrink-0">IDO Terms</span>
                         </div>
 
-                        <div className="flex justify-between items-center px-4 py-3 text-xs">
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs gap-2 w-full">
                           <span className="text-slate-450 font-medium"> Rate</span>
                           <span className="font-mono font-bold text-sky-400">1 USDT = {project.rate.toLocaleString()} ${project.symbol}</span>
                         </div>
-                        <div className="flex justify-between items-center px-4 py-3 text-xs">
-                          <span className="text-slate-450 font-medium">Investor TGE share</span>
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs gap-2 w-full">
+                          <span className="text-slate-455 font-medium">Investor TGE share</span>
                           <span className="font-bold text-white font-mono">{project.vestingTgePercent !== undefined ? project.vestingTgePercent : 20}% Unlocked</span>
                         </div>
-                        <div className="flex justify-between items-center px-4 py-3 text-xs">
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs gap-2 w-full">
                           <span className="text-slate-450 font-medium">Investor Vest Period</span>
                           <span className="font-bold text-white font-mono">
                             {project.vestingMonths ?? Math.max(1, Math.ceil((project.vestingDays || 90) / 30))} Months Linear
                           </span>
                         </div>
-                        <div className="flex justify-between items-center px-4 py-3 text-xs">
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs gap-2 w-full">
+                          <span className="text-slate-450 font-medium">Investor Shield</span>
+                          <span className="font-bold text-white font-mono text-right">
+                            {project.idoStage === 'distribution' || project.status === 'success' || project.status === 'failed'
+                              ? 'No refunds, sale completed'
+                              : 'Refunds available until distribution'}
+                          </span>
+                        </div>
+                         <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs gap-2 w-full">
+                          <span className="text-slate-450 font-medium">Cliff Duration</span>
+                          <span className="font-bold text-white font-mono">
+                            {project.cliffDurationDays} Days
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs gap-2 w-full">
                           <span className="text-slate-450 font-medium">Project Creator</span>
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="font-mono text-slate-400 text-[10px] truncate max-w-[100px]">{project.creator}</span>
+                          <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                            <span className="font-mono text-[10px] text-[#0098EA] select-all truncate max-w-[150px] xs:max-w-[200px] sm:max-w-none">{project.creator}</span>
                             <button
                               type="button"
                               onClick={event => handleCopy(project.creator, 'creator', event)}
-                              className="text-slate-600 hover:text-white p-0.5"
+                              className="text-slate-650 hover:text-white p-0.5 shrink-0"
                             >
                               {copiedText === 'creator' ? <Check className="h-2.5 w-2.5 text-emerald-400" /> : <Copy className="h-2.5 w-2.5" />}
                             </button>
                           </div>
                         </div>
                         {(project.idoStage === 'distribution' || project.status === 'success' || project.status === 'failed') && (
-                          <div className="flex justify-between items-center px-4 py-3 text-xs font-sans">
+                          <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs font-sans gap-2 w-full">
                             <span className="text-slate-450 font-medium">Sale End Time</span>
                             <span className="font-medium text-slate-300">{new Date(project.endTime).toLocaleString()}</span>
                           </div>
@@ -1815,8 +1645,8 @@ export default function LaunchpadDetails({
                       <div className="h-1.5 w-1.5 rounded-full bg-[#0098EA]" />
                       Team & Verification
                     </h3>
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      <div className="gp-tokenomics-verification rounded-xl border border-slate-800 bg-slate-900/10 p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="gp-tokenomics-verification rounded-xl border border-slate-800 bg-slate-900/10 p-4 min-w-0">
                         <div className="flex items-center gap-2 text-slate-300">
                           <Users className="h-4 w-4 text-[#0098EA]" />
                           <span className="text-[10px] font-black uppercase tracking-wider">Project owner</span>
@@ -1836,7 +1666,7 @@ export default function LaunchpadDetails({
                         </div>
                       </div>
 
-                      <div className="gp-tokenomics-verification rounded-xl border border-slate-800 bg-slate-900/10 p-4">
+                      <div className="gp-tokenomics-verification rounded-xl border border-slate-800 bg-slate-900/10 p-4 min-w-0">
                         <div className="flex items-center gap-2">
                           <ShieldCheck className="h-4 w-4 text-[#0098EA]" />
                           <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">Identity review</span>
@@ -1847,7 +1677,7 @@ export default function LaunchpadDetails({
                         <p className="mt-2 text-[10px] leading-4 text-slate-500">KYC is marked verified only after platform review.</p>
                       </div>
 
-                      <div className="gp-tokenomics-verification rounded-xl border border-slate-800 bg-slate-900/10 p-4">
+                      <div className="gp-tokenomics-verification rounded-xl border border-slate-800 bg-slate-900/10 p-4 min-w-0">
                         <div className="flex items-center gap-2">
                           <Sparkles className="h-4 w-4 text-[#0098EA]" />
                           <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">Contract review</span>
@@ -1863,7 +1693,7 @@ export default function LaunchpadDetails({
                   </div>
 
                   {/* Pitch description */}
-                  <div className="gp-tokenomics-description p-5 rounded-2xl bg-slate-900/30 border border-slate-850/80">
+                  <div className="gp-tokenomics-description p-5 rounded-2xl bg-slate-900/30 border border-slate-100/10">
                     <h4 className="text-xs font-black text-slate-450 uppercase tracking-widest mb-2">Campaign Description Detail</h4>
                     <p className="text-xs text-slate-300 leading-relaxed font-sans">{project.description}</p>
                   </div>
@@ -1960,7 +1790,7 @@ export default function LaunchpadDetails({
                       {/* Split descriptions */}
                       <div className="grid gap-4 sm:grid-cols-2">
 
-                        <div className="p-4 rounded-xl bg-slate-900/10 border border-slate-850">
+                        <div className="p-4 rounded-xl bg-slate-900/10 border border-sky-100/10">
                           <h5 className="font-extrabold text-white text-xs mb-1.5 flex items-center gap-1.5">
                             <Shield className="h-4 w-4 text-sky-400" />
                             Vesting Security
@@ -1968,7 +1798,7 @@ export default function LaunchpadDetails({
                           <p className="text-slate-300 leading-relaxed text-[11.5px] font-sans">{auditResult.liquidityAnalysis}</p>
                         </div>
 
-                        <div className="p-4 rounded-xl bg-slate-900/10 border border-slate-850">
+                        <div className="p-4 rounded-xl bg-slate-900/10 border border-sky-100/10">
                           <h5 className="font-extrabold text-white text-xs mb-1.5 flex items-center gap-1.5">
                             <Users className="h-4 w-4 text-emerald-400" />
                             Advisory Allocation Security
@@ -2093,7 +1923,7 @@ export default function LaunchpadDetails({
         </div>
 
         {/* Right active participation card column (4 shares) */}
-        <div className="lg:col-span-4 sticky top-6">
+        <div className="lg:col-span-4 sticky lg:top-6 order-2 lg:order-2">
           {isUpcoming ? (
             <div className="gp-details-action-card rounded-[24px] border border-slate-800 bg-[#0A101D] p-5 sm:p-6 text-white shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 h-28 w-28 rounded-full bg-[#0098EA]/10 blur-2xl pointer-events-none" />
@@ -2107,29 +1937,29 @@ export default function LaunchpadDetails({
                 </div>
 
 
-                <div className="flex items-center justify-center gap-1.5 font-black text-lg tracking-wider">
+                <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 font-black text-sm sm:text-lg tracking-wider">
 
                   {timeDifference > 0 ? (
                     <>
 
-                      <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2.5 py-1 text-[#0098EA]">
+                      <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1.5 py-1 sm:px-2.5 text-[#0098EA] font-mono">
                         {String(timeLeft.days).padStart(2, '0')}d
                       </span>
                       <span className="text-slate-500">:</span>
 
-                      <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2.5 py-1 text-[#0098EA]">
+                      <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1.5 py-1 sm:px-2.5 text-[#0098EA] font-mono">
                         {String(timeLeft.hours).padStart(2, '0')}h
                       </span>
                       <span className="text-slate-500">:</span>
-                      <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2.5 py-1 text-[#0098EA]">
+                      <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1.5 py-1 sm:px-2.5 text-[#0098EA] font-mono">
                         {String(timeLeft.minutes).padStart(2, '0')}m
                       </span>
                       <span className="text-slate-500">:</span>
-                      <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2.5 py-1 text-[#0098EA]">
+                      <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1.5 py-1 sm:px-2.5 text-[#0098EA] font-mono">
                         {String(timeLeft.seconds).padStart(2, '0')}s
                       </span>
                     </>
-                  ) : <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2.5 py-1 text-[#0098EA]">
+                  ) : <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2 py-1 text-xs text-[#0098EA]">
                     VOTE will start in sometime
                   </span>
 
@@ -2191,35 +2021,27 @@ export default function LaunchpadDetails({
 
                     )}
                   </p>
-                  <div className="flex items-center justify-center gap-1.5 font-black text-lg tracking-wider">
+                  <div className="flex items-center justify-center font-black text-lg tracking-wider">
+                    {timeDifference > 0 && (
+                      <div className="mb-4 w-full rounded-2xl border border-sky-400/20 bg-sky-400/10 p-3 sm:p-4 text-center flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
+                        <span className="rounded-lg border border-amber-400/25 bg-slate-950/80 px-2 py-1 text-xs sm:text-sm text-amber-400 font-mono">
+                          {String(timeLeft.days).padStart(2, '0')}d
+                        </span>
+                        <span className="text-slate-500 text-xs sm:text-sm">:</span>
 
-                    {timeDifference > 0 ? (
-                      <>
-
-                        <div className="mb-4 rounded-2xl border border-sky-400/20 bg-sky-400/10 p-4 text-center flex items-center flex-row ">
-
-
-                          <span className="rounded-lg border border-amber-400/25 bg-slate-950/80 px-2.5 py-1 text-amber-400">
-                            {String(timeLeft.days).padStart(2, '0')}d
-                          </span>
-                          <span className="text-slate-500">:</span>
-
-                          <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2.5 py-1 text-[#0098EA]">
-                            {String(timeLeft.hours).padStart(2, '0')}h
-                          </span>
-                          <span className="text-slate-500">:</span>
-                          <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2.5 py-1 text-[#0098EA]">
-                            {String(timeLeft.minutes).padStart(2, '0')}m
-                          </span>
-                          <span className="text-slate-500">:</span>
-                          <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2.5 py-1 text-[#0098EA]">
-                            {String(timeLeft.seconds).padStart(2, '0')}s
-                          </span>
-                        </div>
-                      </>
-                    ) : ""
-                    }
-
+                        <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2 py-1 text-xs sm:text-sm text-[#0098EA] font-mono">
+                          {String(timeLeft.hours).padStart(2, '0')}h
+                        </span>
+                        <span className="text-slate-500 text-xs sm:text-sm">:</span>
+                        <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2 py-1 text-xs sm:text-sm text-[#0098EA] font-mono">
+                          {String(timeLeft.minutes).padStart(2, '0')}m
+                        </span>
+                        <span className="text-slate-500 text-xs sm:text-sm">:</span>
+                        <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2 py-1 text-xs sm:text-sm text-[#0098EA] font-mono">
+                          {String(timeLeft.seconds).padStart(2, '0')}s
+                        </span>
+                      </div>
+                    )}
                   </div>
                     {timeDifference > 0 && (
                     <div className="rounded-xl border border-rose-500/15 bg-rose-500/5 p-4 leading-relaxed space-y-2">
@@ -2317,7 +2139,7 @@ export default function LaunchpadDetails({
                     <div className="space-y-3">
                       <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-tr from-emerald-500/10 to-teal-400/5 p-4 text-center text-emerald-400 shadow-md">
                         <CheckCircle2 className="mx-auto mb-2 h-6 w-6" />
-                        <span className="block text-xs font-bold uppercase tracking-wider">Vote already recorded</span>
+                        <span className="block text-xs font-bold uppercase tracking-wider">Vote recorded</span>
                         <p className="mt-1 text-[10.5px] text-slate-300">
                           This wallet has already voted for this project. The UI will stay synced with the on-chain result.
                         </p>
@@ -2399,25 +2221,25 @@ export default function LaunchpadDetails({
 
 
 
-                      <div className="grid grid-cols-4 gap-2">
-                        <div className="rounded-xl border border-white/10 bg-black/20 p-3 text-center">
-                          <div className="text-lg font-black text-white">{timeLeft.days}</div>
-                          <div className="text-[10px] uppercase text-slate-500">Days</div>
+                      <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                        <div className="rounded-xl border border-white/10 bg-black/20 p-2 sm:p-3 text-center">
+                          <div className="text-sm sm:text-lg font-black text-white">{timeLeft.days}</div>
+                          <div className="text-[8px] sm:text-[10px] uppercase text-slate-500 tracking-wider">Days</div>
                         </div>
 
-                        <div className="rounded-xl border border-white/10 bg-black/20 p-3 text-center">
-                          <div className="text-lg font-black text-white">{timeLeft.hours}</div>
-                          <div className="text-[10px] uppercase text-slate-500">Hours</div>
+                        <div className="rounded-xl border border-white/10 bg-black/20 p-2 sm:p-3 text-center">
+                          <div className="text-sm sm:text-lg font-black text-white">{timeLeft.hours}</div>
+                          <div className="text-[8px] sm:text-[10px] uppercase text-slate-500 tracking-wider">Hours</div>
                         </div>
 
-                        <div className="rounded-xl border border-white/10 bg-black/20 p-3 text-center">
-                          <div className="text-lg font-black text-white">{timeLeft.minutes}</div>
-                          <div className="text-[10px] uppercase text-slate-500">Minutes</div>
+                        <div className="rounded-xl border border-white/10 bg-black/20 p-2 sm:p-3 text-center">
+                          <div className="text-sm sm:text-lg font-black text-white">{timeLeft.minutes}</div>
+                          <div className="text-[8px] sm:text-[10px] uppercase text-slate-500 tracking-wider">Minutes</div>
                         </div>
 
-                        <div className="rounded-xl border border-white/10 bg-black/20 p-3 text-center">
-                          <div className="text-lg font-black text-white">{timeLeft.seconds}</div>
-                          <div className="text-[10px] uppercase text-slate-500">Seconds</div>
+                        <div className="rounded-xl border border-white/10 bg-black/20 p-2 sm:p-3 text-center">
+                          <div className="text-sm sm:text-lg font-black text-white">{timeLeft.seconds}</div>
+                          <div className="text-[8px] sm:text-[10px] uppercase text-slate-500 tracking-wider">Seconds</div>
                         </div>
                       </div>
                       </div>
@@ -2448,26 +2270,26 @@ export default function LaunchpadDetails({
                         Sale Starts In
                       </div>
 
-                      <div className="flex flex-wrap items-center justify-center gap-2 font-mono text-lg font-black tracking-wider">
-                        <span className="rounded-lg border border-amber-400/25 bg-slate-950/80 px-1 py-1 text-amber-400">
+                      <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 font-mono text-sm sm:text-base font-black tracking-wider">
+                        <span className="rounded-lg border border-amber-400/25 bg-slate-950/80 px-1.5 py-1 text-amber-400">
                           {String(timeLeft.days).padStart(2, '0')}d
                         </span>
 
                         <span className="text-slate-500">:</span>
 
-                        <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1 py-1 text-[#0098EA]">
+                        <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1.5 py-1 text-[#0098EA]">
                           {String(timeLeft.hours).padStart(2, '0')}h
                         </span>
 
                         <span className="text-slate-500">:</span>
 
-                        <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1 py-1 text-[#0098EA]">
+                        <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1.5 py-1 text-[#0098EA]">
                           {String(timeLeft.minutes).padStart(2, '0')}m
                         </span>
 
                         <span className="text-slate-500">:</span>
 
-                        <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2.5 py-1 text-[#0098EA]">
+                        <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1.5 py-1 text-[#0098EA]">
                           {String(timeLeft.seconds).padStart(2, '0')}s
                         </span>
                       </div>
@@ -2537,26 +2359,26 @@ export default function LaunchpadDetails({
                               Sale Will Starts in
                             </div>
 
-                            <div className="flex flex-wrap items-center justify-center gap-2 font-mono text-lg font-black tracking-wider">
-                              <span className="rounded-lg border border-amber-400/25 bg-slate-950/80 px-1 py-1 text-amber-400">
+                            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 font-mono text-sm sm:text-base font-black tracking-wider">
+                              <span className="rounded-lg border border-amber-400/25 bg-slate-950/80 px-1.5 py-1 text-amber-400">
                                 {String(timeLeft.days).padStart(2, '0')}d
                               </span>
 
                               <span className="text-slate-500">:</span>
 
-                              <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1 py-1 text-[#0098EA]">
+                              <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1.5 py-1 text-[#0098EA]">
                                 {String(timeLeft.hours).padStart(2, '0')}h
                               </span>
 
                               <span className="text-slate-500">:</span>
 
-                              <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1 py-1 text-[#0098EA]">
+                              <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1.5 py-1 text-[#0098EA]">
                                 {String(timeLeft.minutes).padStart(2, '0')}m
                               </span>
 
                               <span className="text-slate-500">:</span>
 
-                              <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-2.5 py-1 text-[#0098EA]">
+                              <span className="rounded-lg border border-[#0098EA]/25 bg-slate-950/80 px-1.5 py-1 text-[#0098EA]">
                                 {String(timeLeft.seconds).padStart(2, '0')}s
                               </span>
                             </div>
@@ -2583,7 +2405,7 @@ export default function LaunchpadDetails({
                       <p className="mb-3 text-xs font-black uppercase tracking-wider text-sky-400">
                         Sale Ends In
                       </p>
-                      <div className="grid grid-cols-4 gap-2">
+                      <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
                         {[
                           ['Days', timeLeft.days],
                           ['Hours', timeLeft.hours],
@@ -2592,10 +2414,10 @@ export default function LaunchpadDetails({
                         ].map(([label, value]) => (
                           <div
                             key={label}
-                            className="rounded-xl border border-white/10 bg-black/20 p-3"
+                            className="rounded-xl border border-white/10 bg-black/20 p-2 sm:p-3 text-center"
                           >
-                            <div className="text-lg font-black text-white">{value}</div>
-                            <div className="text-[10px] uppercase text-slate-500">{label}</div>
+                            <div className="text-sm sm:text-lg font-black text-white">{value}</div>
+                            <div className="text-[8px] sm:text-[10px] uppercase text-slate-500 tracking-wider">{label}</div>
                           </div>
                         ))}
                       </div>
@@ -2908,7 +2730,7 @@ export default function LaunchpadDetails({
                         contributedUsdt > 0 ? (
                           <div className="space-y-4">
                             <div className="bg-slate-950 border border-slate-850 p-4 rounded-xl space-y-3">
-                              <div className="flex justify-between items-center text-[11px] font-semibold text-slate-400">
+                              <div className="flex flex-wrap items-center justify-between text-[11px] font-semibold text-slate-400 gap-2 w-full">
                                 <span>Your Total Invested USDT Escrow:</span>
                                 <span className="font-mono text-white text-xs font-black">
                                   {contributedUsdt.toLocaleString()} USDT
@@ -2916,20 +2738,20 @@ export default function LaunchpadDetails({
                               </div>
 
                               <div className="border-t border-slate-850/70 pt-2.5 space-y-2 text-[10px]">
-                                <div className="flex justify-between items-center text-slate-400">
+                                <div className="flex flex-wrap items-center justify-between text-slate-400 gap-2 w-full">
                                   <span>Gas Write Fee:</span>
                                   <span className="font-mono text-white">~0.05 TON</span>
                                 </div>
 
-                                <div className="flex justify-between items-center text-slate-450">
+                                <div className="flex flex-wrap items-center justify-between text-slate-450 gap-2 w-full">
                                   <span>Refund Eligibility Status:</span>
                                   <span className={`font-mono font-bold ${isRefunded ? 'text-slate-500' : 'text-emerald-400'}`}>
                                     {isRefunded ? '100% Refund Claimed' : 'Eligible for 100% Refund'}
                                   </span>
                                 </div>
 
-                                <div className="flex justify-between items-center text-[11px] font-black border-t border-dashed border-slate-800 pt-2.5">
-                                  <span className="text-rose-400 uppercase">AVAILABLE FOR DIRECT WITHDRAWAL:</span>
+                                <div className="flex flex-wrap items-center justify-between text-[11px] font-black border-t border-dashed border-slate-800 pt-2.5 gap-2 w-full">
+                                  <span className="text-rose-455 uppercase">AVAILABLE FOR DIRECT WITHDRAWAL:</span>
                                   <span className={`font-mono text-xs font-black ${isRefunded ? 'text-slate-500' : 'text-emerald-400 '}`}>
                                     {isRefunded ? '0.00 USDT' : `${contributedUsdt.toLocaleString()} USDT`}
                                   </span>
@@ -3109,7 +2931,7 @@ export default function LaunchpadDetails({
                           </div>
 
                           <div className="bg-slate-950 border border-slate-850 p-4 rounded-xl space-y-3">
-                            <div className="flex justify-between items-center text-[11px] font-semibold text-slate-400">
+                            <div className="flex flex-wrap items-center justify-between text-[11px] font-semibold text-slate-400 gap-2 w-full">
                               <span>Your Total Escrow Allocation:</span>
                               <span className="font-mono text-white text-xs font-black">
                                 {totalAllocated.toLocaleString()} ${project.symbol}
@@ -3117,28 +2939,28 @@ export default function LaunchpadDetails({
                             </div>
 
                             <div className="border-t border-slate-850/70 pt-2.5 space-y-2 text-[10px]">
-                              <div className="flex justify-between items-center text-slate-400">
+                              <div className="flex flex-wrap items-center justify-between text-slate-400 gap-2 w-full">
                                 <span>TGE Share ({tgePercent}%)</span>
                                 <span className="font-mono font-bold text-white">
                                   {tgeAmount.toLocaleString()} ${project.symbol}
                                 </span>
                               </div>
 
-                              <div className="flex justify-between items-center text-slate-400">
+                              <div className="flex flex-wrap items-center justify-between text-slate-400 gap-2 w-full">
                                 <span>Linear Vest unlocked parts so far:</span>
                                 <span className="font-mono font-bold text-white">
                                   {unlockedVestingPart.toLocaleString()} ${project.symbol} ({Math.round(unlockedPercent)}%)
                                 </span>
                               </div>
 
-                              <div className="flex justify-between items-center text-slate-400 border-t border-slate-850/40 pt-2 text-[11px]">
+                              <div className="flex flex-wrap items-center justify-between text-slate-400 border-t border-slate-850/40 pt-2 text-[11px] gap-2 w-full">
                                 <span>Total Unlocked:</span>
                                 <span className="font-mono font-bold text-[#0098EA]">
                                   {totalUnlockedSoFar.toLocaleString()} ${project.symbol} ({Math.round(percentUnlockedTotal)}%)
                                 </span>
                               </div>
 
-                              <div className="flex justify-between items-center text-slate-400">
+                              <div className="flex flex-wrap items-center justify-between text-slate-400 gap-2 w-full">
                                 <span>Successfully Claimed previously:</span>
                                 <span className="font-mono font-bold text-emerald-400">
                                   {claimedAmount.toLocaleString()} ${project.symbol}
@@ -3146,7 +2968,7 @@ export default function LaunchpadDetails({
                               </div>
 
                               {lockedRemaining > 0 && (
-                                <div className="flex justify-between items-center text-slate-500">
+                                <div className="flex flex-wrap items-center justify-between text-slate-500 gap-2 w-full">
                                   <span>Vesting escrow remaining locked:</span>
                                   <span className="font-mono">
                                     {lockedRemaining.toLocaleString()} ${project.symbol}
@@ -3154,7 +2976,7 @@ export default function LaunchpadDetails({
                                 </div>
                               )}
 
-                              <div className="flex justify-between items-center text-[11px] font-black border-t border-dashed border-slate-800 pt-2.5">
+                              <div className="flex flex-wrap items-center justify-between text-[11px] font-black border-t border-dashed border-slate-800 pt-2.5 gap-2 w-full">
                                 <span className="text-[#00c5ee] uppercase">CONTRACT CLAIMABLE NOW:</span>
                                 <span className="font-mono text-emerald-400 text-xs font-black animate-pulse">
                                   {claimableNow.toLocaleString()} ${project.symbol}
@@ -3248,9 +3070,9 @@ export default function LaunchpadDetails({
                     <Coins className="h-5 w-5 text-[#0098EA] animate-pulse" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-extrabold text-white text-base">Sign Investment Payload</h4>
+                    <h4 className="font-extrabold text-white text-base">Sign USDT Contribution</h4>
                     <p className="text-xs text-slate-400 leading-relaxed px-2">
-                      Transfer <span className="text-emerald-400 font-bold">${contAmount} USDT</span> to the launchpad. The wallet may separately show <span className="text-[#0098EA] font-bold">{USDT_TRANSFER_GAS} TON</span>, which is attached only to execute the USDT jetton transfer.
+                      Transfer <span className="text-emerald-400 font-bold">${contAmount} USDT</span> to the project IDO escrow contract. Wallet may show <span className="text-[#0098EA] font-bold">{USDT_TRANSFER_GAS} TON</span> for Jetton transfer gas.
                     </p>
                   </div>
                 </div>
@@ -3264,7 +3086,7 @@ export default function LaunchpadDetails({
                     <Users className="h-5 w-5 text-emerald-400 animate-pulse" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-extrabold text-white text-base">Writing TON Block</h4>
+                    <h4 className="font-extrabold text-white text-base">Confirming TON Transaction</h4>
                     <p className="text-xs text-slate-400 leading-relaxed px-4">
                       Waiting for the {contAmount} USDT jetton transfer to be confirmed on-chain. Your contribution will only be recorded after verification.
                     </p>
