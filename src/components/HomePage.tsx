@@ -432,7 +432,7 @@ const countdown = showCountdown
           />
 
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#2c9cf4]/20 bg-[#2c9cf4]/10 px-5 py-2.5 font-bold tracking-[-0.02em] text-[#0077d9]">
-            First Trusted AI-Powered IDO Launchpad
+            First Trusted AI-Powered IDO Launchpad1
           </div>
 
           <h1 className="gp-display-font mb-7 text-[clamp(48px,9vw,118px)] font-black leading-[0.9] tracking-[-0.035em]">
