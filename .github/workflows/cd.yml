@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Deploy to GramPad server
         uses: appleboy/ssh-action@v1
         with:
@@ -20,7 +19,32 @@ jobs:
           passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
 
           script: |
+            # Load NVM
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+            # Use Node 24
+            nvm use 24
+
+            # Verify Node/NPM
+            echo "Node version:"
+            node -v
+
+            echo "NPM version:"
+            npm -v
+
+            # Go to project
             cd /var/www/grampadio_launchpad
-            git pull origin main
+
+            # Update server to exactly match GitHub main
+            git fetch origin main
+            git reset --hard origin/main
+
+            # Clean dependencies
+            rm -rf node_modules
+
+            # Install dependencies
             npm ci
+
+            # Build
             npm run build
