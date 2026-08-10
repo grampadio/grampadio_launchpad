@@ -19,7 +19,6 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           passphrase: ${{ secrets.SERVER_SSH_PASSPHRASE }}
 
-
           script: |
             cd /var/www/grampadio_launchpad
             git pull origin main
