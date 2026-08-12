@@ -145,6 +145,7 @@ export const formatTokenAmount = (
   decimals = GRAMX_DECIMALS,
   maxFraction = 4
 ) => {
+  console.log("VITE_GRAMX_DECIMALS:", import.meta.env.VITE_GRAMX_DECIMALS);
   const amount = BigInt(value);
   const unit = 10n ** BigInt(decimals);
   const whole = amount / unit;
