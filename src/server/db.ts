@@ -25,6 +25,7 @@ interface PlatformSettingDocument<T> {
 }
 
 
+
 let cachedClient: MongoClient | null = null;
 const DATABASE_NAME = process.env.DB_NAME;
 
