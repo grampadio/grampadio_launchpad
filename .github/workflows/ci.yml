@@ -31,4 +31,4 @@ jobs:
         run: npm run build
 
       - name: Build Docker image
-        run: docker build -t grampad:test .
+        run: docker build -t ghcr.io/grampadio/grampad:1.0.0 .
