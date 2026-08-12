@@ -77,6 +77,10 @@ async function getMongoDBCollection(collectionName: string = 'projects') {
 }
 
 export async function getDatabaseHealth() {
+  console.log('Checking MongoDB connection health...');
+  const mongoUri = process.env.MONGODB_URI;
+  console.log('MongoDB URI:', mongoUri);
+  console.log('MongoDB Database:', DATABASE_NAME);
   const collection = await getMongoDBCollection('projects');
   const projects = await collection.countDocuments({});
   return {
