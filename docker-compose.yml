@@ -1,6 +1,6 @@
 services:
   grampad:
-    image: grampad:1.0.0
+    image: ghcr.io/grampadio/grampad:1.0.0
     container_name: grampad
     ports:
       - "3004:3004"
