@@ -26,7 +26,8 @@ interface PlatformSettingDocument<T> {
 
 
 let cachedClient: MongoClient | null = null;
-const DATABASE_NAME = process.env.MONGODB_DB;
+const DATABASE_NAME = process.env.DB_NAME;
+
 
 async function getMongoDBCollection(collectionName: string = 'projects') {
   const mongoUri = process.env.MONGODB_URI;
