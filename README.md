@@ -172,3 +172,11 @@ Want to test the contract logic safely inside the browser preview?
 
 #generate admin password
 http://localhost:8080/api/admin/hash?password=admin
+
+
+
+#Docker Build
+docker buildx build \
+  --platform linux/amd64 \
+  -t ghcr.io/grampadio/grampad:1.0.1 \
+  --push .
