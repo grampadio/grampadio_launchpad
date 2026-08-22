@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { WalletState } from '../types.js';
+import { runtimeEnv } from '../config/runtimeEnv.js';
 import {
   buildClaimStakingRewardsPayload,
   buildOwnerWithdrawAnyJettonPayload,
@@ -62,7 +63,7 @@ type StakePosition = UserStakeDetails['stakes'][number];
 const cardClass = 'gp-panel rounded-3xl p-5 sm:p-7';
 const inputClass = 'w-full rounded-xl border border-white/[0.08] bg-[#080E1A]/70 px-3.5 py-3 text-sm text-white placeholder:text-slate-600 transition focus:border-sky-400/45 focus:outline-none';
 const labelClass = 'mb-2 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400';
-const stakingNetwork = String((import.meta as any).env.VITE_TONCENTER_ENDPOINT || '')
+const stakingNetwork = runtimeEnv('VITE_TONCENTER_ENDPOINT')
   .includes('testnet')
   ? CHAIN.TESTNET
   : CHAIN.MAINNET;

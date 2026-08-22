@@ -18,6 +18,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { WalletState, LockerLockRecord } from '../types.js';
+import { runtimeEnv } from '../config/runtimeEnv.js';
 import {
   buildConfigureLockPayload,
   buildEmergencyWithdrawLockerTonPayload,
@@ -56,7 +57,7 @@ const inputClass =
 
 const labelClass =
   'mb-2 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400';
-const lockerNetwork = String((import.meta as any).env.VITE_TONCENTER_ENDPOINT || '')
+const lockerNetwork = runtimeEnv('VITE_TONCENTER_ENDPOINT')
   .includes('testnet')
   ? CHAIN.TESTNET
   : CHAIN.MAINNET;
@@ -121,7 +122,7 @@ const resolveLockSymbol = (lock: any, registry: LockerTokenRegistry, fallbackSym
     }
   }
 
-  const gramxMaster = String((import.meta as any).env.VITE_GRAMX_MASTER || '').trim();
+  const gramxMaster = runtimeEnv('VITE_GRAMX_MASTER').trim();
   if (gramxMaster) {
     try {
       if (

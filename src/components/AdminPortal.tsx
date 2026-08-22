@@ -34,6 +34,7 @@ import {
   Wallet,
   X,
 } from 'lucide-react';
+import { runtimeEnv, runtimeEnvNumber } from '../config/runtimeEnv.js';
 import { AIAudit, AdminSession, LaunchpadProject, ProjectApplication, SwapSettings, WalletState } from '../types.js';
 import TokenLauncher from './TokenLauncher.js';
 import {
@@ -159,12 +160,12 @@ export default function AdminPortal({
   const [swapSettings, setSwapSettings] = useState<SwapSettings>({
     contractAddress: '',
     ownerAddress: '',
-    gramMasterAddress: String((import.meta as any).env.VITE_GRAMX_MASTER || '').trim(),
+    gramMasterAddress: runtimeEnv('VITE_GRAMX_MASTER').trim(),
     gramSymbol: 'GRAM',
-    gramDecimals: Number((import.meta as any).env.VITE_GRAMX_DECIMALS || 9),
-    usdtMasterAddress: String((import.meta as any).env.VITE_TON_USDT_MASTER || '').trim(),
+    gramDecimals: runtimeEnvNumber('VITE_GRAMX_DECIMALS', 9),
+    usdtMasterAddress: runtimeEnv('VITE_TON_USDT_MASTER').trim(),
     usdtSymbol: 'USDT',
-    usdtDecimals: Number((import.meta as any).env.VITE_TON_USDT_DECIMALS || 6),
+    usdtDecimals: runtimeEnvNumber('VITE_TON_USDT_DECIMALS', 6),
     rateScaled: '1000000000',
     rateScale: 1_000_000_000,
     rateLabel: '1',
@@ -204,8 +205,7 @@ export default function AdminPortal({
   const [idoDetails, setIdoDetails] = useState<any | null>(null);
   const [idoLoading, setIdoLoading] = useState(false);
   const [idoFieldLoading, setIdoFieldLoading] = useState<string | null>(null);
-  const UNIVERSAL_LOCKER_ADDRESS =
-  (import.meta as any).env.VITE_UNIVERSAL_LOCKER_ADDRESS || '';
+  const UNIVERSAL_LOCKER_ADDRESS = runtimeEnv('VITE_UNIVERSAL_LOCKER_ADDRESS');
 
   const adminFetch = async (url: string, init?: RequestInit) => {
     const headers = new Headers(init?.headers);

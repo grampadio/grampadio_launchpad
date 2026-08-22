@@ -19,13 +19,14 @@ import {
   getTonClient,
   parseTokenAmount,
 } from './gramStarter.js';
+import { runtimeEnv, runtimeEnvNumber } from '../config/runtimeEnv.js';
 
 export const UNIVERSAL_LOCKER_ADDRESS = String(
-  (import.meta as any).env.VITE_UNIVERSAL_LOCKER_ADDRESS || ''
+  runtimeEnv('VITE_UNIVERSAL_LOCKER_ADDRESS')
 );
 
 export const DEFAULT_JETTON_DECIMALS = Number(
-  (import.meta as any).env.VITE_LOCKER_DEFAULT_DECIMALS || 9
+  runtimeEnvNumber('VITE_LOCKER_DEFAULT_DECIMALS', 9)
 );
 
 export const getUniversalLockerContract = (
@@ -265,8 +266,7 @@ export async function getJettonMetadata(jettonMaster: string) {
     throw new Error('Jetton master address is required.');
   }
 
-  const TONCENTER_ENDPOINT =
-    (import.meta as any).env.VITE_TONCENTER_ENDPOINT || '';
+  const TONCENTER_ENDPOINT = runtimeEnv('VITE_TONCENTER_ENDPOINT');
 
   const isTestnet = TONCENTER_ENDPOINT.includes('testnet');
 
