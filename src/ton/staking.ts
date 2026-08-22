@@ -35,6 +35,9 @@ export const STAKING_DEFAULT_APR_BPS = Number((import.meta as any).env.VITE_STAK
 export const STAKING_DEFAULT_MIN_GRAMX = String((import.meta as any).env.VITE_STAKING_DEFAULT_MIN_GRAMX || '100');
 export const STAKING_DEFAULT_FLEX_FEE_BPS = Number((import.meta as any).env.VITE_STAKING_DEFAULT_FLEX_FEE_BPS || 500);
 
+console.log("STAKING_CONTRACT_ADDRESS:", STAKING_CONTRACT_ADDRESS);
+console.log("GRAMX_MASTER_ADDRESS:", GRAMX_MASTER_ADDRESS);
+
 const stakingReadCache = new Map<string, { expiresAt: number; promise: Promise<any> }>();
 const STAKING_READ_CACHE_MS = 2000;
 const GRAMX_WALLET_CACHE_PREFIX = 'grampad-gramx-wallet';
