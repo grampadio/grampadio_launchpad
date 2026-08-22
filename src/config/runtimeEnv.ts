@@ -9,11 +9,11 @@ export const runtimeEnv = (key: string, fallback = '') => {
     ? window.__GRAMPAD_ENV__?.[key]
     : undefined;
   const buildValue = (import.meta as any).env?.[key];
-  return String(runtimeValue || buildValue || fallback);
+  const value = runtimeValue || buildValue || fallback;
+  return value === 'undefined' || value === 'null' ? fallback : String(value);
 };
 
 export const runtimeEnvNumber = (key: string, fallback: number) => {
   const value = Number(runtimeEnv(key, String(fallback)));
   return Number.isFinite(value) ? value : fallback;
 };
-

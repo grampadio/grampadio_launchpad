@@ -98,6 +98,35 @@ const tonClient = new TonClient({
 const GRAMX_MASTER_ADDRESS = String(process.env.VITE_GRAMX_MASTER || '').trim();
 const GRAMX_DECIMALS = Number(process.env.VITE_GRAMX_DECIMALS || 9);
 const GRAMX_VOTING_MIN_BALANCE = 10n ** BigInt(GRAMX_DECIMALS);
+const PUBLIC_RUNTIME_ENV_KEYS = [
+  'VITE_TONCENTER_ENDPOINT',
+  'VITE_TONCENTER_API_KEY',
+  'VITE_TON_USDT_MASTER',
+  'VITE_TON_USDT_MASTER_ADDRESS',
+  'VITE_TON_USDT_DECIMALS',
+  'VITE_LAUNCHPAD_WALLET',
+  'VITE_GRAMX_MASTER',
+  'VITE_GRAMX_DECIMALS',
+  'VITE_STAKING_CONTRACT_ADDRESS',
+  'VITE_STAKING_DEFAULT_APR_BPS',
+  'VITE_STAKING_DEFAULT_MIN_GRAMX',
+  'VITE_STAKING_DEFAULT_FLEX_FEE_BPS',
+  'VITE_UNIVERSAL_LOCKER_ADDRESS',
+  'VITE_LOCKER_DEFAULT_DECIMALS',
+  'VITE_SWAP_CONTRACT_ADDRESS',
+  'VITE_SWAP_RATE',
+  'VITE_SWAP_TON_RATE',
+  'VITE_SWAP_GRAM_SYMBOL',
+];
+
+const buildRuntimeEnvScript = () => {
+  const env = PUBLIC_RUNTIME_ENV_KEYS.reduce<Record<string, string>>((acc, key) => {
+    acc[key] = process.env[key] || '';
+    return acc;
+  }, {});
+
+  return `window.__GRAMPAD_ENV__ = ${JSON.stringify(env)};\n`;
+};
 
 // Initialize SMTP Transporter
 const smtpHost = process.env.SMTP_HOST;
@@ -2871,11 +2900,11 @@ console.log('txHash:', txHash);
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use('/runtime-env.js', (_req, res, next) => {
+    app.get('/runtime-env.js', (_req, res) => {
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-      next();
+      res.type('application/javascript').send(buildRuntimeEnvScript());
     });
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
