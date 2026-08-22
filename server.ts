@@ -258,7 +258,7 @@ const toUsdtBaseUnits = (amount: number, decimals: number) =>
 
 const runUserBigIntGetter = async (
   contractAddress: string,
-  method: 'get_user_contribution' | 'get_user_allocation',
+  method: 'get_user_contribution' | 'get_user_allocation' | 'get_user_rejected_usdt_credit',
   userAddress: string
 ) => {
   const result = await tonClient.runMethod(Address.parse(contractAddress), method, [
@@ -372,11 +372,12 @@ const syncContributionFromChain = async (
   const contributor = parseContractGetterAddress(contributorAddress);
   const addressKey = contributor.toRawString().toLowerCase();
   const contract = openIdoContract(project);
-  const [chainContribution, chainRaised, chainAllocation, chainUsdtDecimals] = await Promise.all([
+  const [chainContribution, chainRaised, chainAllocation, chainUsdtDecimals, rejectedCredit] = await Promise.all([
     runUserBigIntGetter(project.idoContractAddress!, 'get_user_contribution', contributorAddress),
     contract.getGetRaisedCapital(),
     runUserBigIntGetter(project.idoContractAddress!, 'get_user_allocation', contributorAddress),
     contract.getGetUsdtDecimals(),
+    runUserBigIntGetter(project.idoContractAddress!, 'get_user_rejected_usdt_credit', contributorAddress),
   ]);
   const usdtDecimals = Number(chainUsdtDecimals);
   const unit = 10 ** usdtDecimals;
@@ -393,11 +394,28 @@ const syncContributionFromChain = async (
   project.raised = Number(chainRaised) / unit;
 
   if (chainContribution <= existingContributionBase) {
+    if (rejectedCredit > 0n) {
+      const rejectedUsdt = Number(rejectedCredit) / unit;
+      project.contributionProgressByAddress[addressKey] = {
+        status: 'pending',
+        usdtAmount: rejectedUsdt,
+        txHash,
+        updatedAt: Date.now(),
+      };
+      return {
+        confirmed: false,
+        addressKey,
+        deltaUsdt: 0,
+        tokenDelta: 0,
+        rejectedUsdt,
+      };
+    }
     return {
       confirmed: false,
       addressKey,
       deltaUsdt: 0,
       tokenDelta: 0,
+      rejectedUsdt: 0,
     };
   }
 
@@ -426,6 +444,7 @@ const syncContributionFromChain = async (
     addressKey,
     deltaUsdt,
     tokenDelta,
+    rejectedUsdt: 0,
   };
 };
 

@@ -16,6 +16,7 @@ import { LaunchpadProject, WalletState, AIAudit } from '../types.js';
 import { Address, beginCell, toNano } from "@ton/core";
 import { JettonMaster, JettonWallet } from "@ton/ton";
 import { DEFAULT_PROJECT_BANNER, DEFAULT_PROJECT_LOGO, projectAssetOrDefault } from '../constants/assets.js';
+import { runtimeEnv, runtimeEnvNumber } from '../config/runtimeEnv.js';
 import {
   buildAdvanceStagePayload,
   buildClaimPayload,
@@ -23,6 +24,7 @@ import {
   getIdoContract,
   getTonClient,
   getUserContribution,
+  getUserRejectedUsdtCredit,
   MAINNET_USDT_MASTER,
   parseUSDTAmount,
   waitForContract,
@@ -55,7 +57,7 @@ export default function LaunchpadDetails({
   onProjectUpdate
 }: LaunchpadDetailsProps) {
   const [tonConnectUI] = useTonConnectUI();
-  const tonNetwork = String((import.meta as any).env.VITE_TONCENTER_ENDPOINT || '')
+  const tonNetwork = runtimeEnv('VITE_TONCENTER_ENDPOINT')
     .includes('testnet')
     ? CHAIN.TESTNET
     : CHAIN.MAINNET;
@@ -908,14 +910,15 @@ export default function LaunchpadDetails({
       const idoContract = getIdoContract(project.idoContractAddress);
       const openedIdo = client.open(idoContract);
       const contractUsdtDecimals = Number(await openedIdo.getGetUsdtDecimals());
-      const configuredUsdtDecimals = Number((import.meta as any).env.VITE_TON_USDT_DECIMALS || 6);
+      const configuredUsdtDecimals = runtimeEnvNumber('VITE_TON_USDT_DECIMALS', 6);
       if (contractUsdtDecimals !== configuredUsdtDecimals) {
         throw new Error(
           `This project was deployed for ${contractUsdtDecimals}-decimal USDT, but the configured USDT uses ${configuredUsdtDecimals} decimals. Redeploy or update VITE_TON_USDT_DECIMALS.`
         );
       }
       const contributionBefore = await getUserContribution(project.idoContractAddress, wallet.address);
-      const TON_USDT_MASTER = (import.meta as any).env.VITE_TON_USDT_MASTER || MAINNET_USDT_MASTER;
+      const rejectedBefore = await getUserRejectedUsdtCredit(project.idoContractAddress, wallet.address);
+      const TON_USDT_MASTER = runtimeEnv('VITE_TON_USDT_MASTER', MAINNET_USDT_MASTER);
       const usdtMaster = client.open(JettonMaster.create(Address.parse(TON_USDT_MASTER)));
       const userUsdtWallet = await usdtMaster.getWalletAddress(userAddress);
       const amountInUSDT = parseUSDTAmount(contAmount, contractUsdtDecimals);
@@ -969,7 +972,15 @@ export default function LaunchpadDetails({
 
       setTxStep('confirming');
       await waitForContract(idoContract, async () => {
-        const contribution = await getUserContribution(project.idoContractAddress!, wallet.address!);
+        const [contribution, rejectedCredit] = await Promise.all([
+          getUserContribution(project.idoContractAddress!, wallet.address!),
+          getUserRejectedUsdtCredit(project.idoContractAddress!, wallet.address!),
+        ]);
+        if (rejectedCredit > rejectedBefore) {
+          throw new Error(
+            'The IDO contract rejected this USDT contribution and credited it for return. Check sale stage, sale-token deposit, whitelist, min/max buy, cumulative max buy, and hard cap.'
+          );
+        }
         return contribution >= contributionBefore + amountInUSDT;
       });
 

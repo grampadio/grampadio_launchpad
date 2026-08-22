@@ -7,6 +7,7 @@ import { LaunchpadProject, WalletState } from '../types.js';
 import { getIdoConfigurationStatus, getIdoRecoveryDetails, prepareIdoDeployment, waitForContract, waitForIdoDeployment } from '../ton/gramStarter.js';
 import { Address } from '@ton/core';
 import { DEFAULT_PROJECT_BANNER, DEFAULT_PROJECT_LOGO, projectAssetOrDefault } from '../constants/assets.js';
+import { runtimeEnv } from '../config/runtimeEnv.js';
 import { getJettonMetadata } from '../ton/universalLocker.js';
 
 interface TokenLauncherProps {
@@ -18,7 +19,7 @@ interface TokenLauncherProps {
 
 export default function TokenLauncher({ wallet, onOpenConnect, onDeploySuccess, csrfToken }: TokenLauncherProps) {
   const [tonConnectUI] = useTonConnectUI();
-  const idoNetwork = String((import.meta as any).env.VITE_TONCENTER_ENDPOINT || '')
+  const idoNetwork = runtimeEnv('VITE_TONCENTER_ENDPOINT')
     .includes('testnet')
     ? CHAIN.TESTNET
     : CHAIN.MAINNET;
@@ -289,7 +290,7 @@ const handleAIGenerate = async () => {
       return;
     }
 
-    const launchpadWallet = (import.meta as any).env.VITE_LAUNCHPAD_WALLET;
+    const launchpadWallet = runtimeEnv('VITE_LAUNCHPAD_WALLET');
     try {
       if (!launchpadWallet) {
         throw new Error('VITE_LAUNCHPAD_WALLET must be configured as the permanent superadmin.');

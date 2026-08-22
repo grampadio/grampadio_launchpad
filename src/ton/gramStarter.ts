@@ -23,19 +23,19 @@ import {
   storeWithdrawRaisedUSDT,
   storeWithdrawRemainingSaleTokens,
 } from '../../contracts/build/GramStarterIdo_GramStarterIdo.js';
+import { runtimeEnv, runtimeEnvNumber } from '../config/runtimeEnv.js';
 
 export const MAINNET_USDT_MASTER =
   'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
 export const USDT_DECIMALS = Number(
-  (import.meta as any).env.VITE_TON_USDT_DECIMALS || 6
+  runtimeEnvNumber('VITE_TON_USDT_DECIMALS', 6)
 );
 export const CONTRACT_TON_RESERVE = toNano('0.1');
 
 export const getTonClient = () =>
   new TonClient({
-    endpoint:
-      (import.meta as any).env.VITE_TONCENTER_ENDPOINT || '',
-    apiKey: (import.meta as any).env.VITE_TONCENTER_API_KEY,
+    endpoint: runtimeEnv('VITE_TONCENTER_ENDPOINT'),
+    apiKey: runtimeEnv('VITE_TONCENTER_API_KEY') || undefined,
   });
 
 export const cellToBase64 = (cell: ReturnType<typeof beginCell> | any) =>
@@ -560,6 +560,20 @@ export const getUserContribution = async (
   return result.stack.readBigNumber();
 };
 
+export const getUserRejectedUsdtCredit = async (
+  contractAddress: string,
+  userAddress: string
+) => {
+  const client = getTonClient();
+  const result = await client.runMethod(Address.parse(contractAddress), 'get_user_rejected_usdt_credit', [
+    {
+      type: 'slice',
+      cell: beginCell().storeAddress(Address.parse(userAddress)).endCell(),
+    },
+  ]);
+  return result.stack.readBigNumber();
+};
+
 export const buildJettonTransferPayload = (
   amount: bigint,
   destination: Address,
@@ -620,7 +634,7 @@ export const prepareIdoDeployment = async (input: DeploymentInput) => {
   }
 
   const usdtMasterAddress = Address.parse(
-    (import.meta as any).env.VITE_TON_USDT_MASTER || MAINNET_USDT_MASTER
+    runtimeEnv('VITE_TON_USDT_MASTER', MAINNET_USDT_MASTER)
   );
   const saleTokenMasterAddress = Address.parse(input.saleTokenMaster);
   const saleTokenUnit = 10n ** BigInt(input.saleTokenDecimals);
