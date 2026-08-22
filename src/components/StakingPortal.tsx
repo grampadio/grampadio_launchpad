@@ -127,6 +127,9 @@ export default function StakingPortal({ wallet, onOpenConnect }: StakingPortalPr
 
   const contractAddress = STAKING_CONTRACT_ADDRESS;
   const isConfigured = Boolean(contractAddress);
+  const selectedModeDescription = stakeKind === 'flex'
+    ? `FLEX staking lets you withdraw anytime. If you withdraw before the selected duration ends, the on-chain FLEX fee is deducted.`
+    : `LOCKED staking keeps your GRAMX locked for the selected duration. You can claim/unstake after maturity.`;
 
   const isOwner = useMemo(() => {
     if (!pool || !wallet.address) return false;
@@ -223,10 +226,6 @@ const planRoiLabel = planRoiValues.length
 
   const stakeGramx = async (event: FormEvent) => {
     event.preventDefault();
-    const submitter = (event.nativeEvent as SubmitEvent).submitter;
-    if (!(submitter instanceof HTMLButtonElement) || submitter.dataset.action !== 'create-stake') {
-      return;
-    }
     setAction('stake');
     setMessage(null);
 
@@ -235,6 +234,12 @@ const planRoiLabel = planRoiValues.length
       if (!pool?.walletConfigured) throw new Error('Staking contract wallet is not configured yet.');
 
       const amount = parseGRAMXAmount(stakeAmount);
+      if (amount <= 0n) {
+        throw new Error('Enter a valid GRAMX amount to stake.');
+      }
+      if (pool.minStake && amount < pool.minStake) {
+        throw new Error(`Minimum stake amount is ${formatTokenAmount(pool.minStake)} GRAMX.`);
+      }
       const userGramxWallet = await getUserGramxWalletAddress(userAddress, pool.gramxMaster);
       const payload = buildStakeGramxPayload(
         amount,
@@ -987,7 +992,16 @@ const planRoiLabel = planRoiValues.length
             <form onSubmit={stakeGramx} className="mt-6 grid gap-4 lg:grid-cols-[1fr_0.8fr_0.8fr_auto]">
               <label>
                 <span className={labelClass}>Stake GRAMX</span>
-                <input className={inputClass} required value={stakeAmount} onChange={event => setStakeAmount(event.target.value)} placeholder={`Minimum ${formatTokenAmount(pool?.minStake || 0n)} GRAMX`} />
+                <input
+                  className={inputClass}
+                  required
+                  type="number"
+                  min={formatTokenAmount(pool?.minStake || 0n)}
+                  step="any"
+                  value={stakeAmount}
+                  onChange={event => setStakeAmount(event.target.value)}
+                  placeholder={`Minimum ${formatTokenAmount(pool?.minStake || 0n)} GRAMX`}
+                />
               </label>
 
               <label>
@@ -996,7 +1010,9 @@ const planRoiLabel = planRoiValues.length
                   <option value="locked">LOCKED</option>
                   <option value="flex">FLEX</option>
                 </select>
+                
               </label>
+              
 
               <label>
                 <span className={labelClass}>Duration</span>
@@ -1011,7 +1027,13 @@ const planRoiLabel = planRoiValues.length
                 </select>
               </label>
 
-              <button
+             
+               {!wallet.connected ? (
+                <button type="button" onClick={onOpenConnect}  className="flex items-center justify-center gap-2 self-end rounded-xl bg-[#0098EA] px-5 py-3 text-sm font-bold btn-white-text transition hover:bg-sky-400 disabled:opacity-50">
+                  Connect wallet
+                </button>
+              ):
+               <button
                 type="submit"
                 data-action="create-stake"
                 disabled={action === 'stake' || !wallet.connected || pool?.paused}
@@ -1020,7 +1042,11 @@ const planRoiLabel = planRoiValues.length
                 {action === 'stake' ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
                 Create new stake
               </button>
+              }
             </form>
+            <span className="mt-2 block rounded-xl border border-sky-400/15 bg-sky-400/[0.06] px-3 py-2 text-[11px] leading-relaxed text-slate-300">
+                  {selectedModeDescription}
+                </span>
 
           <div className="mt-8">
   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
