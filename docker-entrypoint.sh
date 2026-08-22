@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-RUNTIME_ENV_FILE="/app/dist/public/runtime-env.js"
+RUNTIME_ENV_FILE="/app/dist/runtime-env.js"
 
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
@@ -38,4 +38,3 @@ mkdir -p "$(dirname "$RUNTIME_ENV_FILE")"
 } > "$RUNTIME_ENV_FILE"
 
 exec "$@"
-

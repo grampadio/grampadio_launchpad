@@ -976,13 +976,33 @@ export default function LaunchpadDetails({
           getUserContribution(project.idoContractAddress!, wallet.address!),
           getUserRejectedUsdtCredit(project.idoContractAddress!, wallet.address!),
         ]);
-        if (rejectedCredit > rejectedBefore) {
-          throw new Error(
-            'The IDO contract rejected this USDT contribution and credited it for return. Check sale stage, sale-token deposit, whitelist, min/max buy, cumulative max buy, and hard cap.'
-          );
-        }
-        return contribution >= contributionBefore + amountInUSDT;
+        return contribution >= contributionBefore + amountInUSDT || rejectedCredit > rejectedBefore;
       });
+
+      const [contributionAfter, rejectedAfter] = await Promise.all([
+        getUserContribution(project.idoContractAddress!, wallet.address!),
+        getUserRejectedUsdtCredit(project.idoContractAddress!, wallet.address!),
+      ]);
+      if (rejectedAfter > rejectedBefore || contributionAfter < contributionBefore + amountInUSDT) {
+        const syncRes = await fetch(`/api/projects/${project.id}/contribution/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contributor: wallet.address,
+            txHash,
+          }),
+        });
+        const syncData = await syncRes.json().catch(() => ({}));
+        if (syncData.project) {
+          setProject(syncData.project);
+        }
+        throw new Error(
+          syncData.error
+            || (syncData.rejectedUsdt
+              ? `The IDO contract rejected this USDT contribution and credited ${syncData.rejectedUsdt} USDT for return. Check sale stage, sale-token deposit, whitelist, min/max buy, cumulative max buy, and hard cap.`
+              : 'The IDO contract rejected this USDT contribution and credited it for return. Check sale stage, sale-token deposit, whitelist, min/max buy, cumulative max buy, and hard cap.')
+        );
+      }
 
       const res = await fetch(`/api/projects/${project.id}/contribute`, {
         method: 'POST',

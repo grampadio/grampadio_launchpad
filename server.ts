@@ -2106,6 +2106,7 @@ console.log('txHash:', txHash);
         confirmed: syncResult.confirmed,
         usdtAmount: syncResult.deltaUsdt,
         tokenAmount: syncResult.tokenDelta,
+        rejectedUsdt: syncResult.rejectedUsdt,
         project: formatProjectForUser(project, contributor),
       });
     } catch (e: any) {
@@ -2165,6 +2166,13 @@ console.log('txHash:', txHash);
 
       const syncResult = await syncContributionFromChain(project, contributor, txHash);
       if (!syncResult.confirmed || syncResult.deltaUsdt <= 0) {
+        if (syncResult.rejectedUsdt > 0) {
+          res.status(409).json({
+            error: `The IDO escrow contract rejected this USDT contribution and credited ${syncResult.rejectedUsdt} USDT for return. Check sale stage, sale-token deposit, whitelist, min/max buy, cumulative max buy, hard cap, USDT master address, and network configuration.`,
+            rejectedUsdt: syncResult.rejectedUsdt,
+          });
+          return;
+        }
         res.status(409).json({ error: 'USDT contribution is not confirmed by the IDO escrow contract yet.' });
         return;
       }
