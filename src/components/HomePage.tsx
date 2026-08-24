@@ -15,6 +15,8 @@ import {
   Coins,
   Flame,
   Twitter,
+  Link2,
+  ExternalLink,
 } from 'lucide-react';
 import { HomePageData } from '../types.js';
 import { DEFAULT_PROJECT_BANNER, DEFAULT_PROJECT_LOGO } from '../constants/assets.js';
@@ -592,6 +594,27 @@ const countdown = showCountdown
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+       <section className="relative z-10 mx-auto max-w-7xl px-4 pb-20 sm:px-6">
+        <div className="gp-panel overflow-hidden rounded-[32px] p-7 text-center sm:p-10">
+          <ShieldCheck className="mx-auto h-10 w-10 text-[#2c9cf4]" />
+
+          <h2 className="gp-display-font mt-5 text-3xl font-black tracking-[-0.03em] sm:text-5xl">
+            Verify <span className='text-[#2c9cf4]'>GRAMX</span> Token Address
+          </h2>
+
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-[var(--gp-muted)]">
+            Verify the GRAMX token address on TON blockchain to ensure authenticity and security.
+          </p>
+
+          <a target="_blank" href='https://tonviewer.com/EQCrfyk-cheLUA2wrHATdJ_0mQ3TcH_irKbpyu8Ds-0qg8Zm'
+            className="btn-white-text mt-7 inline-flex items-center gap-2 rounded-full bg-[#0098EA] px-7 py-3.5 text-sm font-black transition hover:bg-sky-400"
+          >
+           EQCrfyk-cheLUA2wrHATdJ_0mQ3TcH_irKbpyu8Ds-0qg8Zm <span><ExternalLink className="h-4 w-4" /></span>
+
+          </a>
         </div>
       </section>
 
