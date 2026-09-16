@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { WalletState } from '../types.js';
 import {
   Smartphone,
@@ -36,8 +37,8 @@ interface NavbarProps {
   onDisconnect: () => void;
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
-  activeTab: AppTab;
-  setActiveTab: (tab: AppTab) => void;
+  activeTab?: AppTab;
+  setActiveTab?: (tab: AppTab) => void;
 }
 
 export default function Navbar({
@@ -50,22 +51,49 @@ export default function Navbar({
   setActiveTab,
 }: NavbarProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const getAbbreviatedAddress = (addr: string) => {
     return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
   };
 
-  const mobileItems = [
-    { key: 'home' as const, label: 'Home', icon: Building2 },
-    { key: 'explore' as const, label: 'Explore', icon: LayoutGrid },
-    { key: 'staking' as const, label: 'Stake', icon: Coins },
-    { key: 'lplocker' as const, label: 'Locker', icon: LockIcon },
-    { key: 'guide' as const, label: 'Help', icon: HelpCircle },
+  const navItems = [
+    { key: 'home' as const, path: '/', label: 'Home', icon: Building2 },
+    { key: 'explore' as const, path: '/explore', label: 'Explore', icon: LayoutGrid },
+    { key: 'staking' as const, path: '/staking', label: 'Staking', icon: Coins },
+    { key: 'lplocker' as const, path: '/lplocker', label: 'Locker', icon: Lock },
+    { key: 'swap' as const, path: '/swap', label: 'Swap', icon: ArrowUpDown },
+    { key: 'guide' as const, path: '/how-it-works', label: 'How it works', icon: HelpCircle },
   ];
 
+  const mobileItems = [
+    { key: 'home' as const, path: '/', label: 'Home', icon: Building2 },
+    { key: 'explore' as const, path: '/explore', label: 'Explore', icon: LayoutGrid },
+    { key: 'staking' as const, path: '/staking', label: 'Stake', icon: Coins },
+    { key: 'lplocker' as const, path: '/lplocker', label: 'Locker', icon: LockIcon },
+    { key: 'guide' as const, path: '/how-it-works', label: 'Help', icon: HelpCircle },
+  ];
+
+  const isPathActive = (key: AppTab, path: string) => {
+    if (activeTab && activeTab === key) return true;
+    const current = location.pathname.toLowerCase();
+    if (path === '/') {
+      return current === '/' || current === '/home';
+    }
+    if (path === '/explore') {
+      return current === '/explore' || current.startsWith('/project');
+    }
+    if (path === '/how-it-works') {
+      return current === '/how-it-works' || current === '/guide';
+    }
+    return current === path || current.startsWith(path + '/');
+  };
+
   const openPortfolio = () => {
-    setActiveTab('portfolio');
     setUserMenuOpen(false);
+    if (setActiveTab) setActiveTab('portfolio');
+    navigate('/portfolio');
   };
 
   const handleLogout = () => {
@@ -77,8 +105,9 @@ export default function Navbar({
     <>
       <header className="sticky top-0 z-40 w-full border-b border-white/[0.07] bg-[#05070d]/85 backdrop-blur-xl">
         <div className="mx-auto flex h-[64px] max-w-[1440px] min-w-0 items-center justify-between gap-2 px-3 sm:h-[72px] sm:px-6 lg:px-8">
-          <button
-            onClick={() => setActiveTab('home')}
+          <Link
+            to="/"
+            onClick={() => setActiveTab?.('home')}
             className="flex min-w-0 flex-1 items-center gap-1 text-left sm:flex-none"
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden sm:h-14 sm:w-14">
@@ -93,33 +122,27 @@ export default function Navbar({
                 Grampad<span className='text-sky-600'>.io</span>
               </span>
             </div>
-          </button>
+          </Link>
 
           <nav className="hidden items-center rounded-xl border border-white/[0.06] bg-white/[0.025] p-1 md:flex">
-            {[
-               { key: 'home' as const, label: 'Home', icon: Building2 },
-              { key: 'explore' as const, label: 'Explore', icon: LayoutGrid },
-              { key: 'staking' as const, label: 'Staking', icon: Coins },
-              { key: 'lplocker' as const, label: 'Locker', icon: Lock },
-              { key: 'swap' as const, label: 'Swap', icon: ArrowUpDown },
-               { key: 'guide' as const, label: 'How it works', icon: HelpCircle },
-             
-            ].map(item => {
+            {navItems.map(item => {
               const Icon = item.icon;
+              const active = isPathActive(item.key, item.path);
 
               return (
-                <button
+                <Link
                   key={item.key}
-                  onClick={() => setActiveTab(item.key)}
+                  to={item.path}
+                  onClick={() => setActiveTab?.(item.key)}
                   className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition ${
-                    activeTab === item.key
+                    active
                       ? 'bg-white/[0.08] text-white shadow-sm'
                       : 'text-slate-400 hover:bg-white/[0.04] hover:text-white'
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5 text-sky-400" />
                   {item.label}
-                </button>
+                </Link>
               );
             })}
           </nav>
@@ -195,33 +218,34 @@ export default function Navbar({
         </div>
       </header>
 
-<nav className="fixed inset-x-3 bottom-3 z-50 rounded-2xl border border-[var(--gp-border)] bg-[var(--gp-surface)] p-1.5 shadow-2xl backdrop-blur-xl md:hidden">
-  <div className="grid grid-cols-5 gap-1">
-    {mobileItems.map(item => {
-      const Icon = item.icon;
-      const isActive = activeTab === item.key;
+      <nav className="fixed inset-x-3 bottom-3 z-50 rounded-2xl border border-[var(--gp-border)] bg-[var(--gp-surface)] p-1.5 shadow-2xl backdrop-blur-xl md:hidden">
+        <div className="grid grid-cols-5 gap-1">
+          {mobileItems.map(item => {
+            const Icon = item.icon;
+            const active = isPathActive(item.key, item.path);
 
-      return (
-        <button
-          key={item.key}
-          onClick={() => setActiveTab(item.key)}
-          className={`flex text-[#fff] h-[58px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-center text-[9px] leading-none transition ${
-            isActive
-              ? 'bg-[#0098EA]  btn-text-white shadow-[0_8px_22px_rgba(0,152,234,0.28)]'
-              : 'text-[var(--gp-muted)] hover:bg-[#2c9cf4]/10 hover:text-[var(--gp-text)]'
-          }`}
-        >
-          <Icon
-            className={`h-4 w-4 shrink-0 ${
-              isActive ? 'text-[fff]' : 'btn-text-white'
-            }`}
-          />
-          <span className="block max-w-full truncate">{item.label}</span>
-        </button>
-      );
-    })}
-  </div>
-</nav>
+            return (
+              <Link
+                key={item.key}
+                to={item.path}
+                onClick={() => setActiveTab?.(item.key)}
+                className={`flex text-[#fff] h-[58px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-center text-[9px] leading-none transition ${
+                  active
+                    ? 'bg-[#0098EA] btn-text-white shadow-[0_8px_22px_rgba(0,152,234,0.28)]'
+                    : 'text-[var(--gp-muted)] hover:bg-[#2c9cf4]/10 hover:text-[var(--gp-text)]'
+                }`}
+              >
+                <Icon
+                  className={`h-4 w-4 shrink-0 ${
+                    active ? 'text-[#fff]' : 'btn-text-white'
+                  }`}
+                />
+                <span className="block max-w-full truncate">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </>
   );
 }

@@ -57,6 +57,7 @@ export default function TokenLauncher({ wallet, onOpenConnect, onDeploySuccess, 
   const [bannerFileName, setBannerFileName] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [closealert, setClosealert] = useState(false);
 
   // Ref handles for file input elements
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -1046,11 +1047,15 @@ const handleAIGenerate = async () => {
                   type="number"
                   value={softCap>0?softCap:""}
                   onChange={(e) => setSoftCap(Number(e.target.value))}
-                  className="w-full rounded-xl border border-[#1E2E4E]/60 bg-[#0B0F19]/40 px-4 py-2.5 text-sm text-white focus:border-[#0098EA] focus:outline-none"
+                  className=" w-full rounded-xl border border-[#1E2E4E]/60 bg-[#0B0F19]/40 px-4 py-2.5 text-sm text-white focus:border-[#0098EA] focus:outline-none"
                   min="1"
                   required
                 />
+                <span className="text-[10px] text-slate-500 mt-1 block font-semibold text-rose-400">
+                  Balance required: {softCap*rate} {symbol || 'JETTON'}
+                </span>
               </div>
+
 
               {/* Hard Cap */}
               <div>
@@ -1734,11 +1739,17 @@ const handleAIGenerate = async () => {
                 </div>
               )}
 
-              {deployStep === 'complete' && (
+              {(deployStep === 'complete' && closealert) && (
                 <div className="flex flex-col items-center py-8">
                   <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <ShieldCheck className="h-8 w-8 animate-bounce text-emerald-400" />
                   </div>
+                  <button
+                    onClick={() => setClosealert(false)}
+                    className="absolute right-4 top-4 text-slate-400 hover:text-white"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                   <h4 className="font-bold text-lg mb-1">Jetton IDO Seeded!</h4>
                   <p className="text-xs text-slate-400 leading-relaxed">
                     Congratulations! Your IDO escrow contract is deployed and the project is saved as upcoming. Advance it to voting when you are ready.

@@ -1,5 +1,6 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
+import {BrowserRouter} from 'react-router-dom';
 import {TonConnectUIProvider} from '@tonconnect/ui-react';
 import App from './App.tsx';
 import './index.css';
@@ -45,7 +46,9 @@ const manifestUrl = `https://grampad.io/tonconnect-manifest.json`;
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <TonConnectUIProvider manifestUrl={manifestUrl}>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </TonConnectUIProvider>
   </StrictMode>,
 );

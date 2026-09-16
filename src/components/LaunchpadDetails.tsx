@@ -1,4 +1,4 @@
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent, useEffect, useRef } from 'react';
 import {
   ArrowLeft, Loader2, Coins, Globe, Send, Twitter, ShieldCheck, ShieldAlert,
   Users, Calendar, AlertCircle, Sparkles, CheckCircle2, ChevronRight, ThumbsUp, ThumbsDown, Vote, ClipboardCheck,
@@ -68,6 +68,7 @@ export default function LaunchpadDetails({
   const [actionLoading, setActionLoading] = useState(false);
   const [userVoted, setUserVoted] = useState<boolean>(false);
   const [userWhitelisted, setUserWhitelisted] = useState<boolean>(false);
+  const [confirmationChecked, setConfirmationChecked] = useState<boolean>(false);
 
   // Custom AI Audit live auditing states
   const [auditing, setAuditing] = useState(false);
@@ -77,14 +78,37 @@ export default function LaunchpadDetails({
   // Feedback copy state
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
+  const getCountdownTarget = (p: LaunchpadProject) => {
+    return p.idoStage === 'upcoming' ? p.startTime : p.nextPhaseTime;
+  };
+
+  const getInitialDiff = (p: LaunchpadProject) => {
+    const target = getCountdownTarget(p);
+    return target ? target - Date.now() : 0;
+  };
+
+  const getInitialTimeLeft = (p: LaunchpadProject) => {
+    const diff = getInitialDiff(p);
+    if (diff > 0) {
+      const totalSecs = Math.floor(diff / 1000);
+      const d = Math.floor(totalSecs / (3600 * 24));
+      const h = Math.floor((totalSecs % (3600 * 24)) / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      const s = totalSecs % 60;
+      return { days: d, hours: h, minutes: m, seconds: s };
+    }
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  };
+
   // Live ticking countdown timer state
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  const [timeDifference, setTimeDifference] = useState<number>(0)
+  const [timeLeft, setTimeLeft] = useState(() => getInitialTimeLeft(initialProject));
+  const [timeDifference, setTimeDifference] = useState<number>(() => getInitialDiff(initialProject));
 
   // Vesting claim states
   const [claimLoading, setClaimLoading] = useState<boolean>(false);
   const [claimError, setClaimError] = useState<string | null>(null);
   const [claimSuccess, setClaimSuccess] = useState<string | null>(null);
+
   const [claimSnapshot, setClaimSnapshot] = useState<{
     distributionStartedAt: number;
     vestedAmount: number;
@@ -99,6 +123,7 @@ export default function LaunchpadDetails({
     loading: false,
   });
   const [claimNowMs, setClaimNowMs] = useState(Date.now());
+  const claimRefreshInFlight = useRef(false);
   const [gramxBalance, setGramxBalance] = useState<bigint>(0n);
   const [gramxBalanceLoading, setGramxBalanceLoading] = useState(false);
   const [voteGramxChecked, setVoteGramxChecked] = useState(false);
@@ -109,11 +134,10 @@ export default function LaunchpadDetails({
   const [showAdvanceModal, setShowAdvanceModal] = useState<boolean>(false);
   const [selectedNextPhaseDate, setSelectedNextPhaseDate] = useState<string>('');
   const [isConfirmingStage, setIsConfirmingStage] = useState<boolean>(false);
-  const [confirmationChecked, setConfirmationChecked] = useState<boolean>(false);
+
 
   useEffect(() => {
     const updateTime = () => {
-     
       const countdownTarget =
         project.idoStage === 'upcoming'
           ? project.startTime
@@ -159,56 +183,75 @@ export default function LaunchpadDetails({
     return { days, hours, minutes, seconds };
   };
 
-  const refreshClaimSnapshot = async () => {
-    if (!wallet.connected || !wallet.address || project.idoStage !== 'distribution') {
-      setClaimSnapshot(current => ({
-        ...current,
+const refreshClaimSnapshot = async () => {
+  if (claimRefreshInFlight.current) return;
+
+  claimRefreshInFlight.current = true;
+  setClaimSnapshot(current => ({
+    ...current,
+    loading: true,
+  }));
+
+  try {
+    if (
+      !wallet.connected ||
+      !wallet.address ||
+      project.idoStage !== "distribution" ||
+      !project.idoContractAddress
+    ) {
+      setClaimSnapshot({
         distributionStartedAt: 0,
         vestedAmount: 0,
         claimableAmount: 0,
         claimedAmount: 0,
         loading: false,
-      }));
+      });
+
       return;
     }
 
-    setClaimSnapshot(current => ({ ...current, loading: true }));
-    try {
-      const normalize = (value: string) => {
-        try {
-          return Address.parse(value).toRawString().toLowerCase();
-        } catch {
-          return value.trim().toLowerCase();
-        }
-      };
-      const walletKey = normalize(wallet.address);
-      const activeContributions = (project.contributions || []).filter(item =>
-        normalize(item.contributor) === walletKey && !item.refunded
-      );
-      const allocation = activeContributions.reduce((sum, item) => sum + Number(item.tokenAmount || 0), 0);
-      const claimed = activeContributions.reduce((sum, item) => sum + Number(item.claimedAmount || 0), 0);
-      const distributionStartMs = Number(project.distributionStartTime || project.endTime || 0);
-      const cliffEndMs = distributionStartMs + Math.max(0, Number(project.cliffDurationDays || 0)) * 24 * 60 * 60 * 1000;
-      const vestingMonths = Math.max(1, Number(project.vestingMonths || 1));
-      const tgeAmount = allocation * (Math.max(0, Math.min(100, Number(project.vestingTgePercent || 0))) / 100);
-      const linearAmount = Math.max(0, allocation - tgeAmount);
-      const completedMonths = distributionStartMs > 0 && Date.now() >= cliffEndMs
-        ? Math.min(vestingMonths, Math.max(0, Math.floor((Date.now() - cliffEndMs) / (30 * 24 * 60 * 60 * 1000))))
-        : 0;
-      const vestedAmount = project.status === 'success' && Date.now() >= cliffEndMs
-        ? Math.min(allocation, tgeAmount + (linearAmount * completedMonths / vestingMonths))
-        : 0;
-      setClaimSnapshot({
-        distributionStartedAt: distributionStartMs ? Math.floor(distributionStartMs / 1000) : 0,
-        vestedAmount,
-        claimableAmount: Math.max(0, vestedAmount - claimed),
-        claimedAmount: claimed,
-        loading: false,
-      });
-    } catch (error) {
-      setClaimSnapshot(current => ({ ...current, loading: false }));
-    }
-  };
+    const contributor = parseContractGetterAddress(wallet.address);
+    const idoContract = getIdoContract(project.idoContractAddress);
+    const opened = getTonClient().open(idoContract);
+
+    const [
+      distributionStartedAt,
+      vestedAmountRaw,
+      claimableAmountRaw,
+      claimedAmountRaw,
+    ] = await Promise.all([
+      opened.getGetDistributionStartedAt(),
+      opened.getGetUserVestedAllocation(contributor),
+      opened.getGetUserClaimableAllocation(contributor),
+      opened.getGetUserClaimedAllocation(contributor),
+    ]);
+
+    // GRAMX uses 9 decimals
+    const DECIMALS = 9;
+    const divisor = 10 ** DECIMALS;
+
+    const vestedAmount = Number(vestedAmountRaw) / divisor;
+    const claimableAmount = Number(claimableAmountRaw) / divisor;
+    const claimedAmount = Number(claimedAmountRaw) / divisor;
+
+    setClaimSnapshot({
+      distributionStartedAt: Number(distributionStartedAt),
+      vestedAmount,
+      claimableAmount,
+      claimedAmount,
+      loading: false,
+    });
+  } catch (error) {
+    console.error("Failed to refresh on-chain claim snapshot:", error);
+
+    setClaimSnapshot(current => ({
+      ...current,
+      loading: false,
+    }));
+  } finally {
+    claimRefreshInFlight.current = false;
+  }
+};
 
   useEffect(() => {
     refreshClaimSnapshot();
@@ -259,28 +302,32 @@ export default function LaunchpadDetails({
 
   const nextInfo = getNextStageInfo(project.idoStage);
 
-  // Sync state if initial project changes
+  // Sync state only if a different project is provided
   useEffect(() => {
-    setProject(initialProject);
-    setAuditResult(initialProject.aiAudit || null);
-  }, [initialProject]);
+    if (initialProject && initialProject.id !== project.id) {
+      setProject(initialProject);
+      setAuditResult(initialProject.aiAudit || null);
+      setTimeLeft(getInitialTimeLeft(initialProject));
+      setTimeDifference(getInitialDiff(initialProject));
+    }
+  }, [initialProject?.id]);
 
   // Refresh current project from API on demand
-  const reloadProject = async () => {
+  const reloadProject = async (notifyParent = false) => {
     try {
-      const url = wallet.connected && wallet.address
-        ? `/api/projects?address=${encodeURIComponent(wallet.address)}`
-        : `/api/projects`;
+      const url = `/api/projects/${encodeURIComponent(project.id)}${
+        wallet.connected && wallet.address ? `?address=${encodeURIComponent(wallet.address)}` : ''
+      }`;
       const res = await fetch(url);
-      const payload = await res.json();
-      const list: LaunchpadProject[] = Array.isArray(payload) ? payload : payload.projects || [];
-      const match = list.find(p => p.id === project.id);
-      if (match) {
-        setProject(match);
-        setAuditResult(match.aiAudit || null);
-        setUserVoted(!!match.userVoted);
-        if (onProjectUpdate) {
-          onProjectUpdate();
+      if (res.ok) {
+        const match: LaunchpadProject = await res.json();
+        if (match && match.id === project.id) {
+          setProject(match);
+          setAuditResult(match.aiAudit || null);
+          setUserVoted(!!match.userVoted);
+          if (notifyParent && onProjectUpdate) {
+            onProjectUpdate();
+          }
         }
       }
     } catch (e) {
@@ -290,7 +337,7 @@ export default function LaunchpadDetails({
 
   useEffect(() => {
     if (wallet.connected && wallet.address) {
-      reloadProject();
+      reloadProject(false);
     }
   }, [wallet.address, wallet.connected, project.id]);
 
@@ -1580,11 +1627,11 @@ export default function LaunchpadDetails({
                         </div>
                         <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs bg-slate-900/10 gap-2 w-full">
                           <span className="text-slate-400 font-medium">IDO Total Supply</span>
-                          <span className="font-mono font-bold text-white">{project.hardCap * project.rate} Tokens</span>
+                          <span className="font-mono font-bold text-white">{(project.hardCap * project.rate).toLocaleString()} Tokens</span>
                         </div>
                         <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs bg-slate-900/10 gap-2 w-full">
                           <span className="text-slate-400 font-medium">IDO Price</span>
-                          <span className="font-mono font-bold text-white">{1 / project.rate} USDT</span>
+                          <span className="font-mono font-bold text-white">{(1 / project.rate).toLocaleString()} USDT</span>
                         </div>
           
                         <div className="flex flex-wrap items-center justify-between px-4 py-3 text-xs gap-2 w-full">
@@ -2488,30 +2535,27 @@ export default function LaunchpadDetails({
 
                       {contributionIsPending && (
                         <div className="rounded-xl border border-sky-400/25 bg-sky-400/[0.08] p-3 text-[11px] text-sky-100">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <span className="block text-xs font-bold uppercase tracking-wider text-sky-300">
-                                Contribution transaction pending
-                              </span>
-                              <p className="mt-1 leading-5 text-slate-300">
-                                We found a contribution attempt from this wallet. If the TON transaction confirmed after a refresh, sync it from the smart contract to update raised amount and your allocation.
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={handleRefreshContributionStatus}
-                              disabled={contributionSyncLoading}
-                              className="shrink-0 rounded-lg border border-sky-300/30 bg-sky-300/10 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-sky-200 transition hover:bg-sky-300/15 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              {contributionSyncLoading ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <span className="inline-flex items-center gap-1">
-                                  <RefreshCw className="h-3.5 w-3.5" /> Refresh
-                                </span>
-                              )}
-                            </button>
-                          </div>
+                        <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs font-bold uppercase tracking-wider text-sky-400">
+                        Transaction pending?
+                        </span>
+
+                        <button
+                        type="button"
+                        onClick={handleRefreshContributionStatus}
+                        disabled={contributionSyncLoading}
+                        className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-sky-400/30 bg-sky-300/10 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-sky-400 transition hover:bg-sky-300/15 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                        {contributionSyncLoading ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                        <>
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Refresh
+                        </>
+                        )}
+                        </button>
+                        </div>
                         </div>
                       )}
 
@@ -2685,6 +2729,7 @@ export default function LaunchpadDetails({
 
               {/* DISTRIBUTION STAGE */}
               {project.idoStage === 'distribution' && (() => {
+                console.log('Distribution stage rendering with project:', claimSnapshot);
                 const isSoftCapMet = project.raised >= project.softCap;
                 const totalAllocated = userContribution ? userContribution.tokenAmount : 0;
                 const tgePercent = project.vestingTgePercent !== undefined ? project.vestingTgePercent : 20;
@@ -2702,7 +2747,7 @@ export default function LaunchpadDetails({
                   claimSnapshot.distributionStartedAt > 0
                     ? claimSnapshot.distributionStartedAt * 1000
                     : project.distributionStartTime || 0;
-                const cliffEndMs = distributionStartMs + cliffDurationDays * 86400 * 1000;
+                const cliffEndMs = distributionStartMs + cliffDurationDays * 60 * 1000;
                 const monthMs = 30 * 86400 * 1000;
                 const afterCliffMs = Math.max(0, claimNowMs - cliffEndMs);
                 const completedVestingMonths = vestingMonths <= 0
@@ -2855,7 +2900,7 @@ export default function LaunchpadDetails({
                       </p>
                     </div>
 
-                    <div className="rounded-xl border border-sky-400/30 bg-sky-400/20 p-4 space-y-2.5">
+                    <div className="rounded-xl border border-sky-200/20 bg-sky-400/20 p-4 space-y-2.5">
                       <h5 className="font-bold text-sky-350 text-[10px] uppercase tracking-wider flex items-center gap-1.5 border-b border-sky-400/30 pb-1.5">
                         <Coins className="h-3.5 w-3.5 text-[#0098EA]" />
                         Launchpool Vesting Setup
@@ -2883,7 +2928,7 @@ export default function LaunchpadDetails({
                     {wallet.connected ? (
                       userContribution ? (
                         <div className="space-y-4">
-                          <div className="rounded-xl bg-sky-400/20 p-4 border border-[#0098EA]/25 space-y-3 shadow-md">
+                          <div className="rounded-xl bg-sky-200/50 p-4  space-y-3 ">
                             <div className="flex justify-between items-center border-b border-slate-800 pb-2">
                               <div className="flex items-center gap-1.5 text-xs font-bold text-white uppercase tracking-wide">
                                 <Calendar className="h-4 w-4 text-[#0098EA]" />
@@ -2941,7 +2986,7 @@ export default function LaunchpadDetails({
                               </div>
                               <div className="relative h-3 overflow-hidden rounded-full border border-slate-800 bg-slate-950">
                                 <div
-                                  className="absolute inset-y-0 left-0 rounded-full bg-sky-500/40"
+                                  className="absolute inset-y-0 left-0 rounded-full bg-sky-200/40"
                                   style={{ width: `${unlockedPercent}%` }}
                                 />
                                 <div
@@ -2953,17 +2998,17 @@ export default function LaunchpadDetails({
                                 type="button"
                                 onClick={refreshClaimSnapshot}
                                 disabled={claimSnapshot.loading}
-                                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-sky-400/20 bg-sky-400/[0.08] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-sky-300 transition hover:bg-sky-400/[0.14] disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-sky-400/20 bg-sky-200/[0.08] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-sky-400 transition hover:bg-sky-400/[0.14] disabled:cursor-not-allowed disabled:opacity-50"
                               >
                                 <RefreshCw className={`h-3.5 w-3.5 ${claimSnapshot.loading ? 'animate-spin' : ''}`} />
-                                Refresh claim status
+                                {claimSnapshot.loading ? 'Refreshing claim status...' : 'Refresh claim status'}
                               </button>
                             </div>
                           </div>
 
                           <div className="bg-slate-950 border border-slate-850 p-4 rounded-xl space-y-3">
                             <div className="flex flex-wrap items-center justify-between text-[11px] font-semibold text-slate-400 gap-2 w-full">
-                              <span>Your Total Escrow Allocation:</span>
+                              <span>Your Total Allocation:</span>
                               <span className="font-mono text-white text-xs font-black">
                                 {totalAllocated.toLocaleString()} ${project.symbol}
                               </span>
@@ -3000,7 +3045,7 @@ export default function LaunchpadDetails({
 
                               {lockedRemaining > 0 && (
                                 <div className="flex flex-wrap items-center justify-between text-slate-500 gap-2 w-full">
-                                  <span>Vesting escrow remaining locked:</span>
+                                  <span>Vesting remaining locked:</span>
                                   <span className="font-mono">
                                     {lockedRemaining.toLocaleString()} ${project.symbol}
                                   </span>
