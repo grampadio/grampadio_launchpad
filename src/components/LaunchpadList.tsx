@@ -3,7 +3,7 @@ import { Search, Loader2, Calendar, ShieldCheck, CheckCircle, TrendingUp, ArrowU
 import { motion } from 'motion/react';
 import { LaunchpadProject, WalletState } from '../types.js';
 import { DEFAULT_PROJECT_BANNER, DEFAULT_PROJECT_LOGO, projectAssetOrDefault } from '../constants/assets.js';
-
+//test
 interface LaunchpadListProps {
   projects: LaunchpadProject[];
   loading: boolean;
