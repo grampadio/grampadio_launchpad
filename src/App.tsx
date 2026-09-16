@@ -761,7 +761,7 @@ export default function App() {
             </div>
           </div>
           <p className="pt-2 text-xs text-slate-400/70 text-center mt-20">
-            © 2026 Grampad. All rights reserved.
+            © 2026 Grampad. All rights reserved. v.1.0
           </p>
         </div>
       </footer>
