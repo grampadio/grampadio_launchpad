@@ -26,13 +26,31 @@ import {
   getTonClient,
   parseTokenAmount,
 } from './gramStarter.js';
+import { runtimeEnv, runtimeEnvNumber } from '../config/runtimeEnv.js';
 
-export const GRAMX_DECIMALS = Number((import.meta as any).env.VITE_GRAMX_DECIMALS || 9);
-export const GRAMX_MASTER_ADDRESS = String((import.meta as any).env.VITE_GRAMX_MASTER || '').trim();
-export const STAKING_CONTRACT_ADDRESS = String((import.meta as any).env.VITE_STAKING_CONTRACT_ADDRESS || '').trim();
-export const STAKING_DEFAULT_APR_BPS = Number((import.meta as any).env.VITE_STAKING_DEFAULT_APR_BPS || 0);
-export const STAKING_DEFAULT_MIN_GRAMX = String((import.meta as any).env.VITE_STAKING_DEFAULT_MIN_GRAMX || '100');
-export const STAKING_DEFAULT_FLEX_FEE_BPS = Number((import.meta as any).env.VITE_STAKING_DEFAULT_FLEX_FEE_BPS || 500);
+export const STAKING_CONTRACT_ADDRESS = String(
+  runtimeEnv('VITE_STAKING_CONTRACT_ADDRESS')
+);
+export const GRAMX_MASTER_ADDRESS = String(
+  runtimeEnv('VITE_GRAMX_MASTER_ADDRESS')
+);
+export const GRAMX_DECIMALS = Number(
+  runtimeEnv('VITE_GRAMX_DECIMALS')
+);
+export const STAKING_DEFAULT_APR_BPS = Number(
+  runtimeEnv('VITE_STAKING_DEFAULT_APR_BPS')
+);
+export const UNIVERSAL_LOCKER_ADDRESS = String(
+  runtimeEnv('VITE_UNIVERSAL_LOCKER_ADDRESS')
+);
+
+export const STAKING_DEFAULT_MIN_GRAMX = Number(
+  runtimeEnv('VITE_STAKING_DEFAULT_MIN_GRAMX')
+);
+export const STAKING_DEFAULT_FLEX_FEE_BPS = Number(
+  runtimeEnv('VITE_STAKING_DEFAULT_FLEX_FEE_BPS')
+);
+
 
 const stakingReadCache = new Map<string, { expiresAt: number; promise: Promise<any> }>();
 const STAKING_READ_CACHE_MS = 2000;
