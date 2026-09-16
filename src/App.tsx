@@ -34,6 +34,7 @@ import {
   Linkedin,
   Mail,
   BotIcon,
+  Github,
 } from 'lucide-react';
 
 function ScrollToTop() {
@@ -688,12 +689,21 @@ export default function App() {
                   <Linkedin className="h-4 w-4" />
                 </a>
 
-                <a
+                {/* <a
                   href="mailto:hello@grampad.io"
                   className="rounded-lg border border-white/10 p-2 text-slate-400 transition hover:border-sky-400/30 hover:text-sky-400"
                   title="Email"
                 >
                   <Mail className="h-4 w-4" />
+                </a> */}
+                <a
+                  href="https://github.com/grampadio"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg border border-white/10 p-2 text-slate-400 transition hover:border-sky-400/30 hover:text-sky-400"
+                  title="Github"
+                >
+                  <Github className="h-4 w-4" />
                 </a>
               </div>
             </div>
@@ -761,7 +771,7 @@ export default function App() {
             </div>
           </div>
           <p className="pt-2 text-xs text-slate-400/70 text-center mt-20">
-            © 2026 Grampad. All rights reserved. v.1.0
+            © 2026 Grampad. All rights reserved. v.1.2
           </p>
         </div>
       </footer>
