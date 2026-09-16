@@ -433,7 +433,6 @@ contract GramPadGramxStaking {
 
     receive(msg: OwnerWithdrawTon) {
         self.requireOwner();
-        require(context().value >= ton("0.01"), "Not enough TON for gas");
         require(msg.amount > 0, "Invalid withdrawal amount");
         require(
             myBalance() - context().value >= msg.amount,
@@ -449,7 +448,6 @@ contract GramPadGramxStaking {
 
     receive(msg: OwnerWithdrawGramx) {
         self.requireOwner();
-        require(context().value >= ton("0.15"), "Not enough TON for withdraw gas");
         require(self.jettonWalletConfigured, "Jetton wallet not configured");
         require(msg.amount > 0, "Invalid withdrawal amount");
 
@@ -469,7 +467,6 @@ contract GramPadGramxStaking {
 
     receive(msg: OwnerWithdrawAnyJetton) {
         self.requireOwner();
-        require(context().value >= ton("0.15"), "Not enough TON for withdraw gas");
         require(msg.jettonWallet != myAddress(), "Invalid Jetton wallet");
         require(msg.amount > 0, "Invalid withdrawal amount");
 
@@ -491,7 +488,6 @@ contract GramPadGramxStaking {
 
     receive(msg: ConfigureStake) {
         require(!self.paused, "Staking paused");
-        require(context().value >= ton("0.01"), "Not enough TON for gas");
         require(msg.stakeKind == 0 || msg.stakeKind == 1, "Invalid stake kind");
 
         self.requireValidDurationSeconds(msg.durationSeconds);
@@ -505,7 +501,6 @@ contract GramPadGramxStaking {
     receive(msg: SetGramxJettonWallet) {
         self.requireOwner();
         require(!self.jettonWalletConfigured, "Wallet already configured");
-        require(context().value >= ton("0.01"), "Not enough TON for gas");
 
         self.gramxJettonWallet = msg.gramxJettonWallet;
         self.jettonWalletConfigured = true;
@@ -513,7 +508,6 @@ contract GramPadGramxStaking {
 
     receive(msg: SetAnnualRoi) {
         self.requireOwner();
-        require(context().value >= ton("0.01"), "Not enough TON for gas");
         require(msg.annualRoiBasisPoints <= 100000, "Invalid ROI");
 
         self.annualRoiBasisPoints = msg.annualRoiBasisPoints;
@@ -526,7 +520,6 @@ contract GramPadGramxStaking {
 
     receive(msg: SetDurationRoi) {
         self.requireOwner();
-        require(context().value >= ton("0.01"), "Not enough TON for gas");
         self.requireValidDurationDays(msg.durationDays);
         require(msg.annualRoiBasisPoints <= 100000, "Invalid ROI");
 
@@ -552,7 +545,6 @@ contract GramPadGramxStaking {
 
     receive(msg: SetFlexUnstakeFee) {
         self.requireOwner();
-        require(context().value >= ton("0.01"), "Not enough TON for gas");
         require(msg.flexUnstakeFeeBasisPoints <= 5000, "Fee too high");
 
         self.flexUnstakeFeeBasisPoints = msg.flexUnstakeFeeBasisPoints;
@@ -560,14 +552,12 @@ contract GramPadGramxStaking {
 
     receive(msg: SetPaused) {
         self.requireOwner();
-        require(context().value >= ton("0.01"), "Not enough TON for gas");
 
         self.paused = msg.paused;
     }
 
     receive(msg: ChangeOwner) {
         self.requireOwner();
-        require(context().value >= ton("0.01"), "Not enough TON for gas");
 
         self.owner = msg.newOwner;
     }
@@ -589,13 +579,6 @@ contract GramPadGramxStaking {
 
         let staker: Address = msg.sender;
         let userPositionCount: Int = self.userStakeCountOf(staker);
-
-        // Jetton transfers complete before this notification is processed.
-        // Return a sixth deposit instead of rejecting and stranding its tokens.
-        if (userPositionCount >= 5) {
-            self.sendGramx(staker, msg.amount);
-            return;
-        }
 
         let configuredKind: Int = -1;
         let configuredDuration: Int = 0;
@@ -656,8 +639,6 @@ contract GramPadGramxStaking {
     }
 
     receive(msg: ClaimRewards) {
-        require(context().value >= ton("0.15"), "Not enough TON for claim gas");
-
         let user: Address = sender();
 
         require(self.stakeExists(msg.stakeId), "Stake not found");
@@ -681,7 +662,6 @@ contract GramPadGramxStaking {
     }
 
     receive(msg: Unstake) {
-        require(context().value >= ton("0.15"), "Not enough TON for unstake gas");
 
         let user: Address = sender();
 

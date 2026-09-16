@@ -1055,42 +1055,42 @@ export default function SwapPortal({ wallet, onOpenConnect }: SwapPortalProps) {
 
               <div className="mt-4 grid gap-3">
                 {[
-                  [
-                    'GRAMX reserve',
-                    `${
-                      details
-                        ? formatUnits(
-                            details.details.gramReserve,
-                            config.gramDecimals,
-                            4
-                          )
-                        : '0'
-                    } GRAMX`,
-                  ],
-                  [
-                    'USDT reserve',
-                    `${
-                      details
-                        ? formatUnits(
-                            details.details.usdtReserve,
-                            config.usdtDecimals,
-                            2
-                          )
-                        : '0'
-                    } USDT`,
-                  ],
-                  [
-                    'GRAM reserve',
-                    `${
-                      details
-                        ? formatUnits(
-                            details.details.tonReserve,
-                            9,
-                            4
-                          )
-                        : '0'
-                    } GRAM`,
-                  ],
+                  // [
+                  //   'GRAMX reserve',
+                  //   `${
+                  //     details
+                  //       ? formatUnits(
+                  //           details.details.gramReserve,
+                  //           config.gramDecimals,
+                  //           4
+                  //         )
+                  //       : '0'
+                  //   } GRAMX`,
+                  // ],
+                  // [
+                  //   'USDT reserve',
+                  //   `${
+                  //     details
+                  //       ? formatUnits(
+                  //           details.details.usdtReserve,
+                  //           config.usdtDecimals,
+                  //           2
+                  //         )
+                  //       : '0'
+                  //   } USDT`,
+                  // ],
+                  // [
+                  //   'GRAM reserve',
+                  //   `${
+                  //     details
+                  //       ? formatUnits(
+                  //           details.details.tonReserve,
+                  //           9,
+                  //           4
+                  //         )
+                  //       : '0'
+                  //   } GRAM`,
+                  // ],
                   ['Total swaps', details ? String(details.details.totalSwapCount) : '0'],
                   ['Contract state', details?.details?.paused ? 'Paused' : 'Active'],
                 ].map(([label, value]) => (

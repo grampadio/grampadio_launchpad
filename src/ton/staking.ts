@@ -22,19 +22,17 @@ import {
   storeUnstake,
 } from '../../contracts/build/GramPadGramxStaking_GramPadGramxStaking.js';
 import {
-  buildJettonTransferPayload,
   cellToBase64,
   getTonClient,
   parseTokenAmount,
 } from './gramStarter.js';
-import { runtimeEnv, runtimeEnvNumber } from '../config/runtimeEnv.js';
 
-export const GRAMX_DECIMALS = runtimeEnvNumber('VITE_GRAMX_DECIMALS', 9);
-export const GRAMX_MASTER_ADDRESS = runtimeEnv('VITE_GRAMX_MASTER').trim();
-export const STAKING_CONTRACT_ADDRESS = runtimeEnv('VITE_STAKING_CONTRACT_ADDRESS').trim();
-export const STAKING_DEFAULT_APR_BPS = runtimeEnvNumber('VITE_STAKING_DEFAULT_APR_BPS', 0);
-export const STAKING_DEFAULT_MIN_GRAMX = runtimeEnv('VITE_STAKING_DEFAULT_MIN_GRAMX', '100');
-export const STAKING_DEFAULT_FLEX_FEE_BPS = runtimeEnvNumber('VITE_STAKING_DEFAULT_FLEX_FEE_BPS', 500);
+export const GRAMX_DECIMALS = Number((import.meta as any).env.VITE_GRAMX_DECIMALS || 9);
+export const GRAMX_MASTER_ADDRESS = String((import.meta as any).env.VITE_GRAMX_MASTER || '').trim();
+export const STAKING_CONTRACT_ADDRESS = String((import.meta as any).env.VITE_STAKING_CONTRACT_ADDRESS || '').trim();
+export const STAKING_DEFAULT_APR_BPS = Number((import.meta as any).env.VITE_STAKING_DEFAULT_APR_BPS || 0);
+export const STAKING_DEFAULT_MIN_GRAMX = String((import.meta as any).env.VITE_STAKING_DEFAULT_MIN_GRAMX || '100');
+export const STAKING_DEFAULT_FLEX_FEE_BPS = Number((import.meta as any).env.VITE_STAKING_DEFAULT_FLEX_FEE_BPS || 500);
 
 const stakingReadCache = new Map<string, { expiresAt: number; promise: Promise<any> }>();
 const STAKING_READ_CACHE_MS = 2000;
@@ -103,11 +101,11 @@ const dedupeStakingRead = <T>(key: string, read: () => Promise<T>): Promise<T> =
 };
 
 export const STAKING_DURATIONS = [
-{ label: '12 months', seconds: 31536000n, monthsLabel: '12 months' },
-{ label: '9 months', seconds: 23328000n, monthsLabel: '9 months' },
-{ label: '3 months', seconds: 7776000n, monthsLabel: '3 months' },
-{ label: '30 days', seconds: 2592000n, monthsLabel: '30 days' },
-{ label: '7 days', seconds: 604800n, monthsLabel: '7 days' },
+  { label: '7 days', seconds: 604800n, monthsLabel: '7 days' },
+  { label: '30 days', seconds: 2592000n, monthsLabel: '30 days' },
+  { label: '3 months', seconds: 7776000n, monthsLabel: '3 months' },
+  { label: '9 months', seconds: 23328000n, monthsLabel: '9 months' },
+  { label: '12 months', seconds: 31536000n, monthsLabel: '12 months' },
 ] as const;
 
 const fallbackPlans = (roiBasisPoints: bigint) => ({
@@ -128,7 +126,8 @@ export const stakingPlanRoiForDuration = (
   if (duration === 2592000n) return plans.thirtyDaysRoiBasisPoints;
   if (duration === 7776000n) return plans.threeMonthsRoiBasisPoints;
   if (duration === 23328000n) return plans.nineMonthsRoiBasisPoints;
-  return plans.twelveMonthsRoiBasisPoints;
+  if (duration === 31536000n) return plans.twelveMonthsRoiBasisPoints;
+  return 0n;
 };
 
 export type StakeKind = 'flex' | 'locked';
@@ -138,8 +137,19 @@ export const stakeKindToChain = (kind: StakeKind) => kind === 'flex' ? 0n : 1n;
 export const stakeKindFromChain = (kind: bigint | number | string): StakeKind =>
   Number(kind) === 1 ? 'locked' : 'flex';
 
-export const parseGRAMXAmount = (value: string | number) =>
-  parseTokenAmount(value, GRAMX_DECIMALS);
+export const parseGRAMXAmount = (value: string | number) => {
+  if (!Number.isFinite(Number(value)) || Number(value) <= 0) {
+    throw new Error('Enter a valid GRAMX amount greater than zero.');
+  }
+
+  const amount = parseTokenAmount(value, GRAMX_DECIMALS);
+
+  if (amount <= 0n) {
+    throw new Error('GRAMX amount is too small.');
+  }
+
+  return amount;
+};
 
 export const formatTokenAmount = (
   value: bigint | number | string,
@@ -168,6 +178,18 @@ export const getUserTonBalance = async (ownerAddress: string) =>
 export const roiBpsFromPercent = (value: string | number) =>
   BigInt(Math.round(Math.max(0, Math.min(1000, Number(value) || 0)) * 100));
 
+const STAKE_PAYLOAD_MARKER = 0x4752414d;
+const JETTON_TRANSFER_OP = 0x0f8a7ea5;
+const MAX_UINT64 = (1n << 64n) - 1n;
+
+const createJettonQueryId = () => BigInt(Date.now()) & MAX_UINT64;
+
+const assertValidStakeDuration = (durationSeconds: bigint) => {
+  if (!STAKING_DURATIONS.some(item => item.seconds === durationSeconds)) {
+    throw new Error(`Invalid staking duration: ${durationSeconds.toString()} seconds.`);
+  }
+};
+
 export const buildStakeGramxPayload = (
   amount: bigint,
   stakingContractAddress = STAKING_CONTRACT_ADDRESS,
@@ -175,18 +197,38 @@ export const buildStakeGramxPayload = (
   stakeKind: StakeKind,
   durationSeconds: bigint
 ) => {
-  const stakePayload = beginCell()
-    .storeUint(0x4752414d, 32)
-    .storeUint(stakeKindToChain(stakeKind), 8)
-    .storeUint(durationSeconds, 32);
+  if (amount <= 0n) {
+    throw new Error('Stake amount must be greater than zero.');
+  }
 
-  return buildJettonTransferPayload(
-    amount,
-    Address.parse(stakingContractAddress),
-    Address.parse(responseAddress),
-    toNano('0.2'),
-    stakePayload
-  );
+  if (!stakingContractAddress) {
+    throw new Error('Staking contract address is not configured.');
+  }
+
+  if (!responseAddress) {
+    throw new Error('Response wallet address is not configured.');
+  }
+
+  assertValidStakeDuration(durationSeconds);
+const stakePayload = beginCell()
+  .storeUint(STAKE_PAYLOAD_MARKER, 32)
+  .storeUint(stakeKindToChain(stakeKind), 8)
+  .storeUint(durationSeconds, 32)
+  .endCell();
+
+return beginCell()
+  .storeUint(JETTON_TRANSFER_OP, 32)
+  .storeUint(createJettonQueryId(), 64)
+  .storeCoins(amount)
+  .storeAddress(Address.parse(stakingContractAddress))
+  .storeAddress(Address.parse(responseAddress))
+  .storeBit(0) // no custom payload
+  .storeCoins(toNano('0.2')) // TON forwarded to staking contract
+  .storeBit(1) // forward_payload carried as a cell reference
+  .storeRef(stakePayload)
+  .endCell()
+  .toBoc()
+  .toString('base64');
 };
 
 // buildRewardTopUpPayload must send JettonTransfer to owner GRAMX wallet
@@ -200,9 +242,19 @@ export function buildRewardTopUpPayload(
   stakingContractAddress: string,
   ownerAddress: string
 ) {
+  if (amount <= 0n) {
+    throw new Error('Reward top-up amount must be greater than zero.');
+  }
+  if (!stakingContractAddress) {
+    throw new Error('Staking contract address is not configured.');
+  }
+  if (!ownerAddress) {
+    throw new Error('Owner wallet address is not configured.');
+  }
+
   return beginCell()
     .storeUint(0xf8a7ea5, 32)
-    .storeUint(Date.now(), 64)
+    .storeUint(createJettonQueryId(), 64)
     .storeCoins(amount)
     .storeAddress(Address.parse(stakingContractAddress))
     .storeAddress(Address.parse(ownerAddress))
@@ -614,9 +666,13 @@ export const prepareStakingDeployment = async (
   const nineMonthsRoiBasisPoints = roiBpsFromPercent(planRois.nineMonths);
   const twelveMonthsRoiBasisPoints = roiBpsFromPercent(planRois.twelveMonths);
   const minStake = parseGRAMXAmount(input.minStake);
-  const flexUnstakeFeeBasisPoints = BigInt(
-    Math.round(Math.max(0, Math.min(50, Number(input.flexUnstakeFeePercent) || 0)) * 100)
-  );
+
+  const flexFeePercent = Number(input.flexUnstakeFeePercent);
+  if (!Number.isFinite(flexFeePercent) || flexFeePercent < 0 || flexFeePercent > 50) {
+    throw new Error('FLEX unstake fee must be between 0% and 50%.');
+  }
+
+  const flexUnstakeFeeBasisPoints = BigInt(Math.round(flexFeePercent * 100));
   const deploymentId = BigInt(Date.now());
 
   const contract = await GramPadGramxStaking.fromInit(

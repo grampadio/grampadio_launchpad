@@ -288,7 +288,7 @@ export default function Dashboard({ wallet, projects, onSelectProject, onOpenCon
         </h3>
 
         {txHistory.length === 0 ? (
-          <div className="rounded-xl bg-[#090E1A] p-6 text-center text-slate-500 border border-[#1E2E4E]/30 font-semibold text-xs">
+          <div className="rounded-xl bg-slate-950/10 p-6 text-center text-slate-500 border border-[#1E2E4E]/30 font-semibold text-xs">
             No local blocks logged in this browser sandbox yet.
           </div>
         ) : (

@@ -232,13 +232,13 @@ const countdown = showCountdown
         onClick={() => onSelectProject(project.id)}
         className="gp-panel cursor-pointer overflow-hidden rounded-3xl transition duration-300 hover:-translate-y-1 hover:shadow-xl"
       >
-        <div className="relative h-40 overflow-hidden bg-slate-900">
+        <div className="relative h-40 overflow-hidden">
           <img
             src={project.banner || DEFAULT_PROJECT_BANNER}
             alt={`${project.name} banner`}
             className="h-full w-full object-cover transition duration-300 hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+          <div className="absolute inset-0 via-black/10 to-transparent" />
           <span
   className={`absolute right-4 top-4 rounded-full border border-white/15 px-3 py-1 text-[10px] font-black uppercase btn-white-text backdrop-blur-md ${
     project.status === 'failed'
@@ -248,13 +248,14 @@ const countdown = showCountdown
 >
   {project.status}
 </span>
-          <div className="absolute bottom-3 left-4">
-            <img
-              src={project.logo || DEFAULT_PROJECT_LOGO}
-              alt={`${project.name} logo`}
-              className="h-14 w-14 rounded-2xl border-4 border-[var(--gp-surface)] bg-[var(--gp-surface)] object-cover shadow-lg"
-            />
-          </div>
+
+    <div className="gp-details-logo absolute bottom-3 left-4 h-14 w-14 overflow-hidden rounded-xl border border-white bg-white shadow-lg">
+  <img
+    src={project.logo || DEFAULT_PROJECT_LOGO}
+    alt={`${project.name} logo`}
+        className="h-full w-full object-contain rounded-[1px] p-1"
+  />
+</div>
         </div>
         <div className="flex items-center gap-3 px-5 pt-5">
           <div>

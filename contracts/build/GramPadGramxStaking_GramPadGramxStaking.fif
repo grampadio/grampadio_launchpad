@@ -2842,12 +2842,6 @@ PROGRAM{
       s1 34 s() XCHG
       s0 35 s() XCHG
       $GramPadGramxStaking$_fun_requireOwner INLINECALLDICT
-      23376 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      10000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       43103 PUSHINT
       35 s() PUSH
       0 GTINT
@@ -2913,12 +2907,6 @@ PROGRAM{
       s1 34 s() XCHG
       s0 35 s() XCHG
       $GramPadGramxStaking$_fun_requireOwner INLINECALLDICT
-      28937 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      150000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       32101 PUSHINT
       30 s() PUSH
       THROWANYIFNOT
@@ -3029,12 +3017,6 @@ PROGRAM{
       s1 35 s() XCHG
       s0 36 s() XCHG
       $GramPadGramxStaking$_fun_requireOwner INLINECALLDICT
-      28937 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      150000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       50546 PUSHINT
           MYADDR
       36 s() PUSH
@@ -3117,12 +3099,6 @@ PROGRAM{
       46992 PUSHINT
       21 s() PUSH
       NOT
-      THROWANYIFNOT
-      23376 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      10000000 PUSHINT
-      GEQ
       THROWANYIFNOT
       43959 PUSHINT
       s2 PUSH
@@ -3230,12 +3206,6 @@ PROGRAM{
       NOT
       s1 29 s() XCHG
       THROWANYIFNOT
-      23376 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      10000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       31 s() 32 s() XCHG
       30 s() 31 s() XCHG
       29 s() 30 s() XCHG
@@ -3315,12 +3285,6 @@ PROGRAM{
       23 s() POP
       23 s() POP
       23 s() POP
-      23376 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      10000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       58668 PUSHINT
       29 s() PUSH
       100000 PUSHINT
@@ -3374,12 +3338,6 @@ PROGRAM{
       s1 34 s() XCHG
       s0 35 s() XCHG
       $GramPadGramxStaking$_fun_requireOwner INLINECALLDICT
-      23376 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      10000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       34 s() PUSH
       $GramPadGramxStaking$_fun_requireValidDurationDays INLINECALLDICT
       58668 PUSHINT
@@ -3554,12 +3512,6 @@ PROGRAM{
       s1 s3 s0 XCHG3
       $GramPadGramxStaking$_fun_requireOwner INLINECALLDICT
       22 s() POP
-      23376 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      10000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       46136 PUSHINT
       34 s() PUSH
       5000 PUSHINT
@@ -3626,12 +3578,6 @@ PROGRAM{
       s1 s3 s0 XCHG3
       $GramPadGramxStaking$_fun_requireOwner INLINECALLDICT
       20 s() POP
-      23376 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      10000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       32 s() 33 s() XCHG
       31 s() 32 s() XCHG
       30 s() 31 s() XCHG
@@ -3693,12 +3639,6 @@ PROGRAM{
       s1 s3 s0 XCHG3
       $GramPadGramxStaking$_fun_requireOwner INLINECALLDICT
       33 s() POP
-      23376 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      10000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       31 s() 32 s() XCHG
       30 s() 31 s() XCHG
       29 s() 30 s() XCHG
@@ -3831,36 +3771,6 @@ PROGRAM{
       s0 36 s() XCHG
       35 s() PUSH
       $GramPadGramxStaking$_fun_userStakeCountOf INLINECALLDICT
-      DUP
-      4 GTINT
-      IFJMP:<{
-        DROP
-        36 s() POP
-        32 s() 35 s() XCHG
-        31 s() 34 s() XCHG
-        30 s() 33 s() XCHG
-        29 s() 32 s() XCHG
-        28 s() 31 s() XCHG
-        27 s() 30 s() XCHG
-        26 s() 29 s() XCHG
-        25 s() 28 s() XCHG
-        24 s() 27 s() XCHG
-        23 s() 26 s() XCHG
-        22 s() 25 s() XCHG
-        21 s() 24 s() XCHG
-        20 s() 23 s() XCHG
-        19 s() 22 s() XCHG
-        18 s() 21 s() XCHG
-        17 s() 20 s() XCHG
-        16 s() 19 s() XCHG
-        s15 18 s() XCHG
-        s14 17 s() XCHG
-        s13 16 s() XCHG
-        s12 s15 XCHG
-        3 12 BLKSWAP
-        $GramPadGramxStaking$_fun_sendGramx INLINECALLDICT
-        $GramPadGramxStaking$_contract_store INLINECALLDICT
-      }>
       37 s() PUSH
           SBITS
       72 LESSINT
@@ -4239,12 +4149,6 @@ PROGRAM{
       NIP
       64 LDU
       DROP
-      7529 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      150000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       __tact_context_get_sender INLINECALLDICT
       32 s() 33 s() XCHG
       31 s() 33 s() XCHG
@@ -4489,12 +4393,6 @@ PROGRAM{
     IFJMP:<{
       64 LDU
       DROP
-      28788 PUSHINT
-      __tact_context_get INLINECALLDICT
-      $Context$_get_value INLINECALLDICT
-      150000000 PUSHINT
-      GEQ
-      THROWANYIFNOT
       __tact_context_get_sender INLINECALLDICT
       32 s() 33 s() XCHG
       31 s() 33 s() XCHG

@@ -1,6 +1,6 @@
 # Tact compilation report
 Contract: GramPadGramxStaking
-BoC Size: 17717 bytes
+BoC Size: 17373 bytes
 
 ## Structures (Structs and Messages)
 Total structures: 35
@@ -215,18 +215,14 @@ Argument: limit
 * 5637: No rewards available
 * 6699: Stake not active
 * 6974: Invalid 7-day ROI
-* 7529: Not enough TON for claim gas
 * 8808: Reward reserve too low
 * 12648: Below minimum stake
 * 13325: Minimum stake required
 * 15828: Locked stake not mature
 * 17062: Invalid amount
 * 18624: Wallet already configured
-* 23376: Not enough TON for gas
 * 23773: Not stake owner
 * 27530: Invalid 12-month ROI
-* 28788: Not enough TON for unstake gas
-* 28937: Not enough TON for withdraw gas
 * 29751: Invalid 30-day ROI
 * 31360: Invalid 9-month ROI
 * 32101: Jetton wallet not configured
