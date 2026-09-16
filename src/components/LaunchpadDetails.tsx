@@ -1293,26 +1293,25 @@ const refreshClaimSnapshot = async () => {
         <div className="lg:col-span-8 flex flex-col gap-6 order-1 lg:order-1">
 
           {/* Hero space */}
-          <div className="gp-details-hero relative overflow-hidden rounded-[28px] border border-slate-800 shadow-xl">
+          <div className="gp-details-hero relative overflow-hidden rounded-[28px] border border-slate-800">
             {/* Banner block */}
-            <div className="gp-details-banner h-52 sm:h-64 w-full overflow-hidden bg-slate-950 relative">
-              <img
-                src={projectAssetOrDefault(project.banner, DEFAULT_PROJECT_BANNER)}
-                alt={project.name}
-                className="h-full w-full object-cover opacity-85 hover:scale-105 transition duration-1000"
-              />
-              <div className="gp-details-banner-fade absolute inset-0" />
-            </div>
+          <div className="gp-details-banner h-52 sm:h-64 w-full overflow-hidden bg-slate-950 relative">
+  <img
+    src={projectAssetOrDefault(project.banner, DEFAULT_PROJECT_BANNER)}
+    alt={project.name}
+    className="h-full w-full object-cover -translate-y-10 hover:scale-105 transition duration-1000"
+  />
+</div>
 
             {/* Profile overlapping block with elegant alignment */}
             <div className="relative px-5 sm:px-8 pb-5 -mt-14 sm:-mt-16 flex flex-col sm:flex-row items-start sm:items-end gap-5">
-              <div className="gp-details-logo h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-[22px] border-4 bg-slate-900 shadow-2xl shrink-0">
-                <img
-                  src={projectAssetOrDefault(project.logo, DEFAULT_PROJECT_LOGO)}
-                  alt={`${project.name} Logo`}
-                  className="h-full w-full object-cover"
-                />
-              </div>
+            <div className="gp-details-logo h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-[22px] border-4 border-white bg-white shadow-2xl shrink-0">
+  <img
+    src={projectAssetOrDefault(project.logo, DEFAULT_PROJECT_LOGO)}
+    alt={`${project.name} Logo`}
+    className="h-full w-full object-contain rounded-[18px] p-1"
+  />
+</div>
               <div className="gp-details-identity min-w-0 flex-1 rounded-2xl border border-slate-800/80 bg-[#0A101D]/95 p-4 sm:p-5 backdrop-blur-xl">
                 <div className="flex flex-wrap items-center gap-2">
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-none">
@@ -2747,7 +2746,7 @@ const refreshClaimSnapshot = async () => {
                   claimSnapshot.distributionStartedAt > 0
                     ? claimSnapshot.distributionStartedAt * 1000
                     : project.distributionStartTime || 0;
-                const cliffEndMs = distributionStartMs + cliffDurationDays * 60 * 1000;
+                const cliffEndMs = distributionStartMs + cliffDurationDays * 86400 * 1000;
                 const monthMs = 30 * 86400 * 1000;
                 const afterCliffMs = Math.max(0, claimNowMs - cliffEndMs);
                 const completedVestingMonths = vestingMonths <= 0

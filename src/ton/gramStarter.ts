@@ -636,6 +636,7 @@ export const prepareIdoDeployment = async (input: DeploymentInput) => {
   const usdtMasterAddress = Address.parse(
     runtimeEnv('VITE_TON_USDT_MASTER', MAINNET_USDT_MASTER)
   );
+  console.log(usdtMasterAddress)
   const saleTokenMasterAddress = Address.parse(input.saleTokenMaster);
   const saleTokenUnit = 10n ** BigInt(input.saleTokenDecimals);
   const usdtUnit = 10n ** BigInt(USDT_DECIMALS);

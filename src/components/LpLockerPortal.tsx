@@ -179,6 +179,7 @@ export default function LpLockerPortal({
   const [allLockView, setAllLockView] = useState<'active' | 'closed' | 'all'>('active');
   const [allLocksSearch, setAllLocksSearch] = useState('');
   const [allLocksPage, setAllLocksPage] = useState(1);
+  const [showRefreshAfterLock, setShowRefreshAfterLock] = useState(false);
 
   const handleCopyAddress = (addr: string) => {
     if (!addr) return;
@@ -593,89 +594,91 @@ export default function LpLockerPortal({
     }
   };
 
-  const afterTransaction = async (text: string) => {
-    setMessage({ type: 'success', text });
+const afterTransaction = async (text: string, showRefresh = false) => {
+  setMessage({ type: 'success', text });
 
-    setTimeout(() => {
-      loadLocker();
-    }, 4000);
-  };
+  if (showRefresh) {
+    setShowRefreshAfterLock(true);
+  }
 
-  const lockToken = async (event: FormEvent) => {
-    event.preventDefault();
+  setTimeout(() => {
+    loadLocker();
+  }, 4000);
+};
+const lockToken = async (event: FormEvent) => {
+  event.preventDefault();
+  setAction('lock');
+  setMessage(null);
 
-    setAction('lock');
-    setMessage(null);
+  try {
+    const user = requireWallet();
+    if (!jettonMaster) throw new Error('Enter Jetton/LP master address.');
+    if (!unlockAt) throw new Error('Choose unlock date and time.');
 
-    try {
-      const user = requireWallet();
+    const decimals = Number(tokenDecimals || DEFAULT_JETTON_DECIMALS);
+    const unlockTime = toUnixFromDateTimeLocal(unlockAt);
 
-      if (!jettonMaster) throw new Error('Enter Jetton/LP master address.');
-      if (!unlockAt) throw new Error('Choose unlock date and time.');
-
-      const decimals = Number(tokenDecimals || DEFAULT_JETTON_DECIMALS);
-      const unlockTime = toUnixFromDateTimeLocal(unlockAt);
-
-      if (unlockTime <= BigInt(Math.floor(Date.now() / 1000))) {
-        throw new Error('Unlock time must be in the future.');
-      }
-
-      const parsedAmount = parseLockerTokenAmount(amount, decimals);
-      const userJettonWallet = await getUserJettonWalletAddress(user, jettonMaster);
-      rememberTokenForWallet(userJettonWallet.toString(), jettonMaster, tokenSymbol, decimals);
-
-      await tonConnectUI.sendTransaction({
-        validUntil: Math.floor(Date.now() / 1000) + 600,
-        network: lockerNetwork,
-        messages: [
-          {
-            address: lockerAddress,
-            amount: toNano('0.03').toString(),
-            payload: buildConfigureLockPayload(unlockTime),
-          },
-          {
-            address: userJettonWallet.toString(),
-            amount: toNano('0.18').toString(),
-            payload: buildLockJettonPayload(parsedAmount, lockerAddress, user),
-          },
-        ],
-      });
-
-      setAmount('');
-
-      // Persist lock record to Database
-      try {
-        await fetch('/api/locker/locks', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: String(userLocks?.totalLocks ? userLocks.totalLocks + 1n : Date.now()),
-            owner: user,
-            jettonWallet: userJettonWallet.toString(),
-            jettonMaster,
-            symbol: tokenSymbol || 'TOKEN',
-            decimals,
-            amount: amount.trim(),
-            rawAmount: parsedAmount.toString(),
-            unlockTime: Number(unlockTime),
-          }),
-        });
-      } catch (err) {
-        console.error('Failed to save lock record to DB:', err);
-      }
-
-      await afterTransaction(`${tokenSymbol || 'Token'} lock transaction sent.`);
-    } catch (error: any) {
-      if (error.message !== 'Connect wallet first.') {
-        setMessage({
-          type: 'error',
-          text: error.message || 'Lock failed.',
-        });
-      }
-    } finally {
-      setAction(null);
+    if (unlockTime <= BigInt(Math.floor(Date.now() / 1000))) {
+      throw new Error('Unlock time must be in the future.');
     }
-  };
+
+    const parsedAmount = parseLockerTokenAmount(amount, decimals);
+    const userJettonWallet = await getUserJettonWalletAddress(user, jettonMaster);
+    rememberTokenForWallet(userJettonWallet.toString(), jettonMaster, tokenSymbol, decimals);
+
+    await tonConnectUI.sendTransaction({
+      validUntil: Math.floor(Date.now() / 1000) + 600,
+      network: lockerNetwork,
+      messages: [
+        {
+          address: lockerAddress,
+          amount: toNano('0.03').toString(),
+          payload: buildConfigureLockPayload(unlockTime),
+        },
+        {
+          address: userJettonWallet.toString(),
+          amount: toNano('0.18').toString(),
+          payload: buildLockJettonPayload(parsedAmount, lockerAddress, user),
+        },
+      ],
+    });
+
+    setAmount('');
+
+    // Optimistic write — clearly a pending id, never collides with a real lockId
+    try {
+      await fetch('/api/locker/locks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: `pending-${user}-${Date.now()}`,
+          status: 'pending',
+          owner: user,
+          jettonWallet: userJettonWallet.toString(),
+          jettonMaster,
+          symbol: tokenSymbol || 'TOKEN',
+          decimals,
+          amount: amount.trim(),
+          rawAmount: parsedAmount.toString(),
+          unlockTime: Number(unlockTime),
+        }),
+      });
+    } catch (err) {
+      console.error('Failed to save pending lock record to DB:', err);
+    }
+
+    await afterTransaction(
+  `${tokenSymbol || 'Token'} lock transaction confirmed. Click Refresh locks to load it.`,
+  true
+);
+  } catch (error: any) {
+    if (error.message !== 'Connect wallet first.') {
+      setMessage({ type: 'error', text: error.message || 'Lock failed.' });
+    }
+  } finally {
+    setAction(null);
+  }
+};
 
   const withdrawLock = async (lock: LockRow) => {
     const lockId = lock.lockId;
@@ -861,18 +864,23 @@ export default function LpLockerPortal({
             </p>
           </div>
 
-          <button
-            onClick={handleRefreshLocks}
-            disabled={loading || isSyncing || !isConfigured}
-            className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-xs font-bold text-slate-300 transition hover:text-white disabled:opacity-50"
-          >
-            {isSyncing || loading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-sky-400" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
-            {isSyncing ? 'Syncing locks...' : loading ? 'Loading...' : 'Refresh locks'}
-          </button>
+          {(isOwner || showRefreshAfterLock) && (
+  <button
+    onClick={async () => {
+      await handleRefreshLocks();
+      setShowRefreshAfterLock(false);
+    }}
+    disabled={loading || isSyncing || !isConfigured}
+    className="flex items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-xs font-bold text-slate-300 transition hover:text-white disabled:opacity-50"
+  >
+    {isSyncing || loading ? (
+      <Loader2 className="h-4 w-4 animate-spin text-sky-400" />
+    ) : (
+      <RefreshCw className="h-4 w-4" />
+    )}
+    {isSyncing ? 'Syncing locks...' : loading ? 'Loading...' : 'Refresh locks'}
+  </button>
+)}
         </div>
       </section>
 

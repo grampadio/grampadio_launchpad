@@ -234,6 +234,15 @@ const planRoiLabel = planRoiValues.length
       if (!pool?.walletConfigured) throw new Error('Staking contract wallet is not configured yet.');
 
       const amount = parseGRAMXAmount(stakeAmount);
+      const minStake = pool?.minStake ?? 0n;
+      if (amount < minStake) {
+        alert(
+          `Minimum stake is ${formatTokenAmount(minStake)} GRAMX. You entered ${formatTokenAmount(amount)} GRAMX.`
+        );
+        return;
+      }
+
+      
       const userGramxWallet = await getUserGramxWalletAddress(userAddress, pool.gramxMaster);
       const payload = buildStakeGramxPayload(
         amount,
@@ -282,7 +291,7 @@ const planRoiLabel = planRoiValues.length
             amount: toNano('0.18').toString(),
             payload: buildClaimStakingRewardsPayload(stakeId),
           },
-        ],
+        ],        
       });
 
       await afterTransaction(`Reward claim sent for stake #${stakeId}.`);
