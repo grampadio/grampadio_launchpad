@@ -424,9 +424,26 @@ export async function saveSwapSettings(settings: SwapSettings): Promise<void> {
   );
 }
 
+const MAX_FAKE_SWAP_TRANSACTIONS = 10_000;
+
 export async function addSwapTransaction(tx: SwapTransaction): Promise<void> {
   const collection = await getMongoDBCollection('swap_transactions');
   await collection.insertOne(tx as any);
+
+  if (tx.isFake) {
+    const staleFakeTransactions = await collection
+      .find({ isFake: true })
+      .sort({ timestamp: -1 })
+      .skip(MAX_FAKE_SWAP_TRANSACTIONS)
+      .project({ _id: 1 })
+      .toArray();
+
+    if (staleFakeTransactions.length > 0) {
+      await collection.deleteMany({
+        _id: { $in: staleFakeTransactions.map(transaction => transaction._id) },
+      });
+    }
+  }
 }
 
 export async function getSwapTransactions(limit: number = 50): Promise<SwapTransaction[]> {

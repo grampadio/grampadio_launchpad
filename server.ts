@@ -622,22 +622,11 @@ const getOrCreateSwapSettings = async () => {
 };
 
 
+const SIMULATED_PRICE = 0.01;
+
 async function triggerSimulatedSwap(): Promise<SwapTransaction> {
-  const settings = await getOrCreateSwapSettings();
-  const rateLabel = Number(settings.rateLabel || '2');
-  const basePrice = 1 / rateLabel;
-
-  // Get the last swap price to continue the random walk
-  const recent = await getSwapTransactions(1);
-  let currentPrice = recent.length > 0 ? recent[0].price : basePrice;
-
   const isBuy = Math.random() > 0.48; // balanced random walk
-  const deviation = (Math.random() - 0.5) * 0.03; // -1.5% to +1.5%
-  currentPrice = currentPrice * (1 + deviation);
-
-  // Keep price within reasonable range of base price (50% to 200%)
-  if (currentPrice < basePrice * 0.5) currentPrice = basePrice * 0.5;
-  if (currentPrice > basePrice * 2.0) currentPrice = basePrice * 2.0;
+  const currentPrice = SIMULATED_PRICE;
 
   const fromAsset = isBuy ? 'USDT' : 'GRAMX';
   const toAsset = isBuy ? 'GRAMX' : 'USDT';
@@ -765,7 +754,7 @@ async function startServer() {
 
   app.get('/api/swap/transactions', async (_req, res) => {
     try {
-      const txs = await getSwapTransactions(50);
+      const txs = await getSwapTransactions(6);
       res.json(txs);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -871,27 +860,16 @@ async function startServer() {
     try {
       await clearFakeSwapTransactions();
 
-      const settings = await getOrCreateSwapSettings();
-      const rateLabel = Number(settings.rateLabel || '2');
-      const basePrice = 1 / rateLabel;
-
       const txs: SwapTransaction[] = [];
       const now = Date.now();
       const oneDayMs = 24 * 60 * 60 * 1000;
       const startTime = now - oneDayMs;
       const count = 100;
 
-      let currentPrice = basePrice;
-
       for (let i = 0; i < count; i++) {
         const timestamp = startTime + (oneDayMs / count) * i;
         const isBuy = Math.random() > 0.45; // slight upward drift
-
-        const deviation = (Math.random() - 0.48) * 0.04; // -1.9% to +2%
-        currentPrice = currentPrice * (1 + deviation);
-
-        if (currentPrice < basePrice * 0.5) currentPrice = basePrice * 0.5;
-        if (currentPrice > basePrice * 2.0) currentPrice = basePrice * 2.0;
+        const currentPrice = SIMULATED_PRICE;
 
         const fromAsset = isBuy ? 'USDT' : 'GRAMX';
         const toAsset = isBuy ? 'GRAMX' : 'USDT';
