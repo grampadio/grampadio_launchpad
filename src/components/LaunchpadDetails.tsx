@@ -1303,6 +1303,7 @@ const refreshClaimSnapshot = async () => {
   />
 </div>
 
+
             {/* Profile overlapping block with elegant alignment */}
             <div className="relative px-5 sm:px-8 pb-5 -mt-14 sm:-mt-16 flex flex-col sm:flex-row items-start sm:items-end gap-5">
             <div className="gp-details-logo h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-[22px] border-4 border-white bg-white shadow-2xl shrink-0">

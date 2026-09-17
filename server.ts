@@ -677,9 +677,10 @@ async function startServer() {
   app.disable('x-powered-by');
   app.set('trust proxy', 1);
 
-  const uploadDir = path.join(__dirname, 'public', 'uploads', 'projects');
+  const uploadRoot = path.join(process.cwd(), 'public', 'uploads');
+  const uploadDir = path.join(uploadRoot, 'projects');
   fs.mkdirSync(uploadDir, { recursive: true });
-  app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+  app.use('/uploads', express.static(uploadRoot));
 
   const storage = multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadDir),
