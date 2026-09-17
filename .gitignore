@@ -6,4 +6,5 @@ coverage/
 .env*
 !.env.example
 public/uploads/
-yarn.lock
+*.lock
+package-lock.json

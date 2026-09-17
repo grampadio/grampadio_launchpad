@@ -7,3 +7,6 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+    build: .
+    volumes:
+      - ./public/uploads:/app/public/uploads
