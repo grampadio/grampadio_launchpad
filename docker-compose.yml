@@ -9,4 +9,4 @@ services:
     restart: unless-stopped
     build: .
     volumes:
-      - ./public/uploads:/app/public/uploads
+      - /var/www/grampadio_launchpad/public/uploads:/app/public/uploads
